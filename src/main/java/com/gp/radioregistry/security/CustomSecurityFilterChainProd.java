@@ -1,4 +1,4 @@
-package com.gp.radioregistry.config;
+package com.gp.radioregistry.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +16,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @Profile("prod")
-public class SecurityConfigProd {
+public class CustomSecurityFilterChainProd {
    @Bean
    SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(CsrfConfigurer::disable)

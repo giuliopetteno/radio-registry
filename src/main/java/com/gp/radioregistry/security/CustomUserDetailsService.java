@@ -1,4 +1,4 @@
-package com.gp.radioregistry.config;
+package com.gp.radioregistry.security;
 
 import com.gp.radioregistry.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
