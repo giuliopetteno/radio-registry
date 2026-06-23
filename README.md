@@ -45,4 +45,4 @@ The system allows healthcare providers to register and manage medical devices, a
 
 ## Purpose
 
-This project was created as a portfolio and learning application to demonstrate the development of a production-oriented backend service using modern Java and Spring technologies while applying clean architecture and enterprise development principles.
+This project was created as a portfolio to demonstrate the development of a production-oriented backend service using modern Java and Spring technologies while applying clean architecture and enterprise development principles.
