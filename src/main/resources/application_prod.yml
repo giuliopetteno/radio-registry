@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: ${SPRING_APP_NAME:radio-registry}
+
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: ${HIBERNATE_DDL_AUTO:none}
+
+    properties:
+      hibernate:
+        format_sql: ${HIBERNATE_FORMAT_SQL:false}
+
+    show-sql: ${JPA_SHOW_SQL:false}
+
+#  security:
+#    user:
+#      name: ${SECURITY_USERNAME}
+#      password: ${SECURITY_PASSWORD}
+
+logging:
+  pattern:
+    console: ${LOGPATTERN_CONSOLE:%green(%d{HH:mm:ss.SSS}) %blue(%-5level) %red([%thread]) %yellow(%logger{15}) - %msg%n}
+    level:
+      org:
+        springframework:
+          security: ${SPRING_SECURITY_LOG_LEVEL:ERROR}
+
+server:
+  port: 8443
+  servlet:
+    context-path: /api/v1
+  ssl:
+    enabled: true
+    key-store: "classpath:keystore.p12"
+    key-store-password: "${SSL_KEYSTORE_PASSWORD}"
+    key-store-type: PKCS12
+    key-alias: "radio-registry"
