@@ -38,9 +38,8 @@ The system allows healthcare providers to register and manage medical devices, a
 - Role-based access control (Admin, Technician, Operator)
 - Audit logging
 - Unit and integration testing using JUnit 5, Mockito and Testcontainers
-- Docker support
+- Docker containerization with container orchestration using Docker Compose
 - CI/CD pipeline with GitHub Actions
-- Kubernetes deployment
 - Cloud deployment on Oracle Cloud Infrastructure (OCI)
 
 ## Purpose
