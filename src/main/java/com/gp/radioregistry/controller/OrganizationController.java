@@ -1,6 +1,5 @@
 package com.gp.radioregistry.controller;
 
-import com.gp.radioregistry.domain.Organization;
 import com.gp.radioregistry.request.CreateOrganizationRequest;
 import com.gp.radioregistry.response.OrganizationResponse;
 import com.gp.radioregistry.service.OrganizationService;
@@ -28,7 +27,7 @@ public class OrganizationController {
     public ResponseEntity<OrganizationResponse> getOrganizationTreeById(@PathVariable Long id) {
         log.info("Request received for organization tree with id: {}", id);
 
-        Organization organization = organizationService.getOrganizationById(id);
+        var organization = organizationService.getOrganizationById(id);
 
         return ResponseEntity.ok(OrganizationResponse.fromEntity(organization));
     }
@@ -38,7 +37,7 @@ public class OrganizationController {
     public ResponseEntity<OrganizationResponse> createOrganization(@Valid @RequestBody CreateOrganizationRequest request) {
         log.info("Creation request received for organization with name: {}", request.name());
 
-        Organization organization = organizationService.createOrganization(request);
+        var organization = organizationService.createOrganization(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(OrganizationResponse.fromEntity(organization));
     }

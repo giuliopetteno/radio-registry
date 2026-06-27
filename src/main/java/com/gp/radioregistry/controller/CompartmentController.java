@@ -1,7 +1,6 @@
 package com.gp.radioregistry.controller;
 
 
-import com.gp.radioregistry.domain.Compartment;
 import com.gp.radioregistry.request.CreateCompartmentRequest;
 import com.gp.radioregistry.response.CompartmentResponse;
 import com.gp.radioregistry.service.CompartmentService;
@@ -32,7 +31,7 @@ public class CompartmentController {
     public ResponseEntity<CompartmentResponse> createCompartment(@Valid @RequestBody CreateCompartmentRequest request) {
         log.info("Creation request received for compartment with name: {}", request.name());
 
-        Compartment compartment = compartmentService.createCompartment(request);
+        var compartment = compartmentService.createCompartment(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(CompartmentResponse.fromEntity(compartment));
     }

@@ -5,8 +5,9 @@ import com.gp.radioregistry.domain.User;
 import com.gp.radioregistry.exception.ResourceAlreadyExistsException;
 import com.gp.radioregistry.repository.RoleRepository;
 import com.gp.radioregistry.repository.UserRepository;
-import com.gp.radioregistry.request.CreateUserRequest;
+import com.gp.radioregistry.request.RegisterUserRequest;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +27,7 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public User createUser(CreateUserRequest request) {
+    public User createUser(RegisterUserRequest request) {
         if (userRepository.existsByUsername(request.username())) {
             throw new ResourceAlreadyExistsException("User with username " + request.username() + " already exists");
         }
@@ -44,6 +45,11 @@ public class UserService {
                 .roles(new HashSet<>(Set.of(defaultRole)))
                 .build();
         return userRepository.save(user);
+    }
+
+    public User findByUsernameOrEmail(String usernameOrEmail) {
+        return userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username or email: " + usernameOrEmail));
     }
 
     public List<User> getUsers() {
