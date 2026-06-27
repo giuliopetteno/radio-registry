@@ -1,13 +1,17 @@
 package com.gp.radioregistry.security;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.password.CompromisedPasswordChecker;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -26,16 +30,25 @@ public class CustomSecurityFilterChain {
    @Bean
    SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.cors(Customizer.withDefaults()) // explicitly restricted to http://localhost:4200
-                // CSRF protection is disabled because this application does not use cookies for authentication
-                .csrf(CsrfConfigurer::disable)
-                // Using HTTP protocol only for non-production environments
-                .redirectToHttps(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/roles/**", "/organizations/**", "/compartments/**",
-                        "/devices/**", "/device-types/**").authenticated()
-                        .requestMatchers("/auth/**").permitAll());
-        http.formLogin(withDefaults());
-        http.httpBasic(withDefaults());
+            // CSRF protection is disabled because JWT authentication does not need cookies
+            .csrf(CsrfConfigurer::disable)
+            // Using HTTP protocol only for non-production environments
+            .redirectToHttps(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(requests -> requests
+                .requestMatchers("/roles/**", "/organizations/**", "/compartments/**", "/devices/**", "/device-types/**").authenticated()
+                .requestMatchers("/auth/**").permitAll())
+            .formLogin(withDefaults())
+            .httpBasic(withDefaults()).sessionManagement(session -> session
+                // Temporary setup before migrating to JWT auth: maintaining session state via JSESSIONID to avoid re-sending Basic auth credentials
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+            .logout(logout -> logout
+                .logoutUrl("/auth/logout")
+                .invalidateHttpSession(true)
+                .clearAuthentication(true)
+                .deleteCookies("JSESSIONID")
+                .logoutSuccessHandler((_, response, _) ->
+                    response.setStatus(HttpServletResponse.SC_OK))
+            );
         return http.build();
     }
 
@@ -53,6 +66,11 @@ public class CustomSecurityFilterChain {
     @Bean
     public CompromisedPasswordChecker compromisedPasswordChecker() {
         return new HaveIBeenPwnedRestApiPasswordChecker();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
     // CORS is explicitly restricted to localhost for local development.

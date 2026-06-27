@@ -1,6 +1,5 @@
 package com.gp.radioregistry.controller;
 
-import com.gp.radioregistry.domain.Role;
 import com.gp.radioregistry.request.CreateRoleRequest;
 import com.gp.radioregistry.response.RoleResponse;
 import com.gp.radioregistry.service.RoleService;
@@ -31,7 +30,7 @@ public class RoleController {
     public ResponseEntity<RoleResponse> createRole(@Valid @RequestBody CreateRoleRequest request) {
         log.info("Creation request received for role with name: {}", request.name());
 
-        Role role = roleService.createRole(request);
+        var role = roleService.createRole(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(RoleResponse.fromEntity(role));
     }

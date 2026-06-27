@@ -1,6 +1,5 @@
 package com.gp.radioregistry.controller;
 
-import com.gp.radioregistry.domain.DeviceType;
 import com.gp.radioregistry.request.CreateDeviceTypeRequest;
 import com.gp.radioregistry.response.DeviceTypeResponse;
 import com.gp.radioregistry.service.DeviceTypeService;
@@ -31,7 +30,7 @@ public class DeviceTypeController {
     public ResponseEntity<DeviceTypeResponse> createDeviceType(@Valid @RequestBody CreateDeviceTypeRequest request) {
         log.info("Creation request received for device type with name: {}", request.name());
 
-        DeviceType deviceType = deviceTypeService.createDeviceType(request);
+        var deviceType = deviceTypeService.createDeviceType(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(DeviceTypeResponse.fromEntity(deviceType));
     }
