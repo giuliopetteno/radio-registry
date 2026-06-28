@@ -4,17 +4,15 @@ import com.gp.radioregistry.domain.Organization;
 import com.gp.radioregistry.repository.OrganizationRepository;
 import com.gp.radioregistry.request.CreateOrganizationRequest;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class OrganizationService {
     private final OrganizationRepository organizationRepository;
-
-    public OrganizationService(OrganizationRepository organizationRepository) {
-        this.organizationRepository = organizationRepository;
-    }
 
     public Organization createOrganization(CreateOrganizationRequest request) {
         var organization = Organization.builder()

@@ -1,11 +1,16 @@
 package com.gp.radioregistry.service;
 
+import com.gp.radioregistry.constant.AppConstants;
 import com.gp.radioregistry.domain.User;
 import com.gp.radioregistry.exception.ResourceAlreadyExistsException;
 import com.gp.radioregistry.repository.RoleRepository;
 import com.gp.radioregistry.repository.UserRepository;
 import com.gp.radioregistry.request.RegisterUserRequest;
+import com.gp.radioregistry.request.UpdateUserPasswordRequest;
+import com.gp.radioregistry.request.UpdateUserRequest;
+import com.gp.radioregistry.request.UpdateUserRolesRequest;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,20 +18,14 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import static com.gp.radioregistry.constant.AppConstants.Security.ROLE_USER;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     public User createUser(RegisterUserRequest request) {
         if (userRepository.existsByUsername(request.username())) {
@@ -36,15 +35,42 @@ public class UserService {
             throw new ResourceAlreadyExistsException("User with email " + request.email() + " already exists");
         }
 
-        var defaultRole = roleRepository.findByName(ROLE_USER)
-                .orElseThrow(() -> new IllegalStateException("Default role " + ROLE_USER + " not found"));
+        var defaultRole = AppConstants.Security.Role.OPERATOR.getName();
+        var role = roleRepository.findByName(defaultRole)
+                .orElseThrow(() -> new IllegalStateException("Default role " + defaultRole + " not found"));
 
         var user = User.builder()
                 .username(request.username())
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
-                .roles(new HashSet<>(Set.of(defaultRole)))
+                .roles(new HashSet<>(Set.of(role)))
                 .build();
+        return userRepository.save(user);
+    }
+
+    public User updateUser(Long id, UpdateUserRequest request) {
+        var user = getUserById(id);
+        user.setUsername(request.username() != null ? request.username() : user.getUsername());
+        user.setEmail(request.email() != null ? request.email() : user.getEmail());
+
+        return userRepository.save(user);
+    }
+
+    public User updateUserPassword(Long id, UpdateUserPasswordRequest request) {
+        var user = getUserById(id);
+        user.setPassword(passwordEncoder.encode(request.password()));
+
+        return userRepository.save(user);
+    }
+
+    public User updateUserRoles(Long id, UpdateUserRolesRequest request) {
+        var user = getUserById(id);
+
+        user.setRoles(request.roleNames().stream()
+                .map(roleName -> roleRepository.findByName(roleName)
+                        .orElseThrow(() -> new EntityNotFoundException("Role not found with name: " + roleName)))
+                .collect(Collectors.toSet()));
+
         return userRepository.save(user);
     }
 

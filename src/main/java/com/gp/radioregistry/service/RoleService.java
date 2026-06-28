@@ -5,17 +5,15 @@ import com.gp.radioregistry.exception.ResourceAlreadyExistsException;
 import com.gp.radioregistry.repository.RoleRepository;
 import com.gp.radioregistry.request.CreateRoleRequest;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class RoleService {
     private final RoleRepository roleRepository;
-
-    public RoleService(RoleRepository roleRepository) {
-        this.roleRepository = roleRepository;
-    }
 
     public Role createRole(CreateRoleRequest request) {
         var roleName = request.name().trim().toUpperCase();

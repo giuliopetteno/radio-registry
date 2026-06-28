@@ -5,6 +5,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.password.CompromisedPasswordChecker;
 import org.springframework.security.config.Customizer;
@@ -39,14 +40,18 @@ public class CustomSecurityFilterChainProd {
             // Using HTTPS protocol only for production environment
             .redirectToHttps(https -> https.requestMatchers(AnyRequestMatcher.INSTANCE))
             .authorizeHttpRequests(requests -> requests
-                .requestMatchers("/roles/**", "/organizations/**", "/compartments/**", "/devices/**", "/device-types/**").hasRole(ROLE_USER)
-                .requestMatchers("/auth/**").permitAll())
+                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/organizations/**", "/compartments/**",
+                    "/devices/**", "/device-types/**").hasAnyRole(Role.OPERATOR.getName(), Role.TECHNICIAN.getName(), Role.ADMIN.getName())
+                .requestMatchers("/organizations/**", "/compartments/**", "/devices/**",
+                    "/device-types/**").hasAnyRole(Role.TECHNICIAN.getName(), Role.ADMIN.getName())
+                .anyRequest().hasRole(Role.ADMIN.getName()))
             .formLogin(withDefaults())
             .httpBasic(withDefaults()).sessionManagement(session -> session
                 // Temporary setup before migrating to JWT auth: maintaining session state via JSESSIONID to avoid re-sending Basic auth credentials
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .logout(logout -> logout
-                .logoutUrl(LOGOUT_API)
+                .logoutUrl(AUTH_PATH+LOGOUT_PATH)
                 .invalidateHttpSession(true)
                 .clearAuthentication(true)
                 .deleteCookies(SESSION_COOKIE)
@@ -84,7 +89,7 @@ public class CustomSecurityFilterChainProd {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOrigins(List.of(PROTOCOL_HTTPS+DOMAIN+PORT));
+        corsConfig.setAllowedOrigins(List.of(String.format("%s://%s:%s", PROTOCOL_HTTPS, DOMAIN, PORT)));
         corsConfig.setAllowedMethods(List.of("*"));
         corsConfig.setAllowCredentials(true);
         corsConfig.setAllowedHeaders(List.of("*"));
