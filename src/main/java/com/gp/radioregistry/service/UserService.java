@@ -66,9 +66,9 @@ public class UserService {
     public User updateUserRoles(Long id, UpdateUserRolesRequest request) {
         var user = getUserById(id);
 
-        user.setRoles(request.roleNames().stream()
-                .map(roleName -> roleRepository.findByName(roleName)
-                        .orElseThrow(() -> new EntityNotFoundException("Role not found with name: " + roleName)))
+        user.setRoles(request.roleIds().stream()
+                .map(roleId -> roleRepository.findById(roleId)
+                        .orElseThrow(() -> new EntityNotFoundException("Role not found with ID: " + roleId)))
                 .collect(Collectors.toSet()));
 
         return userRepository.save(user);
