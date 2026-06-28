@@ -26,7 +26,7 @@ The system allows healthcare providers to register and manage medical devices, a
 
 - Java 25
 - Spring Boot 4
-- Spring Security
+- Spring Security with JWT and role-based access control (Admin, Technician, Operator)
 - Hibernate / JPA
 - PostgreSQL
 - Gradle
@@ -35,7 +35,6 @@ The system allows healthcare providers to register and manage medical devices, a
 
 ## Planned Enhancements
 
-- Role-based access control (Admin, User, Technician, Operator)
 - Audit logging
 - Unit and integration testing using JUnit 5, Mockito and Testcontainers
 - Docker containerization with container orchestration using Docker Compose
