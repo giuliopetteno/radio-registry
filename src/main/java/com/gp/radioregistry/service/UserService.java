@@ -1,6 +1,5 @@
 package com.gp.radioregistry.service;
 
-import com.gp.radioregistry.domain.Role;
 import com.gp.radioregistry.domain.User;
 import com.gp.radioregistry.exception.ResourceAlreadyExistsException;
 import com.gp.radioregistry.repository.RoleRepository;
@@ -14,6 +13,8 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static com.gp.radioregistry.constant.AppConstants.Security.ROLE_USER;
 
 @Service
 public class UserService {
@@ -35,10 +36,10 @@ public class UserService {
             throw new ResourceAlreadyExistsException("User with email " + request.email() + " already exists");
         }
 
-        Role defaultRole = roleRepository.findByName("USER")
-                .orElseThrow(() -> new IllegalStateException("Default role USER not found"));
+        var defaultRole = roleRepository.findByName(ROLE_USER)
+                .orElseThrow(() -> new IllegalStateException("Default role " + ROLE_USER + " not found"));
 
-        User user = User.builder()
+        var user = User.builder()
                 .username(request.username())
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))

@@ -17,7 +17,7 @@ public class OrganizationService {
     }
 
     public Organization createOrganization(CreateOrganizationRequest request) {
-        Organization organization = Organization.builder()
+        var organization = Organization.builder()
                 .name(request.name())
                 .code(request.code())
                 .description(request.description())

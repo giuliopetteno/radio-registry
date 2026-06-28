@@ -8,6 +8,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
 
+import static com.gp.radioregistry.constant.AppConstants.Validation.DESCRIPTION_MAX_LENGTH;
+import static com.gp.radioregistry.constant.AppConstants.Validation.NAME_MAX_LENGTH;
+
 @Entity
 @Table(name = "device_type")
 @Getter
@@ -21,10 +24,10 @@ public class DeviceType {
     private Long id;
 
     @Column(nullable = false)
-    @Size(max = 50)
+    @Size(max = NAME_MAX_LENGTH)
     private String name;
 
-    @Size(max = 200)
+    @Size(max = DESCRIPTION_MAX_LENGTH)
     private String description;
 
     @CreationTimestamp

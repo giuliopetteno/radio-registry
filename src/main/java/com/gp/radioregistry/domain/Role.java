@@ -8,6 +8,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
 
+import static com.gp.radioregistry.constant.AppConstants.Validation.NAME_MAX_LENGTH;
+
 @Entity
 @Table(name = "roles")
 @Getter
@@ -21,7 +23,7 @@ public class Role {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    @Size(max = 50)
+    @Size(max = NAME_MAX_LENGTH)
     private String name;
 
     @CreationTimestamp

@@ -35,7 +35,7 @@ The system allows healthcare providers to register and manage medical devices, a
 
 ## Planned Enhancements
 
-- Role-based access control (Admin, Technician, Operator)
+- Role-based access control (Admin, User, Technician, Operator)
 - Audit logging
 - Unit and integration testing using JUnit 5, Mockito and Testcontainers
 - Docker containerization with container orchestration using Docker Compose

@@ -15,6 +15,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.gp.radioregistry.constant.AppConstants.Security.ROLE_PREFIX;
+import static com.gp.radioregistry.constant.AppConstants.Validation.*;
+
 @Entity
 @Table(name = "users")
 @Getter
@@ -28,15 +31,15 @@ public class User implements UserDetails {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    @Size(max = 50)
+    @Size(min = USERNAME_MIN_LENGTH, max = USERNAME_MAX_LENGTH)
     private String username;
 
     @Column(nullable = false, unique = true)
-    @Size(max = 50)
+    @Size(max = EMAIL_MAX_LENGTH)
     private String email;
 
     @Column(nullable = false)
-    @Size(max = 200)
+    @Size(min = PASSWORD_MIN_LENGTH, max = PASSWORD_MAX_LENGTH)
     private String password;
 
     @Builder.Default
@@ -67,7 +70,7 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
+                .map(role -> new SimpleGrantedAuthority(ROLE_PREFIX + role.getName()))
                 .collect(Collectors.toSet());
     }
 

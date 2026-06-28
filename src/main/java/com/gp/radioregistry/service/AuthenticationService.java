@@ -18,7 +18,7 @@ public class AuthenticationService {
     }
 
     public Authentication doAuthentication(LoginRequest loginRequest, HttpServletRequest servletRequest) {
-        Authentication authentication = authenticationManager.authenticate(
+        var authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password()));
 
         if (authentication.isAuthenticated()) {

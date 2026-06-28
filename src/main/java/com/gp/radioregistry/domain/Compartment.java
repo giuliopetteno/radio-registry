@@ -10,6 +10,8 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.gp.radioregistry.constant.AppConstants.Validation.*;
+
 @Entity
 @Table(name = "compartment")
 @Getter
@@ -23,14 +25,14 @@ public class Compartment {
     private Long id;
 
     @Column(nullable = false)
-    @Size(max = 50)
+    @Size(max = NAME_MAX_LENGTH)
     private String name;
 
     @Column(nullable = false)
-    @Size(max = 20)
+    @Size(max = CODE_MAX_LENGTH)
     private String code;
 
-    @Size(max = 200)
+    @Size(max = DESCRIPTION_MAX_LENGTH)
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

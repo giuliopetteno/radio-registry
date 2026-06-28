@@ -1,6 +1,7 @@
 package com.gp.radioregistry.security;
 
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -22,32 +23,37 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+import static com.gp.radioregistry.constant.AppConstants.Api.*;
+import static com.gp.radioregistry.constant.AppConstants.Security.*;
 import static org.springframework.security.config.Customizer.withDefaults;
 
+@Log4j2
 @Configuration
 @Profile("!prod")
 public class CustomSecurityFilterChain {
    @Bean
    SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-        http.cors(Customizer.withDefaults()) // explicitly restricted to http://localhost:4200
+        http.cors(Customizer.withDefaults())
             // CSRF protection is disabled because JWT authentication does not need cookies
             .csrf(CsrfConfigurer::disable)
             // Using HTTP protocol only for non-production environments
             .redirectToHttps(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(requests -> requests
-                .requestMatchers("/roles/**", "/organizations/**", "/compartments/**", "/devices/**", "/device-types/**").authenticated()
+                .requestMatchers("/roles/**", "/organizations/**", "/compartments/**", "/devices/**", "/device-types/**").hasRole(ROLE_USER)
                 .requestMatchers("/auth/**").permitAll())
             .formLogin(withDefaults())
             .httpBasic(withDefaults()).sessionManagement(session -> session
                 // Temporary setup before migrating to JWT auth: maintaining session state via JSESSIONID to avoid re-sending Basic auth credentials
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .logout(logout -> logout
-                .logoutUrl("/auth/logout")
+                .logoutUrl(LOGOUT_API)
                 .invalidateHttpSession(true)
                 .clearAuthentication(true)
-                .deleteCookies("JSESSIONID")
-                .logoutSuccessHandler((_, response, _) ->
-                    response.setStatus(HttpServletResponse.SC_OK))
+                .deleteCookies(SESSION_COOKIE)
+                .logoutSuccessHandler((_, response, authentication) -> {
+                    log.info("Logout successful for the user {}", authentication != null ? authentication.getName() : "");
+                    response.setStatus(HttpServletResponse.SC_OK);
+                })
             );
         return http.build();
     }
@@ -77,11 +83,11 @@ public class CustomSecurityFilterChain {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOrigins(List.of("http://localhost:4200"));
+        corsConfig.setAllowedOrigins(List.of(PROTOCOL_HTTP+DOMAIN+PORT));
         corsConfig.setAllowedMethods(List.of("*"));
         corsConfig.setAllowCredentials(true);
         corsConfig.setAllowedHeaders(List.of("*"));
-        corsConfig.setMaxAge(3600L);
+        corsConfig.setMaxAge(SESSION_TIMEOUT_SEC);
 
         UrlBasedCorsConfigurationSource corsConfigSource = new UrlBasedCorsConfigurationSource();
         corsConfigSource.registerCorsConfiguration("/**", corsConfig);

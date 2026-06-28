@@ -17,7 +17,7 @@ public class DeviceTypeService {
     }
 
     public DeviceType createDeviceType(CreateDeviceTypeRequest request) {
-        DeviceType deviceType = DeviceType.builder()
+        var deviceType = DeviceType.builder()
                 .name(request.name().trim())
                 .description(request.description())
                 .build();
