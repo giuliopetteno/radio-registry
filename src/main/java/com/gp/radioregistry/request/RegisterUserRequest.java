@@ -19,7 +19,7 @@ public record RegisterUserRequest(
         @Size(max = EMAIL_MAX_LENGTH, message = "Email must not exceed {max} characters")
         String email,
 
-        @Schema(description = "Account password (min 8 characters)")
+        @Schema(description = "Account password")
         @NotBlank(message = "Password is required")
         @Size(min=PASSWORD_MIN_LENGTH, max=PASSWORD_MAX_LENGTH, message = "Password must be between {min} and {max} characters")
         String password

@@ -24,6 +24,7 @@ public final class AppConstants {
 		public static final String DEVICE_TYPES_PATH 		= "/devices-types";
 		public static final String COMPARTMENTS_PATH 		= "/compartments";
 		public static final String ORGANIZATIONS_PATH 		= "/organizations";
+		public static final String WC_ALL 					= "/**";
 	}
 
 	// ── Security ─────────────────────────────────────────────────────────────

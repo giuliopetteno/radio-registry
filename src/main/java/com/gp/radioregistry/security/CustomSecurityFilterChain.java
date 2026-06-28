@@ -40,11 +40,12 @@ public class CustomSecurityFilterChain {
             // Using HTTP protocol only for non-production environments
             .redirectToHttps(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(requests -> requests
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/organizations/**", "/compartments/**",
-                    "/devices/**", "/device-types/**").hasAnyRole(Role.OPERATOR.getName(), Role.TECHNICIAN.getName(), Role.ADMIN.getName())
-                .requestMatchers("/organizations/**", "/compartments/**", "/devices/**",
-                    "/device-types/**").hasAnyRole(Role.TECHNICIAN.getName(), Role.ADMIN.getName())
+                .requestMatchers(AUTH_PATH+WC_ALL).permitAll()
+                .requestMatchers(HttpMethod.GET, ORGANIZATIONS_PATH+WC_ALL, COMPARTMENTS_PATH+WC_ALL,
+                    DEVICES_PATH+WC_ALL, DEVICE_TYPES_PATH+WC_ALL)
+                    .hasAnyRole(Role.OPERATOR.getName(), Role.TECHNICIAN.getName(), Role.ADMIN.getName())
+                .requestMatchers(ORGANIZATIONS_PATH+WC_ALL, COMPARTMENTS_PATH+WC_ALL, DEVICES_PATH+WC_ALL,
+                    DEVICE_TYPES_PATH+WC_ALL).hasAnyRole(Role.TECHNICIAN.getName(), Role.ADMIN.getName())
                 .anyRequest().hasRole(Role.ADMIN.getName()))
             .formLogin(withDefaults())
             .httpBasic(withDefaults()).sessionManagement(session -> session
