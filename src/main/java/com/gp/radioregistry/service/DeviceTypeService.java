@@ -4,17 +4,15 @@ import com.gp.radioregistry.domain.DeviceType;
 import com.gp.radioregistry.repository.DeviceTypeRepository;
 import com.gp.radioregistry.request.CreateDeviceTypeRequest;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class DeviceTypeService {
     private final DeviceTypeRepository deviceTypeRepository;
-
-    public DeviceTypeService(DeviceTypeRepository deviceTypeRepository) {
-        this.deviceTypeRepository = deviceTypeRepository;
-    }
 
     public DeviceType createDeviceType(CreateDeviceTypeRequest request) {
         var deviceType = DeviceType.builder()

@@ -45,8 +45,8 @@ public record CreateDeviceRequest(
 ) {
     @AssertTrue(message = "Either an organization or a compartment must be specified")
     public boolean orgOrCompValid() {
-        return (organizationId == null) != (compartmentId == null);
-    }
+        return (organizationId != null && organizationId > 0) != (compartmentId != null && compartmentId > 0);
+  }
 }
 
 

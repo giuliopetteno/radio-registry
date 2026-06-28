@@ -4,6 +4,8 @@ import com.gp.radioregistry.domain.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.OffsetDateTime;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public record UserResponse(
     @Schema(description = "Unique user ID")
@@ -14,6 +16,9 @@ public record UserResponse(
 
     @Schema(description = "The email of the user")
     String email,
+
+    @Schema(description = "The roles of the user")
+    Set<RoleResponse> roles,
 
     @Schema(description = "Indicates if the user is enabled")
     Boolean enabled,
@@ -36,6 +41,9 @@ public record UserResponse(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
+                user.getRoles().stream()
+                    .map(RoleResponse::fromEntity)
+                    .collect(Collectors.toSet()),
                 user.isEnabled(),
                 user.isAccountNonLocked(),
                 user.getCreatedAt(),

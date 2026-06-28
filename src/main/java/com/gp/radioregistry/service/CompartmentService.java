@@ -5,19 +5,16 @@ import com.gp.radioregistry.repository.CompartmentRepository;
 import com.gp.radioregistry.repository.OrganizationRepository;
 import com.gp.radioregistry.request.CreateCompartmentRequest;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class CompartmentService {
     private final CompartmentRepository compartmentRepository;
     private final OrganizationRepository organizationRepository;
-
-    public CompartmentService(CompartmentRepository compartmentRepository, OrganizationRepository organizationRepository) {
-        this.compartmentRepository = compartmentRepository;
-        this.organizationRepository = organizationRepository;
-    }
 
     public Compartment createCompartment(CreateCompartmentRequest request) {
         var compartment = Compartment.builder()

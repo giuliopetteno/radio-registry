@@ -1,5 +1,8 @@
 package com.gp.radioregistry.constant;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 public final class AppConstants {
 
 	private AppConstants() {
@@ -9,25 +12,39 @@ public final class AppConstants {
 	public static final class Api {
 		private Api() {}
 
-		public static final String PROTOCOL_HTTP    = "http://";
-		public static final String PROTOCOL_HTTPS   = "https://";
-		public static final String DOMAIN  			= "localhost:";
-		public static final String PORT 			= "4200";
-		public static final String LOGOUT_API 		= "/auth/logout";
+		public static final String PROTOCOL_HTTP    		= "http";
+		public static final String PROTOCOL_HTTPS   		= "https";
+		public static final String DOMAIN  					= "localhost";
+		public static final String PORT 					= "4200";
+		public static final String LOGOUT_PATH 				= "/logout";
+		public static final String AUTH_PATH 				= "/auth";
+		public static final String USERS_PATH 				= "/users";
+		public static final String ROLES_PATH 				= "/roles";
+		public static final String DEVICES_PATH 			= "/devices";
+		public static final String DEVICE_TYPES_PATH 		= "/devices-types";
+		public static final String COMPARTMENTS_PATH 		= "/compartments";
+		public static final String ORGANIZATIONS_PATH 		= "/organizations";
 	}
 
 	// ── Security ─────────────────────────────────────────────────────────────
 	public static final class Security {
 		private Security() {}
 
+		@Getter
+		@AllArgsConstructor
+		public enum Role {
+			ADMIN(1L, "ADMIN"),
+			TECHNICIAN(2L,"TECHNICIAN"),
+			OPERATOR(3L,"OPERATOR");
+
+			private final Long id;
+			private final String name;
+		}
+
 		public static final int    BCRYPT_STRENGTH      = 12;
 		public static final String SESSION_COOKIE		= "JSESSIONID";
 		public static final long   SESSION_TIMEOUT_SEC  = 3600L;
 		public static final String ROLE_PREFIX 			= "ROLE_";
-		public static final String ROLE_ADMIN           = "ADMIN";
-		public static final String ROLE_USER            = "USER";
-		public static final String ROLE_TECHNICIAN      = "TECHNICIAN";
-		public static final String ROLE_OPERATOR        = "OPERATOR";
 	}
 
 	// ── Pagination ───────────────────────────────────────────────────────────

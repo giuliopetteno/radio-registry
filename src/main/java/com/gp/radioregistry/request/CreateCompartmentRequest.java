@@ -31,8 +31,8 @@ public record CreateCompartmentRequest(
 ) {
     @AssertTrue(message = "Either an organization or a parent compartment must be specified")
     public boolean orgOrCompValid() {
-        return (organizationId == null) != (parentCompartmentId == null);
-    }
+        return (organizationId != null && organizationId > 0) != (parentCompartmentId != null && parentCompartmentId > 0);
+  }
 }
 
 
