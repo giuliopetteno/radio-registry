@@ -27,7 +27,7 @@ public class DeviceService {
     }
 
     public Device createDevice(CreateDeviceRequest request) {
-        Device device = Device.builder()
+        var device = Device.builder()
                 .name(request.name())
                 .deviceType(deviceTypeRepository.getReferenceById(request.deviceTypeId()))
                 .serialNumber(request.serialNumber())

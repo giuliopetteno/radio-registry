@@ -18,13 +18,13 @@ public class RoleService {
     }
 
     public Role createRole(CreateRoleRequest request) {
-        String roleName = request.name().trim().toUpperCase();
+        var roleName = request.name().trim().toUpperCase();
 
         if (roleRepository.existsByName(roleName)) {
             throw new ResourceAlreadyExistsException("Role with name " + request.name() + " already exists");
         }
 
-        Role role = Role.builder()
+        var role = Role.builder()
                 .name(roleName)
                 .build();
         return roleRepository.save(role);

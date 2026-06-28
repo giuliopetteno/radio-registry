@@ -5,19 +5,21 @@ import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+import static com.gp.radioregistry.constant.AppConstants.Validation.*;
+
 public record CreateCompartmentRequest(
     @Schema(description = "Compartment name, mandatory and cannot be empty")
     @NotBlank(message = "The compartment name is mandatory")
-    @Size(max = 50)
+    @Size(max = NAME_MAX_LENGTH)
     String name,
 
     @Schema(description = "Compartment code, mandatory and cannot be empty")
     @NotBlank(message = "The compartment code is mandatory")
-    @Size(max = 20)
+    @Size(max = CODE_MAX_LENGTH)
     String code,
 
     @Schema(description = "Optional description for the compartment")
-    @Size(max = 200)
+    @Size(max = DESCRIPTION_MAX_LENGTH)
     String description,
 
     @Schema(description = "ID of the organization to which the compartment belongs")

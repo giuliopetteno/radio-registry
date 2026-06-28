@@ -1,14 +1,15 @@
 package com.gp.radioregistry.domain;
 
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import jakarta.persistence.*;
-
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+
+import static com.gp.radioregistry.constant.AppConstants.Validation.*;
 
 @Entity
 @Table(name = "device")
@@ -23,7 +24,7 @@ public class Device {
     private Long id;
 
     @Column(nullable = false)
-    @Size(max = 50)
+    @Size(max = NAME_MAX_LENGTH)
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -31,10 +32,10 @@ public class Device {
     private DeviceType deviceType;
 
     @Column(name = "serial_number", nullable = false)
-    @Size(max = 20)
+    @Size(max = SERIAL_NUMBER_MAX_LENGTH)
     private String serialNumber;
 
-    @Size(max = 200)
+    @Size(max = DESCRIPTION_MAX_LENGTH)
     private String description;
 
     @Column(name = "installation_date", nullable = false)

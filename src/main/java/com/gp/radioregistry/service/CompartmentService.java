@@ -20,7 +20,7 @@ public class CompartmentService {
     }
 
     public Compartment createCompartment(CreateCompartmentRequest request) {
-        Compartment compartment = Compartment.builder()
+        var compartment = Compartment.builder()
                 .name(request.name())
                 .code(request.code())
                 .description(request.description())
