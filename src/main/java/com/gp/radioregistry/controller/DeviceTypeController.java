@@ -1,6 +1,7 @@
 package com.gp.radioregistry.controller;
 
 import com.gp.radioregistry.request.CreateDeviceTypeRequest;
+import com.gp.radioregistry.request.UpdateDeviceTypeRequest;
 import com.gp.radioregistry.response.DeviceTypeResponse;
 import com.gp.radioregistry.service.DeviceTypeService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,6 +33,26 @@ public class DeviceTypeController {
         var deviceType = deviceTypeService.createDeviceType(request);
 
         return ResponseEntity.created(URI.create(String.format("%s/%d", DEVICE_TYPES_PATH, deviceType.getId()))).body(DeviceTypeResponse.fromEntity(deviceType));
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update request for device type", description = "Updates a device type.")
+    public ResponseEntity<DeviceTypeResponse> updateDeviceType(@PathVariable Long id, @Valid @RequestBody UpdateDeviceTypeRequest request) {
+        log.info("Update request received for device type with id: {}", id);
+
+        var deviceType = deviceTypeService.updateDeviceType(id, request);
+
+        return ResponseEntity.ok(DeviceTypeResponse.fromEntity(deviceType));
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete request for device type", description = "Deletes a device type by ID.")
+    public ResponseEntity<Void> deleteDeviceType(@PathVariable Long id) {
+        log.info("Delete request received for device type with id: {}", id);
+
+        deviceTypeService.deleteDeviceType(id);
+
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping

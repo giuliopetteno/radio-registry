@@ -9,11 +9,11 @@ import static com.gp.radioregistry.constant.AppConstants.Validation.NAME_MAX_LEN
 
 public record CreateDeviceTypeRequest(
     @Schema(description = "The unique identifier name of the device type. Cannot be empty.")
-    @NotBlank(message = "The name is mandatory and cannot contain only whitespace")
+    @NotBlank(message = "The device type name is required")
     @Size(max = NAME_MAX_LENGTH)
     String name,
 
-    @Schema(description = "Description of the device type.")
+    @Schema(description = "Optional description for the device type.")
     @Size(max = DESCRIPTION_MAX_LENGTH)
     String description
 ){}

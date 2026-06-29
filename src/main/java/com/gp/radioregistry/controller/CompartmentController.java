@@ -2,6 +2,7 @@ package com.gp.radioregistry.controller;
 
 
 import com.gp.radioregistry.request.CreateCompartmentRequest;
+import com.gp.radioregistry.request.UpdateCompartmentRequest;
 import com.gp.radioregistry.response.CompartmentResponse;
 import com.gp.radioregistry.service.CompartmentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,6 +34,26 @@ public class CompartmentController {
         var compartment = compartmentService.createCompartment(request);
 
         return ResponseEntity.created(URI.create(String.format("%s/%d", COMPARTMENTS_PATH, compartment.getId()))).body(CompartmentResponse.fromEntity(compartment));
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update request for compartment", description = "Updates a compartment.")
+    public ResponseEntity<CompartmentResponse> updateCompartment(@PathVariable Long id, @Valid @RequestBody UpdateCompartmentRequest request) {
+        log.info("Update request received for compartment with id: {}", id);
+
+        var compartment = compartmentService.updateCompartment(id, request);
+
+        return ResponseEntity.ok(CompartmentResponse.fromEntity(compartment));
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete request for compartment", description = "Deletes a compartment by ID.")
+    public ResponseEntity<Void> deleteCompartment(@PathVariable Long id) {
+        log.info("Delete request received for compartment with id: {}", id);
+
+        compartmentService.deleteCompartment(id);
+
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping

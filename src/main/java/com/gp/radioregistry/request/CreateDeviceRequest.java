@@ -14,25 +14,25 @@ import static com.gp.radioregistry.constant.AppConstants.Validation.*;
 
 public record CreateDeviceRequest(
     @Schema(description = "Device name")
-    @NotBlank(message = "The name is mandatory")
+    @NotBlank(message = "The device name is required")
     @Size(max = NAME_MAX_LENGTH)
     String name,
 
     @Schema(description = "ID of the device type")
-    @NotNull(message = "The device type is mandatory")
+    @NotNull(message = "The device type is required")
     Long deviceTypeId,
 
     @Schema(description = "Device serial number")
-    @NotBlank(message = "The serial number is mandatory")
+    @NotBlank(message = "The device serial number is required")
     @Size(max = SERIAL_NUMBER_MAX_LENGTH)
     String serialNumber,
 
-    @Schema(description = "Device description")
+    @Schema(description = "Optional description for the device")
     @Size(max = DESCRIPTION_MAX_LENGTH)
     String description,
 
-    @Schema(description = "Installation date and time")
-    @NotNull(message = "The installation date is mandatory")
+    @Schema(description = "Installation date")
+    @NotNull(message = "The device installation date is required")
     @JsonFormat(pattern = DEFAULT_DATE_FORMAT)
     LocalDate installationDate,
 

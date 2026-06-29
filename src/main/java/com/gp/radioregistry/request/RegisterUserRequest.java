@@ -23,4 +23,5 @@ public record RegisterUserRequest(
         @NotBlank(message = "Password is required")
         @Size(min=PASSWORD_MIN_LENGTH, max=PASSWORD_MAX_LENGTH, message = "Password must be between {min} and {max} characters")
         String password
+
 ) {}

@@ -9,12 +9,12 @@ import static com.gp.radioregistry.constant.AppConstants.Validation.*;
 
 public record CreateCompartmentRequest(
     @Schema(description = "Compartment name, mandatory and cannot be empty")
-    @NotBlank(message = "The compartment name is mandatory")
+    @NotBlank(message = "The compartment name is required")
     @Size(max = NAME_MAX_LENGTH)
     String name,
 
     @Schema(description = "Compartment code, mandatory and cannot be empty")
-    @NotBlank(message = "The compartment code is mandatory")
+    @NotBlank(message = "The compartment code is required")
     @Size(max = CODE_MAX_LENGTH)
     String code,
 
@@ -22,7 +22,7 @@ public record CreateCompartmentRequest(
     @Size(max = DESCRIPTION_MAX_LENGTH)
     String description,
 
-    @Schema(description = "ID of the organization to which the compartment belongs")
+    @Schema(description = "ID of the organization to which the compartment belongs (optional, must be set only if this is not a child comparment)")
     Long organizationId,
 
     @Schema(description = "ID of the parent compartment (optional, must be set only if this is a child compartment)")

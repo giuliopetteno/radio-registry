@@ -1,6 +1,7 @@
 package com.gp.radioregistry.controller;
 
 import com.gp.radioregistry.request.CreateOrganizationRequest;
+import com.gp.radioregistry.request.UpdateOrganizationRequest;
 import com.gp.radioregistry.response.OrganizationResponse;
 import com.gp.radioregistry.service.OrganizationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,6 +35,26 @@ public class OrganizationController {
         return ResponseEntity.created(URI.create(String.format("%s/%d", ORGANIZATIONS_PATH, organization.getId()))).body(OrganizationResponse.fromEntity(organization));
     }
 
+    @PutMapping("/{id}")
+    @Operation(summary = "Update request for organization", description = "Updates an organization.")
+    public ResponseEntity<OrganizationResponse> updateOrganization(@PathVariable Long id, @Valid @RequestBody UpdateOrganizationRequest request) {
+        log.info("Update request received for organization with id: {}", id);
+
+        var organization = organizationService.updateOrganization(id, request);
+
+        return ResponseEntity.ok(OrganizationResponse.fromEntity(organization));
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete request for organization", description = "Deletes an organization by ID.")
+    public ResponseEntity<Void> deleteOrganization(@PathVariable Long id) {
+        log.info("Delete request received for organization with id: {}", id);
+
+        organizationService.deleteOrganization(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{id}/tree")
     @Operation(summary = "Request organization tree", description = "Retrieves the entire tree of an organization")
     public ResponseEntity<OrganizationResponse> getOrganizationTreeById(@PathVariable Long id) {
@@ -52,16 +73,6 @@ public class OrganizationController {
         var organizations = organizationService.getOrganizations();
 
         return ResponseEntity.ok(organizations.stream().map(OrganizationResponse::fromEntity).toList());
-    }
-
-    @GetMapping("/{id}")
-    @Operation(summary = "Get organization by id", description = "Returns a single organization matching the given id.")
-    public ResponseEntity<OrganizationResponse> getOrganizationById(@PathVariable Long id) {
-        log.info("Request received to fetch organization with id: {}", id);
-
-        var organization = organizationService.getOrganizationById(id);
-
-        return ResponseEntity.ok(OrganizationResponse.fromEntity(organization));
     }
 }
 
