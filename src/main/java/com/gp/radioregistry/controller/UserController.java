@@ -37,10 +37,10 @@ public class UserController {
 
     @PutMapping("/{id}/password")
     @Operation(summary = "Update request for password of a user", description = "Updates the password of a user. Admin-only")
-    public ResponseEntity<UserResponse> updateUserPassword(@PathVariable Long id, @Valid @RequestBody UpdateUserPasswordRequest request) {
+    public ResponseEntity<Void> updateUserPassword(@PathVariable Long id, @Valid @RequestBody UpdateUserPasswordRequest request) {
         log.info("Update password request received for user with id: {}", id);
 
-        var user = userService.updateUserPassword(id, request);
+        userService.updateUserPassword(id, request);
 
         return ResponseEntity.noContent().build();
     }
