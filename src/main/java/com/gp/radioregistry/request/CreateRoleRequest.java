@@ -11,4 +11,5 @@ public record CreateRoleRequest(
     @NotBlank(message = "Role name is required")
     @Size(max = NAME_MAX_LENGTH, message = "Role name must not exceed {max} characters")
     String name
+
 ) {}

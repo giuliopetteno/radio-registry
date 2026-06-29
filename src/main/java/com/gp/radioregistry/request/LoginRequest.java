@@ -11,4 +11,5 @@ public record LoginRequest(
         @Schema(description = "Account password")
         @NotBlank(message = "Password is required")
         String password
+
 ) {}

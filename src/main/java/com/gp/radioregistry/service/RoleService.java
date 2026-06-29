@@ -4,11 +4,13 @@ import com.gp.radioregistry.domain.Role;
 import com.gp.radioregistry.exception.ResourceAlreadyExistsException;
 import com.gp.radioregistry.repository.RoleRepository;
 import com.gp.radioregistry.request.CreateRoleRequest;
+import com.gp.radioregistry.request.UpdateRoleRequest;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +28,19 @@ public class RoleService {
                 .name(roleName)
                 .build();
         return roleRepository.save(role);
+    }
+
+    public Role updateRole(Long id, UpdateRoleRequest request) {
+        var role = getRoleById(id);
+        Optional.ofNullable(request.name()).ifPresent(role::setName);
+
+        return roleRepository.save(role);
+    }
+
+    public void deleteRole(Long id) {
+        var role = roleRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Role not found with id: " + id));
+        roleRepository.delete(role);
     }
 
     public List<Role> getRoles() {

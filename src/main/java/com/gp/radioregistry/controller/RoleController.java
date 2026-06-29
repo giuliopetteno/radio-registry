@@ -1,6 +1,7 @@
 package com.gp.radioregistry.controller;
 
 import com.gp.radioregistry.request.CreateRoleRequest;
+import com.gp.radioregistry.request.UpdateRoleRequest;
 import com.gp.radioregistry.response.RoleResponse;
 import com.gp.radioregistry.service.RoleService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,6 +33,26 @@ public class RoleController {
         var role = roleService.createRole(request);
 
         return ResponseEntity.created(URI.create(String.format("%s/%d", ROLES_PATH, role.getId()))).body(RoleResponse.fromEntity(role));
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update request for role", description = "Updates a role. Admin-only")
+    public ResponseEntity<RoleResponse> updateRole(@PathVariable Long id, @Valid @RequestBody UpdateRoleRequest request) {
+        log.info("Update request received for role with id: {}", id);
+
+        var role = roleService.updateRole(id, request);
+
+        return ResponseEntity.ok(RoleResponse.fromEntity(role));
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete request for role", description = "Deletes a role by ID. Admin-only")
+    public ResponseEntity<Void> deleteRole(@PathVariable Long id) {
+        log.info("Delete request received for role with id: {}", id);
+
+        roleService.deleteRole(id);
+
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -50,8 +51,8 @@ public class UserService {
 
     public User updateUser(Long id, UpdateUserRequest request) {
         var user = getUserById(id);
-        user.setUsername(request.username() != null ? request.username() : user.getUsername());
-        user.setEmail(request.email() != null ? request.email() : user.getEmail());
+        Optional.ofNullable(request.username()).ifPresent(user::setUsername);
+        Optional.ofNullable(request.email()).ifPresent(user::setEmail);
 
         return userRepository.save(user);
     }
@@ -72,6 +73,12 @@ public class UserService {
                 .collect(Collectors.toSet()));
 
         return userRepository.save(user);
+    }
+
+    public void deleteUser(Long id) {
+        var user = userRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
+        userRepository.delete(user);
     }
 
     public User findByUsernameOrEmail(String usernameOrEmail) {

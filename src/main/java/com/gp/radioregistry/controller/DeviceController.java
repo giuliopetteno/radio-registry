@@ -2,6 +2,7 @@ package com.gp.radioregistry.controller;
 
 
 import com.gp.radioregistry.request.CreateDeviceRequest;
+import com.gp.radioregistry.request.UpdateDeviceRequest;
 import com.gp.radioregistry.response.DeviceResponse;
 import com.gp.radioregistry.service.DeviceService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,6 +34,26 @@ public class DeviceController {
         var device = deviceService.createDevice(request);
 
         return ResponseEntity.created(URI.create(String.format("%s/%d", DEVICES_PATH, device.getId()))).body(DeviceResponse.fromEntity(device));
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update request for device", description = "Updates a device.")
+    public ResponseEntity<DeviceResponse> updateDevice(@PathVariable Long id, @Valid @RequestBody UpdateDeviceRequest request) {
+        log.info("Update request received for device with id: {}", id);
+
+        var device = deviceService.updateDevice(id, request);
+
+        return ResponseEntity.ok(DeviceResponse.fromEntity(device));
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete request for device", description = "Deletes a device by ID.")
+    public ResponseEntity<Void> deleteDevice(@PathVariable Long id) {
+        log.info("Delete request received for device with id: {}", id);
+
+        deviceService.deleteDevice(id);
+
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping

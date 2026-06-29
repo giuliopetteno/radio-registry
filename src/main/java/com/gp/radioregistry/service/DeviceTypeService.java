@@ -3,11 +3,13 @@ package com.gp.radioregistry.service;
 import com.gp.radioregistry.domain.DeviceType;
 import com.gp.radioregistry.repository.DeviceTypeRepository;
 import com.gp.radioregistry.request.CreateDeviceTypeRequest;
+import com.gp.radioregistry.request.UpdateDeviceTypeRequest;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +22,20 @@ public class DeviceTypeService {
                 .description(request.description())
                 .build();
         return deviceTypeRepository.save(deviceType);
+    }
+
+    public DeviceType updateDeviceType(Long id, UpdateDeviceTypeRequest request) {
+        var deviceType = getDeviceTypeById(id);
+        Optional.ofNullable(request.name()).ifPresent(deviceType::setName);
+        deviceType.setDescription(request.description());
+
+        return deviceTypeRepository.save(deviceType);
+    }
+
+    public void deleteDeviceType(Long id) {
+        var deviceType = deviceTypeRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Device type not found with id: " + id));
+        deviceTypeRepository.delete(deviceType);
     }
 
     public List<DeviceType> getDeviceTypes() {

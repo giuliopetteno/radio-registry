@@ -26,7 +26,7 @@ public class UserController {
     private final UserService userService;
 
     @PutMapping("/{id}")
-    @Operation(summary = "Updates a user", description = "Updates a user. Admin-only")
+    @Operation(summary = "Update request for user", description = "Updates a user. Admin-only")
     public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @Valid @RequestBody UpdateUserRequest request) {
         log.info("Update request received for user with id: {}", id);
 
@@ -36,7 +36,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}/password")
-    @Operation(summary = "Updates the password of a user", description = "Updates the password of a user. Admin-only")
+    @Operation(summary = "Update request for password of a user", description = "Updates the password of a user. Admin-only")
     public ResponseEntity<UserResponse> updateUserPassword(@PathVariable Long id, @Valid @RequestBody UpdateUserPasswordRequest request) {
         log.info("Update password request received for user with id: {}", id);
 
@@ -46,13 +46,23 @@ public class UserController {
     }
 
     @PutMapping("/{id}/roles")
-    @Operation(summary = "Updates the roles of a user", description = "Updates the roles of a user. Admin-only")
+    @Operation(summary = "Update request for roles of a user", description = "Updates the roles of a user. Admin-only")
     public ResponseEntity<UserResponse> updateUserRoles(@PathVariable Long id, @Valid @RequestBody UpdateUserRolesRequest request) {
         log.info("Update roles request received for user with id: {}", id);
 
         var user = userService.updateUserRoles(id, request);
 
         return ResponseEntity.ok(UserResponse.fromEntity(user));
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete request for user", description = "Deletes a user by ID. Admin-only")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        log.info("Delete request received for user with id: {}", id);
+
+        userService.deleteUser(id);
+
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
