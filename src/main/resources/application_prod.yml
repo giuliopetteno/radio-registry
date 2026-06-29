@@ -26,6 +26,16 @@ spring:
 #      name: ${SECURITY_USERNAME}
 #      password: ${SECURITY_PASSWORD}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ${EXPOSURE_INCLUDE}
+
+  endpoint:
+    health:
+      show-details: ${SHOW_DETAILS}
+
 logging:
   pattern:
     console: ${LOGPATTERN_CONSOLE:%green(%d{HH:mm:ss.SSS}) %blue(%-5level) %red([%thread]) %yellow(%logger{15}) - %msg%n}
