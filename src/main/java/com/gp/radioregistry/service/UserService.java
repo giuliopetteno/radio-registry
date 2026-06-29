@@ -57,11 +57,11 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User updateUserPassword(Long id, UpdateUserPasswordRequest request) {
+    public void updateUserPassword(Long id, UpdateUserPasswordRequest request) {
         var user = getUserById(id);
         user.setPassword(passwordEncoder.encode(request.password()));
 
-        return userRepository.save(user);
+        userRepository.save(user);
     }
 
     public User updateUserRoles(Long id, UpdateUserRolesRequest request) {
