@@ -7,25 +7,30 @@ CREATE TABLE IF NOT EXISTS organization(
      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS compartment(
+CREATE TABLE IF NOT EXISTS department(
     id BIGSERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     code TEXT NOT NULL,
     description TEXT,
     organization_id BIGINT,
-    parent_compartment_id BIGINT,
+    parent_department_id BIGINT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
-    CONSTRAINT fk_compartment_organization
+    CONSTRAINT fk_department_organization
     FOREIGN KEY (organization_id)
     REFERENCES organization(id)
     ON DELETE RESTRICT,
 
-    CONSTRAINT fk_compartment_parent
-    FOREIGN KEY (parent_compartment_id)
-    REFERENCES compartment(id)
-    ON DELETE SET NULL
+    CONSTRAINT fk_department_parent
+    FOREIGN KEY (parent_department_id)
+    REFERENCES department(id)
+    ON DELETE SET NULL,
+
+    CONSTRAINT chk_department_parent_structure CHECK(
+    (organization_id IS NOT NULL AND parent_department_id IS NULL)
+    OR
+    (organization_id IS NULL AND parent_department_id IS NOT NULL)
 );
 
 CREATE TABLE IF NOT EXISTS device_type(
@@ -44,7 +49,7 @@ CREATE TABLE IF NOT EXISTS device(
     description TEXT,
     installation_date DATE NOT NULL,
     organization_id BIGINT,
-    compartment_id BIGINT,
+    department_id BIGINT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
@@ -53,9 +58,9 @@ CREATE TABLE IF NOT EXISTS device(
     REFERENCES organization(id)
     ON DELETE RESTRICT,
 
-    CONSTRAINT fk_device_compartment
-    FOREIGN KEY (compartment_id)
-    REFERENCES compartment(id)
+    CONSTRAINT fk_device_department
+    FOREIGN KEY (department_id)
+    REFERENCES department(id)
     ON DELETE RESTRICT,
 
     CONSTRAINT fk_device_type
@@ -63,13 +68,13 @@ CREATE TABLE IF NOT EXISTS device(
     REFERENCES device_type(id)
     ON DELETE RESTRICT,
 
-    CONSTRAINT chk_device_parent CHECK (
-    (organization_id IS NOT NULL AND compartment_id IS NULL)
+    CONSTRAINT chk_device_parent_structure CHECK(
+    (organization_id IS NOT NULL AND department_id IS NULL)
     OR
-    (organization_id IS NULL AND compartment_id IS NOT NULL))
+    (organization_id IS NULL AND department_id IS NOT NULL))
 );
 
-CREATE INDEX idx_compartment_organization ON compartment(organization_id);
+CREATE INDEX idx_department_organization ON department(organization_id);
 CREATE INDEX idx_device_organization ON device(organization_id);
-CREATE INDEX idx_device_compartment ON device(compartment_id);
-CREATE INDEX idx_compartment_parent ON compartment(parent_compartment_id);
+CREATE INDEX idx_device_department ON device(department_id);
+CREATE INDEX idx_department_parent ON department(parent_department_id);

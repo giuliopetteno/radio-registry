@@ -12,9 +12,8 @@ The system allows healthcare providers to register and manage medical devices, a
 ## Features
 
 - Medical devices management
-- Hospital organizations management
-- Hospital compartments management
-- Association between devices, organizations, and compartments
+- Hospital organizations and departments management
+- Association between devices, organizations, and departments
 - RESTful API architecture
 - Authentication and authorization with Spring Security
 - API documentation with Swagger/OpenAPI
@@ -25,7 +24,7 @@ The system allows healthcare providers to register and manage medical devices, a
 ## Technology Stack
 
 - Java 25
-- Spring Boot 4
+- Spring Boot 4 + Actuator
 - Spring Security with JWT and role-based access control (Admin, Technician, Operator)
 - Hibernate / JPA
 - PostgreSQL

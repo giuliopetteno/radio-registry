@@ -24,6 +24,8 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
 	implementation("org.springframework.boot:spring-boot-starter-security:4.1.0")
+	implementation("org.springframework.boot:spring-boot-starter-actuator:4.1.0")
+	implementation("org.springframework.boot:spring-boot-starter-aop:4.0.0-M2")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3")
 	implementation("jakarta.validation:jakarta.validation-api:3.0.2")
 	testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
@@ -39,4 +41,8 @@ dependencies {
 tasks.test {
 	useJUnitPlatform()
 	jvmArgs("-javaagent:${mockitoAgent.asPath}", "-Xshare:off")
+}
+
+springBoot {
+	buildInfo()
 }
