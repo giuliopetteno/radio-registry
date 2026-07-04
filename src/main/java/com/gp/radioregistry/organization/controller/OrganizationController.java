@@ -9,11 +9,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
 
 import static com.gp.radioregistry.constant.ApiConstants.ORGANIZATIONS_PATH;
 
@@ -67,12 +69,12 @@ public class OrganizationController {
 
     @GetMapping
     @Operation(summary = "List all organizations", description = "Returns the complete list of organizations available in the system.")
-    public ResponseEntity<List<OrganizationResponse>> getOrganizations() {
+    public ResponseEntity<Page<OrganizationResponse>> getOrganizations(@ParameterObject Pageable pageable) {
         log.info("Request received to fetch all organizations");
 
-        var organizations = organizationService.getOrganizations();
+        var organizations = organizationService.getOrganizations(pageable);
 
-        return ResponseEntity.ok(organizations.stream().map(OrganizationResponse::fromEntity).toList());
+        return ResponseEntity.ok(organizations.map(OrganizationResponse::fromEntity));
     }
 }
 

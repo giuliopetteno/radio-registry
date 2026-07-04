@@ -9,11 +9,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
 
 import static com.gp.radioregistry.constant.ApiConstants.ROLES_PATH;
 
@@ -57,12 +59,12 @@ public class RoleController {
 
     @GetMapping
     @Operation(summary = "List all roles", description = "Returns the complete list of roles available in the system. Admin-only")
-    public ResponseEntity<List<RoleResponse>> getRoles() {
+    public ResponseEntity<Page<RoleResponse>> getRoles(@ParameterObject Pageable pageable) {
         log.info("Request received to fetch all roles");
 
-        var roles = roleService.getRoles();
+        var roles = roleService.getRoles(pageable);
 
-        return ResponseEntity.ok(roles.stream().map(RoleResponse::fromEntity).toList());
+        return ResponseEntity.ok(roles.map(RoleResponse::fromEntity));
     }
 
     @GetMapping("/{id}")

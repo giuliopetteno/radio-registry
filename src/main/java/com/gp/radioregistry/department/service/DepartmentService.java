@@ -10,9 +10,10 @@ import com.gp.radioregistry.department.repository.DepartmentRepository;
 import com.gp.radioregistry.organization.repository.OrganizationRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -53,8 +54,8 @@ public class DepartmentService {
         departmentRepository.delete(department);
     }
 
-    public List<Department> getDepartments() {
-        return departmentRepository.findAll();
+    public Page<Department> getDepartments(Pageable pageable) {
+        return departmentRepository.findAll(pageable);
     }
 
     public Department getDepartmentById(Long id) {

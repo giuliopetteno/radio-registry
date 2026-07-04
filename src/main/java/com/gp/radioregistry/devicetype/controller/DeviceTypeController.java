@@ -9,11 +9,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
 
 import static com.gp.radioregistry.constant.ApiConstants.DEVICE_TYPES_PATH;
 
@@ -57,12 +59,12 @@ public class DeviceTypeController {
 
     @GetMapping
     @Operation(summary = "List all device types", description = "Returns the complete list of device types available in the system.")
-    public ResponseEntity<List<DeviceTypeResponse>> getDeviceTypes() {
+    public ResponseEntity<Page<DeviceTypeResponse>> getDeviceTypes(@ParameterObject Pageable pageable) {
         log.info("Request received to fetch all device types");
 
-        var deviceTypes = deviceTypeService.getDeviceTypes();
+        var deviceTypes = deviceTypeService.getDeviceTypes(pageable);
 
-        return ResponseEntity.ok(deviceTypes.stream().map(DeviceTypeResponse::fromEntity).toList());
+        return ResponseEntity.ok(deviceTypes.map(DeviceTypeResponse::fromEntity));
     }
 
     @GetMapping("/{id}")

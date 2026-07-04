@@ -10,11 +10,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
 
 import static com.gp.radioregistry.constant.ApiConstants.DEVICES_PATH;
 
@@ -58,12 +60,12 @@ public class DeviceController {
 
     @GetMapping
     @Operation(summary = "List all devices", description = "Returns the complete list of devices available in the system.")
-    public ResponseEntity<List<DeviceResponse>> getDevices() {
+    public ResponseEntity<Page<DeviceResponse>> getDevices(@ParameterObject Pageable pageable) {
         log.info("Request received to fetch all devices");
 
-        var devices = deviceService.getDevices();
+        var devices = deviceService.getDevices(pageable);
 
-        return ResponseEntity.ok(devices.stream().map(DeviceResponse::fromEntity).toList());
+        return ResponseEntity.ok(devices.map(DeviceResponse::fromEntity));
     }
 
     @GetMapping("/{id}")

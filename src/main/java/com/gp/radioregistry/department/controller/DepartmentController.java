@@ -10,11 +10,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
 
 import static com.gp.radioregistry.constant.ApiConstants.DEPARTMENTS_PATH;
 
@@ -58,12 +60,12 @@ public class DepartmentController {
 
     @GetMapping
     @Operation(summary = "List all departments", description = "Returns the complete list of departments available in the system.")
-    public ResponseEntity<List<DepartmentResponse>> getDepartments() {
+    public ResponseEntity<Page<DepartmentResponse>> getDepartments(@ParameterObject Pageable pageable) {
         log.info("Request received to fetch all departments");
 
-        var departments = departmentService.getDepartments();
+        var departments = departmentService.getDepartments(pageable);
 
-        return ResponseEntity.ok(departments.stream().map(DepartmentResponse::fromEntity).toList());
+        return ResponseEntity.ok(departments.map(DepartmentResponse::fromEntity));
     }
 
     @GetMapping("/{id}")
