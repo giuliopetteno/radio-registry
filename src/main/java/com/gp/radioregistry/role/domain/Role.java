@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.envers.Audited;
 
 import java.time.OffsetDateTime;
 
@@ -17,6 +18,7 @@ import static com.gp.radioregistry.constant.ValidationConstants.NAME_MAX_LENGTH;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Audited
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
