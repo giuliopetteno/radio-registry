@@ -1,0 +1,10 @@
+services:
+  radio-registry:
+    build: .
+    image: radio-registry:latest
+    container_name: radio-registry
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    env_file:
+      - .env
