@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.envers.Audited;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import static com.gp.radioregistry.constant.ValidationConstants.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Audited
 public class Department {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

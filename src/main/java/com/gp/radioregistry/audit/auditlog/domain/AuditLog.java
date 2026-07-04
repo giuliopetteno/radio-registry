@@ -1,31 +1,29 @@
 package com.gp.radioregistry.audit.auditlog.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 
 @Entity
 @Table(name = "audit_logs")
 @Getter
-@Builder
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class AuditLog {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "user_id")
-	private Long userId;
-
 	@Column(name = "username", length = 255)
 	private String username;
 
+	@JdbcTypeCode(SqlTypes.JSON)
 	@Column(name = "user_roles", columnDefinition = "jsonb")
 	private String userRoles;
 
@@ -40,15 +38,6 @@ public class AuditLog {
 
 	@Column(name = "entity_id", length = 50)
 	private String entityId;
-
-	@Column(name = "description", columnDefinition = "text")
-	private String description;
-
-	@Column(name = "old_value", columnDefinition = "jsonb")
-	private String oldValue;
-
-	@Column(name = "new_value", columnDefinition = "jsonb")
-	private String newValue;
 
 	@Column(name = "success", nullable = false)
 	private boolean success;

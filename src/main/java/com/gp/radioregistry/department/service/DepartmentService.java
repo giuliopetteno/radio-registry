@@ -1,10 +1,13 @@
 package com.gp.radioregistry.department.service;
 
+import com.gp.radioregistry.audit.annotation.Auditable;
+import com.gp.radioregistry.audit.enums.AuditAction;
+import com.gp.radioregistry.audit.enums.AuditEntityType;
 import com.gp.radioregistry.department.domain.Department;
-import com.gp.radioregistry.department.repository.DepartmentRepository;
-import com.gp.radioregistry.organization.repository.OrganizationRepository;
 import com.gp.radioregistry.department.dto.request.CreateDepartmentRequest;
 import com.gp.radioregistry.department.dto.request.UpdateDepartmentRequest;
+import com.gp.radioregistry.department.repository.DepartmentRepository;
+import com.gp.radioregistry.organization.repository.OrganizationRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +21,7 @@ public class DepartmentService {
     private final DepartmentRepository departmentRepository;
     private final OrganizationRepository organizationRepository;
 
+    @Auditable(action = AuditAction.CREATE, entityType = AuditEntityType.DEPARTMENT, entityId = "#result.id")
     public Department createDepartment(CreateDepartmentRequest request) {
         var department = Department.builder()
                 .name(request.name())
@@ -30,6 +34,7 @@ public class DepartmentService {
         return departmentRepository.save(department);
     }
 
+    @Auditable(action = AuditAction.UPDATE, entityType = AuditEntityType.DEPARTMENT, entityId = "#id")
     public Department updateDepartment(Long id, UpdateDepartmentRequest request) {
         var department = getDepartmentById(id);
         Optional.ofNullable(request.name()).ifPresent(department::setName);
@@ -41,6 +46,7 @@ public class DepartmentService {
         return departmentRepository.save(department);
     }
 
+    @Auditable(action = AuditAction.DELETE, entityType = AuditEntityType.DEPARTMENT, entityId = "#id")
     public void deleteDepartment(Long id) {
         var department = departmentRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Department not found with id: " + id));

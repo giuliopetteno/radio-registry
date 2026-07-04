@@ -1,12 +1,15 @@
 package com.gp.radioregistry.device.service;
 
-import com.gp.radioregistry.device.domain.Device;
+import com.gp.radioregistry.audit.annotation.Auditable;
+import com.gp.radioregistry.audit.enums.AuditAction;
+import com.gp.radioregistry.audit.enums.AuditEntityType;
 import com.gp.radioregistry.department.repository.DepartmentRepository;
+import com.gp.radioregistry.device.domain.Device;
+import com.gp.radioregistry.device.dto.request.CreateDeviceRequest;
+import com.gp.radioregistry.device.dto.request.UpdateDeviceRequest;
 import com.gp.radioregistry.device.repository.DeviceRepository;
 import com.gp.radioregistry.devicetype.repository.DeviceTypeRepository;
 import com.gp.radioregistry.organization.repository.OrganizationRepository;
-import com.gp.radioregistry.device.dto.request.CreateDeviceRequest;
-import com.gp.radioregistry.device.dto.request.UpdateDeviceRequest;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +25,7 @@ public class DeviceService {
     private final OrganizationRepository organizationRepository;
     private final DepartmentRepository departmentRepository;
 
+    @Auditable(action = AuditAction.CREATE, entityType = AuditEntityType.DEVICE, entityId = "#result.id")
     public Device createDevice(CreateDeviceRequest request) {
         var device = Device.builder()
                 .name(request.name())
@@ -35,6 +39,7 @@ public class DeviceService {
         return deviceRepository.save(device);
     }
 
+    @Auditable(action = AuditAction.UPDATE, entityType = AuditEntityType.DEVICE, entityId = "#id")
     public Device updateDevice(Long id, UpdateDeviceRequest request) {
         var device = getDeviceById(id);
         Optional.ofNullable(request.name()).ifPresent(device::setName);
@@ -50,6 +55,7 @@ public class DeviceService {
         return deviceRepository.save(device);
     }
 
+    @Auditable(action = AuditAction.DELETE, entityType = AuditEntityType.DEVICE, entityId = "#id")
     public void deleteDevice(Long id) {
         var device = deviceRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Device not found with id: " + id));
