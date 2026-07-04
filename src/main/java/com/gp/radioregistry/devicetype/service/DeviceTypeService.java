@@ -9,9 +9,10 @@ import com.gp.radioregistry.devicetype.dto.request.UpdateDeviceTypeRequest;
 import com.gp.radioregistry.devicetype.repository.DeviceTypeRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -44,9 +45,8 @@ public class DeviceTypeService {
         deviceTypeRepository.delete(deviceType);
     }
 
-    public List<DeviceType> getDeviceTypes() {
-
-        return deviceTypeRepository.findAll();
+    public Page<DeviceType> getDeviceTypes(Pageable pageable) {
+        return deviceTypeRepository.findAll(pageable);
     }
 
     public DeviceType getDeviceTypeById(Long id) {

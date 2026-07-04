@@ -10,9 +10,10 @@ import com.gp.radioregistry.role.dto.request.UpdateRoleRequest;
 import com.gp.radioregistry.role.repository.RoleRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -49,8 +50,8 @@ public class RoleService {
         roleRepository.delete(role);
     }
 
-    public List<Role> getRoles() {
-        return roleRepository.findAll();
+    public Page<Role> getRoles(Pageable pageable) {
+        return roleRepository.findAll(pageable);
     }
 
     public Role getRoleById(Long id) {

@@ -18,8 +18,16 @@ spring:
     properties:
       hibernate:
         format_sql: ${HIBERNATE_FORMAT_SQL:false}
+        default_batch_fetch_size: ${HIBERNATE_DEFAULT_BATCH_FETCH_SIZE:20}
 
     show-sql: ${JPA_SHOW_SQL:false}
+
+  data:
+    web:
+      pageable:
+        default-page: ${DEFAULT_PAGE:0}
+        default-page-size: ${DEFAULT_PAGE_SIZE:20}
+        max-page-size: ${MAX_PAGE_SIZE:100}
 
 #  security:
 #    user:

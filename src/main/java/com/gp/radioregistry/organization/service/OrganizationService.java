@@ -9,9 +9,10 @@ import com.gp.radioregistry.organization.dto.request.UpdateOrganizationRequest;
 import com.gp.radioregistry.organization.repository.OrganizationRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -47,13 +48,11 @@ public class OrganizationService {
         organizationRepository.delete(organization);
     }
 
-    public List<Organization> getOrganizations() {
-
-        return organizationRepository.findAll();
+    public Page<Organization> getOrganizations(Pageable pageable) {
+        return organizationRepository.findAll(pageable);
     }
 
     public Organization getOrganizationById(Long id) {
-
         return organizationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Organization not found with ID: " + id));
     }

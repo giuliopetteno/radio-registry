@@ -10,10 +10,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 import static com.gp.radioregistry.constant.ApiConstants.USERS_PATH;
 
@@ -67,12 +68,12 @@ public class UserController {
 
     @GetMapping
     @Operation(summary = "List all users", description = "Returns the complete list of users available in the system. Admin-only")
-    public ResponseEntity<List<UserResponse>> getUsers() {
+    public ResponseEntity<Page<UserResponse>> getUsers(@ParameterObject Pageable pageable) {
         log.info("Request received to fetch all users");
 
-        var users = userService.getUsers();
+        var users = userService.getUsers(pageable);
 
-        return ResponseEntity.ok(users.stream().map(UserResponse::fromEntity).toList());
+        return ResponseEntity.ok(users.map(UserResponse::fromEntity));
     }
 
     @GetMapping("/{id}")
