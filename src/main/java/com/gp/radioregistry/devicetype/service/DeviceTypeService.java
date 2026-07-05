@@ -20,7 +20,7 @@ import java.util.Optional;
 public class DeviceTypeService {
     private final DeviceTypeRepository deviceTypeRepository;
 
-    @Auditable(action = AuditAction.CREATE, entityType = AuditEntityType.DEVICE_TYPE, entityId = "#result.id")
+    @Auditable(action = AuditAction.CREATE, entityType = AuditEntityType.DEVICE_TYPE, entityId = "#result.id", description = "Device type creation attempt")
     public DeviceType createDeviceType(CreateDeviceTypeRequest request) {
         var deviceType = DeviceType.builder()
                 .name(request.name().trim())
@@ -29,7 +29,7 @@ public class DeviceTypeService {
         return deviceTypeRepository.save(deviceType);
     }
 
-    @Auditable(action = AuditAction.UPDATE, entityType = AuditEntityType.DEVICE_TYPE, entityId = "#id")
+    @Auditable(action = AuditAction.UPDATE, entityType = AuditEntityType.DEVICE_TYPE, entityId = "#id", description = "Device type update attempt")
     public DeviceType updateDeviceType(Long id, UpdateDeviceTypeRequest request) {
         var deviceType = getDeviceTypeById(id);
         Optional.ofNullable(request.name()).ifPresent(deviceType::setName);
@@ -38,7 +38,7 @@ public class DeviceTypeService {
         return deviceTypeRepository.save(deviceType);
     }
 
-    @Auditable(action = AuditAction.DELETE, entityType = AuditEntityType.DEVICE_TYPE, entityId = "#id")
+    @Auditable(action = AuditAction.DELETE, entityType = AuditEntityType.DEVICE_TYPE, entityId = "#id", description = "Device type deletion attempt")
     public void deleteDeviceType(Long id) {
         var deviceType = deviceTypeRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Device type not found with id: " + id));

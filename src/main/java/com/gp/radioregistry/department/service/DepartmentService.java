@@ -22,7 +22,7 @@ public class DepartmentService {
     private final DepartmentRepository departmentRepository;
     private final OrganizationRepository organizationRepository;
 
-    @Auditable(action = AuditAction.CREATE, entityType = AuditEntityType.DEPARTMENT, entityId = "#result.id")
+    @Auditable(action = AuditAction.CREATE, entityType = AuditEntityType.DEPARTMENT, entityId = "#result.id", description = "Department creation attempt")
     public Department createDepartment(CreateDepartmentRequest request) {
         var department = Department.builder()
                 .name(request.name())
@@ -35,7 +35,7 @@ public class DepartmentService {
         return departmentRepository.save(department);
     }
 
-    @Auditable(action = AuditAction.UPDATE, entityType = AuditEntityType.DEPARTMENT, entityId = "#id")
+    @Auditable(action = AuditAction.UPDATE, entityType = AuditEntityType.DEPARTMENT, entityId = "#id", description = "Department update attempt")
     public Department updateDepartment(Long id, UpdateDepartmentRequest request) {
         var department = getDepartmentById(id);
         Optional.ofNullable(request.name()).ifPresent(department::setName);
@@ -47,7 +47,7 @@ public class DepartmentService {
         return departmentRepository.save(department);
     }
 
-    @Auditable(action = AuditAction.DELETE, entityType = AuditEntityType.DEPARTMENT, entityId = "#id")
+    @Auditable(action = AuditAction.DELETE, entityType = AuditEntityType.DEPARTMENT, entityId = "#id", description = "Department deletion attempt")
     public void deleteDepartment(Long id) {
         var department = departmentRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Department not found with id: " + id));

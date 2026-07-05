@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 public class AuthenticationService {
     public final AuthenticationManager authenticationManager;
 
-    @Auditable(action = AuditAction.LOGIN, entityType = AuditEntityType.USER)
+    @Auditable(action = AuditAction.LOGIN, entityType = AuditEntityType.USER, description = "User login attempt")
     public Authentication doAuthentication(LoginRequest loginRequest) {
         return authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password()));

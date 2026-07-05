@@ -20,7 +20,7 @@ import java.util.Optional;
 public class OrganizationService {
     private final OrganizationRepository organizationRepository;
 
-    @Auditable(action = AuditAction.CREATE, entityType = AuditEntityType.ORGANIZATION, entityId = "#result.id")
+    @Auditable(action = AuditAction.CREATE, entityType = AuditEntityType.ORGANIZATION, entityId = "#result.id", description = "Organization creation attempt")
     public Organization createOrganization(CreateOrganizationRequest request) {
         var organization = Organization.builder()
                 .name(request.name())
@@ -31,7 +31,7 @@ public class OrganizationService {
         return organizationRepository.save(organization);
     }
 
-    @Auditable(action = AuditAction.UPDATE, entityType = AuditEntityType.ORGANIZATION, entityId = "#id")
+    @Auditable(action = AuditAction.UPDATE, entityType = AuditEntityType.ORGANIZATION, entityId = "#id", description = "Organization update attempt")
     public Organization updateOrganization(Long id, UpdateOrganizationRequest request) {
         var organization = getOrganizationById(id);
         Optional.ofNullable(request.name()).ifPresent(organization::setName);
@@ -41,7 +41,7 @@ public class OrganizationService {
         return organizationRepository.save(organization);
     }
 
-    @Auditable(action = AuditAction.DELETE, entityType = AuditEntityType.ORGANIZATION, entityId = "#id")
+    @Auditable(action = AuditAction.DELETE, entityType = AuditEntityType.ORGANIZATION, entityId = "#id", description = "Organization deletion attempt")
     public void deleteOrganization(Long id) {
         var organization = organizationRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Organization not found with id: " + id));

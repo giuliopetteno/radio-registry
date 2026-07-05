@@ -1,11 +1,12 @@
 CREATE TABLE IF NOT EXISTS audit_logs(
     id BIGSERIAL PRIMARY KEY,
-    username VARCHAR(255),
+    username VARCHAR(100),
     user_roles JSONB,
     ip_address VARCHAR(45),
     action VARCHAR(50) NOT NULL,
     entity_type VARCHAR(100),
     entity_id VARCHAR(50),
+    description VARCHAR(200),
     success BOOLEAN NOT NULL,
     error_detail TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL

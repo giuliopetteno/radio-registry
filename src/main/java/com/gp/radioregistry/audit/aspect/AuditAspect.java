@@ -18,6 +18,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.lang.reflect.Method;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -44,11 +45,13 @@ public class AuditAspect {
 		ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 		auditLog.setIpAddress(servletRequestAttributes != null ? servletRequestAttributes.getRequest().getRemoteAddr() : null);
 
-		auditLog.setAction(auditable.action().getText());
-		auditLog.setEntityType(auditable.entityType().getText());
+		auditLog.setAction(auditable.action().toString());
+		auditLog.setEntityType(auditable.entityType().toString());
 
 		if(args.length > 0 && args[0] instanceof Long id)
 			auditLog.setEntityId(id.toString());
+
+		auditLog.setDescription(auditable.description());
 
 		Object result;
 		try {
@@ -82,6 +85,7 @@ public class AuditAspect {
 		auditLog.setUserRoles(
 			authentication.getAuthorities().stream()
 				.map(GrantedAuthority::getAuthority)
+				.filter(Objects::nonNull)
 				.filter(authority -> authority.startsWith("ROLE_"))
 				.map(authority -> "\"" + authority + "\"")
 				.collect(Collectors.joining(",", "[", "]"))
