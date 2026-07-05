@@ -8,7 +8,7 @@ plugins {
 group = "com.gp"
 version = "0.0.1-SNAPSHOT"
 
-val mockitoAgent by configurations.creating
+val mockitoAgent: Configuration = configurations.create("mockitoAgent")
 
 java {
 	toolchain {
@@ -21,26 +21,32 @@ repositories {
 }
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
-	implementation("org.springframework.boot:spring-boot-starter-security:4.1.0")
-	implementation("org.springframework.boot:spring-boot-starter-actuator:4.1.0")
+	implementation("org.springframework.boot:spring-boot-starter-security")
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	implementation("org.springframework.boot:spring-boot-starter-validation")
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-aop:4.0.0-M2")
-	implementation("org.hibernate.orm:hibernate-envers:7.4.3.Final")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3")
-	implementation("jakarta.validation:jakarta.validation-api:3.0.2")
-	testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
-	testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
-	testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
+	implementation("org.hibernate.orm:hibernate-envers")
 	runtimeOnly("org.postgresql:postgresql")
-	developmentOnly("org.springframework.boot:spring-boot-devtools:4.1.0")
-	testCompileOnly("org.projectlombok:lombok")
+	developmentOnly("org.springframework.boot:spring-boot-devtools")
+	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+	testImplementation("org.springframework.boot:spring-boot-starter-security-test")
+	testImplementation(platform("org.testcontainers:testcontainers-bom:2.0.5"))
+	testImplementation("org.springframework.boot:spring-boot-testcontainers")
+	testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+	testImplementation("org.testcontainers:testcontainers-postgresql")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-	mockitoAgent("org.mockito:mockito-core:5.23.0") { isTransitive = false }
+	mockitoAgent("org.mockito:mockito-core:5.23.0") {
+		isTransitive = false
+	}
 }
 
 tasks.test {
 	useJUnitPlatform()
+	environment("PROFILE_ACTIVE", "test")
 	jvmArgs("-javaagent:${mockitoAgent.asPath}", "-Xshare:off")
 }
 

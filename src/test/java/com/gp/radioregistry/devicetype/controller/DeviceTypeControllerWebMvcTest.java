@@ -1,0 +1,308 @@
+package com.gp.radioregistry.devicetype.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gp.radioregistry.devicetype.domain.DeviceType;
+import com.gp.radioregistry.devicetype.dto.request.CreateDeviceTypeRequest;
+import com.gp.radioregistry.devicetype.dto.request.UpdateDeviceTypeRequest;
+import com.gp.radioregistry.devicetype.service.DeviceTypeService;
+import com.gp.radioregistry.security.config.SecurityConfig;
+import com.gp.radioregistry.security.enums.Role;
+import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.OffsetDateTime;
+import java.util.List;
+
+import static com.gp.radioregistry.constant.ApiConstants.DEVICE_TYPES_PATH;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(DeviceTypeController.class)
+@Import(SecurityConfig.class)
+@DisplayName("DeviceTypeController @WebMvcTest")
+class DeviceTypeControllerWebMvcTest {
+
+    private static final Long DEVICE_TYPE_ID = 7L;
+    private static final Long DEVICE_TYPE_ID_NOT_FOUND = 99L;
+
+    private static final String DEVICE_TYPE_NAME = "CT Scanner";
+    private static final String DEVICE_TYPE_DESCRIPTION = "Computed tomography scanner type";
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    private ObjectMapper objectMapper;
+
+    @MockitoBean
+    private DeviceTypeService deviceTypeService;
+
+    private DeviceType deviceType;
+
+    @BeforeEach
+    void setUp() {
+        this.objectMapper = new ObjectMapper();
+
+        OffsetDateTime now = OffsetDateTime.now();
+
+        deviceType = DeviceType.builder()
+                .id(DEVICE_TYPE_ID)
+                .name(DEVICE_TYPE_NAME)
+                .description(DEVICE_TYPE_DESCRIPTION)
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+    }
+
+    private CreateDeviceTypeRequest validCreateRequest() {
+        return new CreateDeviceTypeRequest(DEVICE_TYPE_NAME, DEVICE_TYPE_DESCRIPTION);
+    }
+
+    @Nested
+    @DisplayName("Security")
+    class Security {
+
+        @Test
+        @DisplayName("GET returns 401 when unauthenticated")
+        void getUnauthenticatedReturns401() throws Exception {
+            mockMvc.perform(get(DEVICE_TYPES_PATH))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("POST returns 401 when unauthenticated")
+        void createUnauthenticatedReturns401() throws Exception {
+            mockMvc.perform(post(DEVICE_TYPES_PATH)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(validCreateRequest())))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("POST returns 403 for OPERATOR (read-only) role")
+        void createWithOperatorReturns403() throws Exception {
+            mockMvc.perform(post(DEVICE_TYPES_PATH)
+                            .with(user("operator").roles(Role.OPERATOR.getName()))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(validCreateRequest())))
+                    .andExpect(status().isForbidden());
+        }
+
+        @Test
+        @DisplayName("PUT returns 401 when unauthenticated")
+        void updateUnauthenticatedReturns401() throws Exception {
+            var request = new UpdateDeviceTypeRequest(DEVICE_TYPE_NAME, DEVICE_TYPE_DESCRIPTION);
+
+            mockMvc.perform(put(DEVICE_TYPES_PATH + "/{id}", DEVICE_TYPE_ID)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("PUT returns 403 for OPERATOR (read-only) role")
+        void updateWithOperatorReturns403() throws Exception {
+            var request = new UpdateDeviceTypeRequest(DEVICE_TYPE_NAME, DEVICE_TYPE_DESCRIPTION);
+
+            mockMvc.perform(put(DEVICE_TYPES_PATH + "/{id}", DEVICE_TYPE_ID)
+                            .with(user("operator").roles(Role.OPERATOR.getName()))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isForbidden());
+        }
+
+        @Test
+        @DisplayName("DELETE returns 401 when unauthenticated")
+        void deleteUnauthenticatedReturns401() throws Exception {
+            mockMvc.perform(delete(DEVICE_TYPES_PATH + "/{id}", DEVICE_TYPE_ID))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("DELETE returns 403 for OPERATOR (read-only) role")
+        void deleteWithOperatorReturns403() throws Exception {
+            mockMvc.perform(delete(DEVICE_TYPES_PATH + "/{id}", DEVICE_TYPE_ID)
+                            .with(user("operator").roles(Role.OPERATOR.getName())))
+                    .andExpect(status().isForbidden());
+        }
+
+        @Test
+        @DisplayName("GET is allowed for OPERATOR role")
+        void getWithOperatorIsAllowed() throws Exception {
+            when(deviceTypeService.getDeviceTypeById(DEVICE_TYPE_ID)).thenReturn(deviceType);
+
+            mockMvc.perform(get(DEVICE_TYPES_PATH + "/{id}", DEVICE_TYPE_ID)
+                            .with(user("operator").roles(Role.OPERATOR.getName())))
+                    .andExpect(status().isOk());
+        }
+    }
+
+    @Nested
+    @DisplayName("Bean validation")
+    class Validation {
+
+        @Test
+        @DisplayName("POST returns 400 with field errors when name is blank")
+        void createBlankNameReturns400() throws Exception {
+            var invalid = new CreateDeviceTypeRequest("  ", DEVICE_TYPE_DESCRIPTION);
+
+            mockMvc.perform(post(DEVICE_TYPES_PATH)
+                            .with(user("tech").roles(Role.TECHNICIAN.getName()))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(invalid)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(header().string("Content-Type", "application/problem+json"))
+                    .andExpect(jsonPath("$.status").value(400))
+                    .andExpect(jsonPath("$.errors.name").exists());
+        }
+
+        @Test
+        @DisplayName("PUT returns 400 when name exceeds max length")
+        void updateTooLongNameReturns400() throws Exception {
+            String tooLongName = "x".repeat(51);
+            var invalid = new UpdateDeviceTypeRequest(tooLongName, DEVICE_TYPE_DESCRIPTION);
+
+            mockMvc.perform(put(DEVICE_TYPES_PATH + "/{id}", DEVICE_TYPE_ID)
+                            .with(user("tech").roles(Role.TECHNICIAN.getName()))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(invalid)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.name").exists());
+        }
+    }
+
+    @Nested
+    @DisplayName("Exception mapping")
+    class ExceptionMapping {
+
+        @Test
+        @DisplayName("GET by id maps EntityNotFoundException to 404 ProblemDetail")
+        void getByIdNotFoundReturns404() throws Exception {
+            when(deviceTypeService.getDeviceTypeById(DEVICE_TYPE_ID_NOT_FOUND))
+                    .thenThrow(new EntityNotFoundException("Device type not found with id: " + DEVICE_TYPE_ID_NOT_FOUND));
+
+            mockMvc.perform(get(DEVICE_TYPES_PATH + "/{id}", DEVICE_TYPE_ID_NOT_FOUND)
+                            .with(user("operator").roles(Role.OPERATOR.getName())))
+                    .andExpect(status().isNotFound())
+                    .andExpect(header().string("Content-Type", "application/problem+json"))
+                    .andExpect(jsonPath("$.status").value(404))
+                    .andExpect(jsonPath("$.title").value("Resource not found"))
+                    .andExpect(jsonPath("$.detail").value("Device type not found with id: " + DEVICE_TYPE_ID_NOT_FOUND))
+                    .andExpect(jsonPath("$.timestamp").exists());
+        }
+
+        @Test
+        @DisplayName("DELETE returns 204 No Content on success (no response body)")
+        void deleteReturns204() throws Exception {
+            mockMvc.perform(delete(DEVICE_TYPES_PATH + "/{id}", DEVICE_TYPE_ID)
+                            .with(user("tech").roles(Role.TECHNICIAN.getName())))
+                    .andExpect(status().isNoContent())
+                    .andExpect(content().string(""));
+
+            verify(deviceTypeService).deleteDeviceType(DEVICE_TYPE_ID);
+        }
+
+        @Test
+        @DisplayName("DELETE maps EntityNotFoundException to 404 ProblemDetail")
+        void deleteNotFoundReturns404() throws Exception {
+            doThrow(new EntityNotFoundException("Device type not found with ID: " + DEVICE_TYPE_ID_NOT_FOUND))
+                    .when(deviceTypeService).deleteDeviceType(DEVICE_TYPE_ID_NOT_FOUND);
+
+            mockMvc.perform(delete(DEVICE_TYPES_PATH + "/{id}", DEVICE_TYPE_ID_NOT_FOUND)
+                            .with(user("tech").roles(Role.TECHNICIAN.getName())))
+                    .andExpect(status().isNotFound())
+                    .andExpect(header().string("Content-Type", "application/problem+json"))
+                    .andExpect(jsonPath("$.status").value(404))
+                    .andExpect(jsonPath("$.title").value("Resource not found"))
+                    .andExpect(jsonPath("$.detail").value("Device type not found with ID: " + DEVICE_TYPE_ID_NOT_FOUND))
+                    .andExpect(jsonPath("$.timestamp").exists());
+        }
+    }
+
+    @Nested
+    @DisplayName("JSON response shape & headers")
+    class ResponseShape {
+
+        @Test
+        @DisplayName("POST returns 201 with Location header, JSON content type and mapped body")
+        void createReturns201WithLocationAndBody() throws Exception {
+            when(deviceTypeService.createDeviceType(any(CreateDeviceTypeRequest.class))).thenReturn(deviceType);
+
+            mockMvc.perform(post(DEVICE_TYPES_PATH)
+                            .with(user("tech").roles(Role.TECHNICIAN.getName()))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(validCreateRequest())))
+                    .andExpect(status().isCreated())
+                    .andExpect(header().string("Location", DEVICE_TYPES_PATH + "/" + DEVICE_TYPE_ID))
+                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.id").value(DEVICE_TYPE_ID))
+                    .andExpect(jsonPath("$.name").value(DEVICE_TYPE_NAME))
+                    .andExpect(jsonPath("$.description").value(DEVICE_TYPE_DESCRIPTION));
+        }
+
+        @Test
+        @DisplayName("GET by id returns 200 with mapped body")
+        void getByIdReturnsMappedBody() throws Exception {
+            when(deviceTypeService.getDeviceTypeById(DEVICE_TYPE_ID)).thenReturn(deviceType);
+
+            mockMvc.perform(get(DEVICE_TYPES_PATH + "/{id}", DEVICE_TYPE_ID)
+                            .with(user("operator").roles(Role.OPERATOR.getName())))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.id").value(DEVICE_TYPE_ID))
+                    .andExpect(jsonPath("$.name").value(DEVICE_TYPE_NAME))
+                    .andExpect(jsonPath("$.description").value(DEVICE_TYPE_DESCRIPTION));
+        }
+
+        @Test
+        @DisplayName("GET (list) returns 200 with a paginated JSON body (content + page metadata)")
+        void getDeviceTypesReturnsPagedJson() throws Exception {
+            Pageable pageable = PageRequest.of(0, 20);
+            Page<DeviceType> page = new PageImpl<>(List.of(deviceType), pageable, 1);
+            when(deviceTypeService.getDeviceTypes(any(Pageable.class))).thenReturn(page);
+
+            mockMvc.perform(get(DEVICE_TYPES_PATH)
+                            .with(user("operator").roles(Role.OPERATOR.getName())))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.content").isArray())
+                    .andExpect(jsonPath("$.content[0].id").value(DEVICE_TYPE_ID))
+                    .andExpect(jsonPath("$.content[0].name").value(DEVICE_TYPE_NAME))
+                    .andExpect(jsonPath("$.totalElements").value(1))
+                    .andExpect(jsonPath("$.totalPages").value(1))
+                    .andExpect(jsonPath("$.number").value(0))
+                    .andExpect(jsonPath("$.size").value(20));
+        }
+
+        @Test
+        @DisplayName("GET (list) returns 200 with an empty content array when there are no device types")
+        void getDeviceTypesReturnsEmptyPagedJson() throws Exception {
+            Pageable pageable = PageRequest.of(0, 20);
+            when(deviceTypeService.getDeviceTypes(any(Pageable.class))).thenReturn(Page.empty(pageable));
+
+            mockMvc.perform(get(DEVICE_TYPES_PATH)
+                            .with(user("operator").roles(Role.OPERATOR.getName())))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.content").isArray())
+                    .andExpect(jsonPath("$.content").isEmpty())
+                    .andExpect(jsonPath("$.totalElements").value(0));
+        }
+    }
+}
+
