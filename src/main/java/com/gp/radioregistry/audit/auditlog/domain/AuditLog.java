@@ -20,7 +20,7 @@ public class AuditLog {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "username", length = 255)
+	@Column(name = "username", length = 100)
 	private String username;
 
 	@JdbcTypeCode(SqlTypes.JSON)
@@ -38,6 +38,9 @@ public class AuditLog {
 
 	@Column(name = "entity_id", length = 50)
 	private String entityId;
+
+	@Column(name = "description", length = 200)
+	private String description;
 
 	@Column(name = "success", nullable = false)
 	private boolean success;

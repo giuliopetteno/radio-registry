@@ -26,7 +26,7 @@ public class DeviceService {
     private final OrganizationRepository organizationRepository;
     private final DepartmentRepository departmentRepository;
 
-    @Auditable(action = AuditAction.CREATE, entityType = AuditEntityType.DEVICE, entityId = "#result.id")
+    @Auditable(action = AuditAction.CREATE, entityType = AuditEntityType.DEVICE, entityId = "#result.id", description = "Device creation attempt")
     public Device createDevice(CreateDeviceRequest request) {
         var device = Device.builder()
                 .name(request.name())
@@ -40,7 +40,7 @@ public class DeviceService {
         return deviceRepository.save(device);
     }
 
-    @Auditable(action = AuditAction.UPDATE, entityType = AuditEntityType.DEVICE, entityId = "#id")
+    @Auditable(action = AuditAction.UPDATE, entityType = AuditEntityType.DEVICE, entityId = "#id", description = "Device update attempt")
     public Device updateDevice(Long id, UpdateDeviceRequest request) {
         var device = getDeviceById(id);
         Optional.ofNullable(request.name()).ifPresent(device::setName);
@@ -56,7 +56,7 @@ public class DeviceService {
         return deviceRepository.save(device);
     }
 
-    @Auditable(action = AuditAction.DELETE, entityType = AuditEntityType.DEVICE, entityId = "#id")
+    @Auditable(action = AuditAction.DELETE, entityType = AuditEntityType.DEVICE, entityId = "#id", description = "Device deletion attempt")
     public void deleteDevice(Long id) {
         var device = deviceRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Device not found with id: " + id));
