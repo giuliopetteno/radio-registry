@@ -1,7 +1,7 @@
 services:
   radio-registry:
     build: .
-    image: radio-registry:latest
+    image: ${CONTAINER_REGISTRY_REPO}/radio-registry:latest
     container_name: radio-registry
     ports:
       - "8080:8080"

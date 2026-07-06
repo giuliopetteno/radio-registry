@@ -24,19 +24,24 @@ The system allows healthcare providers to register and manage medical devices, a
 ## Technology Stack
 
 - Java 25
-- Spring Boot 4 + Actuator
-- Spring Security with JWT and role-based access control (Admin, Technician, Operator)
+- Spring Boot 4
+- Spring Boot Actuator for health, info & metrics endpoints, enabling production monitoring
+- Spring Security with JWT for authentication and role-based access control (Admin, Technician, Operator)
 - Hibernate / JPA
 - PostgreSQL
-- Gradle
-- Lombok
-- Swagger / OpenAPI
+- Audit logging with AOP & Hibernate Envers
+- Test suite: 
+  - Unit tests (JUnit 5 & Mockito)
+  - Slice tests (@WebMvcTest & @DataJpaTest)
+  - Integration tests (@SpringBootTest & Testcontainers)
+- Environment-based configuration for default & production profiles
+- Containerization with Docker & Docker Compose
+- Gradle build system with Kotlin DSL
+- Swagger / OpenAPI for interactive API documentation & endpoint testing
+- Lombok for boilerplate code reduction
 
 ## Planned Enhancements
 
-- Audit logging
-- Unit and integration testing using JUnit 5, Mockito and Testcontainers
-- Docker containerization with container orchestration using Docker Compose
 - CI/CD pipeline with GitHub Actions
 - Cloud deployment on Oracle Cloud Infrastructure (OCI)
 

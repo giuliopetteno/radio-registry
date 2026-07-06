@@ -2,9 +2,6 @@ spring:
   application:
     name: ${SPRING_APP_NAME:radio-registry}
 
-  config:
-    import: application_prod.yml
-
   profiles:
     active: ${PROFILE_ACTIVE}
 
