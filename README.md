@@ -42,6 +42,7 @@ The system allows healthcare providers to register and manage medical devices, a
 
 ## Planned Enhancements
 
+- Apache Kafka with Outbox Pattern & Idempotent Consumer for event-driven communication
 - CI/CD pipeline with GitHub Actions
 - Cloud deployment on Oracle Cloud Infrastructure (OCI)
 

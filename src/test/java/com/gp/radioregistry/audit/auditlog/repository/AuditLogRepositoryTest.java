@@ -1,7 +1,8 @@
 package com.gp.radioregistry.audit.auditlog.repository;
 
 import com.gp.radioregistry.audit.auditlog.domain.AuditLog;
-import com.gp.radioregistry.config.AbstractPostgresContainerTest;
+import com.gp.radioregistry.base.AbstractPostgresContainerTest;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -32,6 +33,7 @@ class AuditLogRepositoryTest extends AbstractPostgresContainerTest {
     private TestEntityManager entityManager;
 
     @Test
+    @DisplayName("should persist audit log and generate id")
     void savePersistsAuditLogAndGeneratesId() {
         var auditLog = AuditLog.builder()
                 .username(AUDIT_USERNAME)
@@ -50,6 +52,7 @@ class AuditLogRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return persisted audit log by id")
     void findByIdReturnsPersistedAuditLog() {
         var saved = auditLogRepository.save(AuditLog.builder()
                 .username(AUDIT_USERNAME)
@@ -71,6 +74,7 @@ class AuditLogRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return empty when audit log does not exist")
     void findByIdReturnsEmptyWhenAuditLogDoesNotExist() {
         Optional<AuditLog> found = auditLogRepository.findById(-1L);
 
@@ -78,6 +82,7 @@ class AuditLogRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return all persisted audit logs")
     void findAllReturnsAllPersistedAuditLogs() {
         auditLogRepository.save(AuditLog.builder()
                 .username(AUDIT_USERNAME)
@@ -99,6 +104,7 @@ class AuditLogRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return the number of audit logs")
     void countReturnsNumberOfAuditLogs() {
         auditLogRepository.save(AuditLog.builder()
                 .action(AUDIT_ACTION)
@@ -109,6 +115,7 @@ class AuditLogRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should remove the audit log")
     void deleteRemovesAuditLog() {
         var saved = auditLogRepository.save(AuditLog.builder()
                 .action(AUDIT_ACTION)
@@ -123,6 +130,7 @@ class AuditLogRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should violate not-null constraint when saving audit log without action")
     void savingAuditLogWithoutActionViolatesNotNullConstraint() {
         var auditLog = AuditLog.builder()
                 .username(AUDIT_USERNAME)
@@ -135,4 +143,3 @@ class AuditLogRepositoryTest extends AbstractPostgresContainerTest {
         }).isInstanceOf(DataIntegrityViolationException.class);
     }
 }
-

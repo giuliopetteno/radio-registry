@@ -1,8 +1,9 @@
 package com.gp.radioregistry.department.repository;
 
-import com.gp.radioregistry.config.AbstractPostgresContainerTest;
+import com.gp.radioregistry.base.AbstractPostgresContainerTest;
 import com.gp.radioregistry.department.domain.Department;
 import com.gp.radioregistry.organization.domain.Organization;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -43,6 +44,7 @@ class DepartmentRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should persist department and generate id")
     void savePersistsDepartmentAndGeneratesId() {
         var organization = persistOrganization();
 
@@ -61,6 +63,7 @@ class DepartmentRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return persisted department by id")
     void findByIdReturnsPersistedDepartment() {
         var organization = persistOrganization();
 
@@ -83,6 +86,7 @@ class DepartmentRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return empty when department does not exist")
     void findByIdReturnsEmptyWhenDepartmentDoesNotExist() {
         Optional<Department> found = departmentRepository.findById(-1L);
 
@@ -90,6 +94,7 @@ class DepartmentRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return all persisted departments")
     void findAllReturnsAllPersistedDepartments() {
         var organization = persistOrganization();
 
@@ -114,6 +119,7 @@ class DepartmentRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return the number of departments")
     void countReturnsNumberOfDepartments() {
         var organization = persistOrganization();
 
@@ -127,6 +133,7 @@ class DepartmentRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should remove the department")
     void deleteRemovesDepartment() {
         var organization = persistOrganization();
 
@@ -144,6 +151,7 @@ class DepartmentRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should support self-referencing parent department")
     void supportsSelfReferencingParentDepartment() {
         var organization = persistOrganization();
 
@@ -169,6 +177,7 @@ class DepartmentRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should violate not-null constraint when saving department without organization")
     void savingDepartmentWithoutOrganizationViolatesNotNullConstraint() {
         var department = Department.builder()
                 .name(DEPARTMENT_NAME)

@@ -2,12 +2,12 @@ package com.gp.radioregistry.device.domain;
 
 import com.gp.radioregistry.department.domain.Department;
 import com.gp.radioregistry.devicetype.domain.DeviceType;
+import com.gp.radioregistry.exception.InvalidEntityStateException;
 import com.gp.radioregistry.organization.domain.Organization;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.*;
 import org.hibernate.envers.Audited;
 
 import java.time.LocalDate;
@@ -16,7 +16,11 @@ import java.time.OffsetDateTime;
 import static com.gp.radioregistry.constant.ValidationConstants.*;
 
 @Entity
-@Table(name = "device")
+@Table(name = "device",
+        check = @CheckConstraint(
+                name = "chk_device_parent_structure",
+                constraint = "(organization_id IS NOT NULL AND department_id IS NULL) "
+                        + "OR (organization_id IS NULL AND department_id IS NOT NULL)"))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,18 +32,20 @@ public class Device {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     @Size(max = NAME_MAX_LENGTH)
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "device_type_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.RESTRICT)
     private DeviceType deviceType;
 
-    @Column(name = "serial_number", nullable = false)
+    @Column(name = "serial_number", nullable = false, columnDefinition = "TEXT")
     @Size(max = SERIAL_NUMBER_MAX_LENGTH)
     private String serialNumber;
 
+    @Column(columnDefinition = "TEXT")
     @Size(max = DESCRIPTION_MAX_LENGTH)
     private String description;
 
@@ -48,10 +54,12 @@ public class Device {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id")
+    @OnDelete(action = OnDeleteAction.RESTRICT)
     private Organization organization;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id")
+    @OnDelete(action = OnDeleteAction.RESTRICT)
     private Department department;
 
     @CreationTimestamp
@@ -61,5 +69,16 @@ public class Device {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
-}
 
+    @PrePersist
+    @PreUpdate
+    private void validateParentStructure() {
+        boolean hasOrganization = organization != null;
+        boolean hasDepartment = department != null;
+        if (hasOrganization == hasDepartment) {
+            throw new InvalidEntityStateException(
+                "A device must reference exactly one owner: either an organization "
+                    + "or a department, but not both and not neither.");
+        }
+    }
+}

@@ -28,14 +28,15 @@ public class Organization {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     @Size(max = NAME_MAX_LENGTH)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     @Size(max = CODE_MAX_LENGTH)
     private String code;
 
+    @Column(columnDefinition = "TEXT")
     @Size(max = DESCRIPTION_MAX_LENGTH)
     private String description;
 
@@ -55,4 +56,3 @@ public class Organization {
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
 }
-

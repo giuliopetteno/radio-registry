@@ -1,8 +1,9 @@
 package com.gp.radioregistry.user.repository;
 
-import com.gp.radioregistry.config.AbstractPostgresContainerTest;
+import com.gp.radioregistry.base.AbstractPostgresContainerTest;
 import com.gp.radioregistry.role.domain.Role;
 import com.gp.radioregistry.user.domain.User;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -41,6 +42,7 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should persist user and generate id")
     void savePersistsUserAndGeneratesId() {
         var saved = userRepository.save(baseUser().build());
 
@@ -52,6 +54,7 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return persisted user by id")
     void findByIdReturnsPersistedUser() {
         var saved = userRepository.save(baseUser().build());
         entityManager.flush();
@@ -65,6 +68,7 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return empty when user does not exist")
     void findByIdReturnsEmptyWhenUserDoesNotExist() {
         Optional<User> found = userRepository.findById(-1L);
 
@@ -72,6 +76,7 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return all persisted users")
     void findAllReturnsAllPersistedUsers() {
         userRepository.save(baseUser().build());
         userRepository.save(User.builder()
@@ -89,6 +94,7 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return the number of users")
     void countReturnsNumberOfUsers() {
         userRepository.save(baseUser().build());
 
@@ -96,6 +102,7 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should remove the user")
     void deleteRemovesUser() {
         var saved = userRepository.save(baseUser().build());
         entityManager.flush();
@@ -107,6 +114,7 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should persist role associations")
     void persistsRoleAssociations() {
         var role = entityManager.persistFlushFind(Role.builder().name(ROLE_NAME).build());
 
@@ -123,6 +131,7 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return matching user by username")
     void findByUsernameReturnsMatchingUser() {
         userRepository.save(baseUser().build());
         entityManager.flush();
@@ -135,11 +144,13 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return empty when no user matches the username")
     void findByUsernameReturnsEmptyWhenNoUserMatches() {
         assertThat(userRepository.findByUsername(UNKNOWN_VALUE)).isEmpty();
     }
 
     @Test
+    @DisplayName("should return matching user by email")
     void findByEmailReturnsMatchingUser() {
         userRepository.save(baseUser().build());
         entityManager.flush();
@@ -152,11 +163,13 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return empty when no user matches the email")
     void findByEmailReturnsEmptyWhenNoUserMatches() {
         assertThat(userRepository.findByEmail(UNKNOWN_VALUE)).isEmpty();
     }
 
     @Test
+    @DisplayName("should match user by username with findByUsernameOrEmail")
     void findByUsernameOrEmailMatchesByUsername() {
         userRepository.save(baseUser().build());
         entityManager.flush();
@@ -169,6 +182,7 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should match user by email with findByUsernameOrEmail")
     void findByUsernameOrEmailMatchesByEmail() {
         userRepository.save(baseUser().build());
         entityManager.flush();
@@ -181,11 +195,13 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return empty when no user matches username or email")
     void findByUsernameOrEmailReturnsEmptyWhenNoUserMatches() {
         assertThat(userRepository.findByUsernameOrEmail(UNKNOWN_VALUE, UNKNOWN_VALUE)).isEmpty();
     }
 
     @Test
+    @DisplayName("should return true when user exists by username")
     void existsByUsernameReturnsTrueWhenUserExists() {
         userRepository.save(baseUser().build());
         entityManager.flush();
@@ -194,11 +210,13 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return false when user does not exist by username")
     void existsByUsernameReturnsFalseWhenUserDoesNotExist() {
         assertThat(userRepository.existsByUsername(UNKNOWN_VALUE)).isFalse();
     }
 
     @Test
+    @DisplayName("should return true when user exists by email")
     void existsByEmailReturnsTrueWhenUserExists() {
         userRepository.save(baseUser().build());
         entityManager.flush();
@@ -207,11 +225,13 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return false when user does not exist by email")
     void existsByEmailReturnsFalseWhenUserDoesNotExist() {
         assertThat(userRepository.existsByEmail(UNKNOWN_VALUE)).isFalse();
     }
 
     @Test
+    @DisplayName("should violate not-null constraint when saving user without password")
     void savingUserWithoutPasswordViolatesNotNullConstraint() {
         var user = User.builder()
                 .username(USERNAME)
@@ -225,6 +245,7 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should violate unique constraint when saving user with duplicate username")
     void savingUserWithDuplicateUsernameViolatesUniqueConstraint() {
         userRepository.save(baseUser().build());
         entityManager.flush();
@@ -240,6 +261,7 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should violate unique constraint when saving user with duplicate email")
     void savingUserWithDuplicateEmailViolatesUniqueConstraint() {
         userRepository.save(baseUser().build());
         entityManager.flush();
@@ -254,4 +276,3 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
         }).isInstanceOf(DataIntegrityViolationException.class);
     }
 }
-
