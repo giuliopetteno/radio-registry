@@ -1,7 +1,8 @@
 package com.gp.radioregistry.organization.repository;
 
-import com.gp.radioregistry.config.AbstractPostgresContainerTest;
+import com.gp.radioregistry.base.AbstractPostgresContainerTest;
 import com.gp.radioregistry.organization.domain.Organization;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -30,6 +31,7 @@ class OrganizationRepositoryTest extends AbstractPostgresContainerTest {
     private TestEntityManager entityManager;
 
     @Test
+    @DisplayName("should persist organization and generate id")
     void savePersistsOrganizationAndGeneratesId() {
         var organization = Organization.builder()
                 .name(ORGANIZATION_NAME)
@@ -45,6 +47,7 @@ class OrganizationRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return persisted organization by id")
     void findByIdReturnsPersistedOrganization() {
         var saved = organizationRepository.save(Organization.builder()
                 .name(ORGANIZATION_NAME)
@@ -62,6 +65,7 @@ class OrganizationRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return empty when organization does not exist")
     void findByIdReturnsEmptyWhenOrganizationDoesNotExist() {
         Optional<Organization> found = organizationRepository.findById(-1L);
 
@@ -69,6 +73,7 @@ class OrganizationRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return all persisted organizations")
     void findAllReturnsAllPersistedOrganizations() {
         organizationRepository.save(Organization.builder()
                 .name(ORGANIZATION_NAME)
@@ -88,6 +93,7 @@ class OrganizationRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return the number of organizations")
     void countReturnsNumberOfOrganizations() {
         organizationRepository.save(Organization.builder()
                 .name(ORGANIZATION_NAME)
@@ -98,6 +104,7 @@ class OrganizationRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should remove the organization")
     void deleteRemovesOrganization() {
         var saved = organizationRepository.save(Organization.builder()
                 .name(ORGANIZATION_NAME)
@@ -112,6 +119,7 @@ class OrganizationRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should violate not-null constraint when saving organization without name")
     void savingOrganizationWithoutNameViolatesNotNullConstraint() {
         var organization = Organization.builder()
                 .code(ORGANIZATION_CODE)
@@ -123,4 +131,3 @@ class OrganizationRepositoryTest extends AbstractPostgresContainerTest {
         }).isInstanceOf(DataIntegrityViolationException.class);
     }
 }
-

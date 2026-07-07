@@ -1,7 +1,8 @@
 package com.gp.radioregistry.devicetype.repository;
 
-import com.gp.radioregistry.config.AbstractPostgresContainerTest;
+import com.gp.radioregistry.base.AbstractPostgresContainerTest;
 import com.gp.radioregistry.devicetype.domain.DeviceType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -28,6 +29,7 @@ class DeviceTypeRepositoryTest extends AbstractPostgresContainerTest {
     private TestEntityManager entityManager;
 
     @Test
+    @DisplayName("should persist device type and generate id")
     void savePersistsDeviceTypeAndGeneratesId() {
         var deviceType = DeviceType.builder()
                 .name(DEVICE_TYPE_NAME)
@@ -42,6 +44,7 @@ class DeviceTypeRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return persisted device type by id")
     void findByIdReturnsPersistedDeviceType() {
         var saved = deviceTypeRepository.save(DeviceType.builder()
                 .name(DEVICE_TYPE_NAME)
@@ -58,6 +61,7 @@ class DeviceTypeRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return empty when device type does not exist")
     void findByIdReturnsEmptyWhenDeviceTypeDoesNotExist() {
         Optional<DeviceType> found = deviceTypeRepository.findById(-1L);
 
@@ -65,6 +69,7 @@ class DeviceTypeRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return all persisted device types")
     void findAllReturnsAllPersistedDeviceTypes() {
         deviceTypeRepository.save(DeviceType.builder()
                 .name(DEVICE_TYPE_NAME)
@@ -82,6 +87,7 @@ class DeviceTypeRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return the number of device types")
     void countReturnsNumberOfDeviceTypes() {
         deviceTypeRepository.save(DeviceType.builder()
                 .name(DEVICE_TYPE_NAME)
@@ -91,6 +97,7 @@ class DeviceTypeRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should remove the device type")
     void deleteRemovesDeviceType() {
         var saved = deviceTypeRepository.save(DeviceType.builder()
                 .name(DEVICE_TYPE_NAME)
@@ -104,6 +111,7 @@ class DeviceTypeRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should violate not-null constraint when saving device type without name")
     void savingDeviceTypeWithoutNameViolatesNotNullConstraint() {
         var deviceType = DeviceType.builder()
                 .description(DEVICE_TYPE_DESCRIPTION)
@@ -115,4 +123,3 @@ class DeviceTypeRepositoryTest extends AbstractPostgresContainerTest {
         }).isInstanceOf(DataIntegrityViolationException.class);
     }
 }
-

@@ -49,6 +49,23 @@ tasks.test {
 	useJUnitPlatform()
 	environment("PROFILE_ACTIVE", "test")
 	jvmArgs("-javaagent:${mockitoAgent.asPath}", "-Xshare:off")
+	filter {
+		excludeTestsMatching("*IntegrationTest")
+	}
+}
+
+tasks.register<Test>("integrationTest") {
+	description = "Runs full @SpringBootTest end-to-end tests"
+	group = "verification"
+	useJUnitPlatform()
+	filter {
+		includeTestsMatching("*IntegrationTest")
+	}
+	shouldRunAfter(tasks.test)
+}
+
+tasks.named("check") {
+	dependsOn(tasks.named("integrationTest"))
 }
 
 springBoot {

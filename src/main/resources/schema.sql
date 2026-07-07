@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS department(
     CONSTRAINT chk_department_parent_structure CHECK(
     (organization_id IS NOT NULL AND parent_department_id IS NULL)
     OR
-    (organization_id IS NULL AND parent_department_id IS NOT NULL)
+    (organization_id IS NULL AND parent_department_id IS NOT NULL))
 );
 
 CREATE TABLE IF NOT EXISTS device_type(

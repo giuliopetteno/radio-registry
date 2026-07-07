@@ -1,7 +1,8 @@
 package com.gp.radioregistry.role.repository;
 
-import com.gp.radioregistry.config.AbstractPostgresContainerTest;
+import com.gp.radioregistry.base.AbstractPostgresContainerTest;
 import com.gp.radioregistry.role.domain.Role;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -28,6 +29,7 @@ class RoleRepositoryTest extends AbstractPostgresContainerTest {
     private TestEntityManager entityManager;
 
     @Test
+    @DisplayName("should persist role and generate id")
     void savePersistsRoleAndGeneratesId() {
         var role = Role.builder()
                 .name(ROLE_NAME)
@@ -41,6 +43,7 @@ class RoleRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return persisted role by id")
     void findByIdReturnsPersistedRole() {
         var saved = roleRepository.save(Role.builder()
                 .name(ROLE_NAME)
@@ -55,6 +58,7 @@ class RoleRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return empty when role does not exist")
     void findByIdReturnsEmptyWhenRoleDoesNotExist() {
         Optional<Role> found = roleRepository.findById(-1L);
 
@@ -62,6 +66,7 @@ class RoleRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return all persisted roles")
     void findAllReturnsAllPersistedRoles() {
         roleRepository.save(Role.builder().name(ROLE_NAME).build());
         roleRepository.save(Role.builder().name(ROLE_NAME_SECONDARY).build());
@@ -75,6 +80,7 @@ class RoleRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return the number of roles")
     void countReturnsNumberOfRoles() {
         roleRepository.save(Role.builder().name(ROLE_NAME).build());
 
@@ -82,6 +88,7 @@ class RoleRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should remove the role")
     void deleteRemovesRole() {
         var saved = roleRepository.save(Role.builder().name(ROLE_NAME).build());
         entityManager.flush();
@@ -93,6 +100,7 @@ class RoleRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return matching role by name")
     void findByNameReturnsMatchingRole() {
         roleRepository.save(Role.builder().name(ROLE_NAME).build());
         entityManager.flush();
@@ -105,6 +113,7 @@ class RoleRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return empty when no role matches the name")
     void findByNameReturnsEmptyWhenNoRoleMatches() {
         Optional<Role> found = roleRepository.findByName(ROLE_NAME_UNKNOWN);
 
@@ -112,6 +121,7 @@ class RoleRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return true when role exists by name")
     void existsByNameReturnsTrueWhenRoleExists() {
         roleRepository.save(Role.builder().name(ROLE_NAME).build());
         entityManager.flush();
@@ -120,11 +130,13 @@ class RoleRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should return false when role does not exist by name")
     void existsByNameReturnsFalseWhenRoleDoesNotExist() {
         assertThat(roleRepository.existsByName(ROLE_NAME_UNKNOWN)).isFalse();
     }
 
     @Test
+    @DisplayName("should violate not-null constraint when saving role without name")
     void savingRoleWithoutNameViolatesNotNullConstraint() {
         var role = Role.builder().build();
 
@@ -135,6 +147,7 @@ class RoleRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
+    @DisplayName("should violate unique constraint when saving role with duplicate name")
     void savingRoleWithDuplicateNameViolatesUniqueConstraint() {
         roleRepository.save(Role.builder().name(ROLE_NAME).build());
         entityManager.flush();
@@ -145,4 +158,3 @@ class RoleRepositoryTest extends AbstractPostgresContainerTest {
         }).isInstanceOf(DataIntegrityViolationException.class);
     }
 }
-

@@ -37,6 +37,16 @@ public class GlobalExceptionHandler {
 		return problemDetail;
 	}
 
+	@ExceptionHandler(InvalidEntityStateException.class)
+	public ProblemDetail handleInvalidEntityState(InvalidEntityStateException ex) {
+		log.warn("Invalid entity state: {}", ex.getMessage());
+
+		ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+		problemDetail.setTitle("Invalid entity state");
+		problemDetail.setProperty("timestamp", Instant.now());
+		return problemDetail;
+	}
+
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ProblemDetail handleValidation(MethodArgumentNotValidException ex) {
 		log.warn("Validation failed: {}", ex.getMessage());

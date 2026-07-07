@@ -1,4 +1,4 @@
-package com.gp.radioregistry.config;
+package com.gp.radioregistry.base;
 
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.postgresql.PostgreSQLContainer;

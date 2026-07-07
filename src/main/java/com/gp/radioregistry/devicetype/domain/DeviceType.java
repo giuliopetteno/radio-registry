@@ -25,10 +25,11 @@ public class DeviceType {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     @Size(max = NAME_MAX_LENGTH)
     private String name;
 
+    @Column(columnDefinition = "TEXT")
     @Size(max = DESCRIPTION_MAX_LENGTH)
     private String description;
 
@@ -40,4 +41,3 @@ public class DeviceType {
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
 }
-
