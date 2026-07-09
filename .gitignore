@@ -39,3 +39,4 @@ out/
 .env.*
 /src/main/resources/keystore.p12
 /deps.txt
+/certs/
