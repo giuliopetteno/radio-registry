@@ -3,7 +3,7 @@ spring:
     name: ${SPRING_APP_NAME:radio-registry}
 
   profiles:
-    active: ${PROFILE_ACTIVE}
+    active: ${PROFILE_ACTIVE:default}
 
   datasource:
     url: ${DB_URL}
@@ -29,6 +29,18 @@ spring:
         default-page-size: ${DEFAULT_PAGE_SIZE:20}
         max-page-size: ${MAX_PAGE_SIZE:100}
 
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+        retries: 3
+        spring.json.add.type.headers: false
+
 #  security:
 #    user:
 #      name: ${SECURITY_USERNAME}
@@ -51,12 +63,17 @@ management:
 logging:
   pattern:
     console: ${LOGPATTERN_CONSOLE:%green(%d{HH:mm:ss.SSS}) %blue(%-5level) %red([%thread]) %yellow(%logger{15}) - %msg%n}
-    level:
-      org:
-        springframework:
-          security: ${SPRING_SECURITY_LOG_LEVEL:TRACE}
+  level:
+    org:
+      springframework:
+        security: ${SPRING_SECURITY_LOG_LEVEL:TRACE}
 
 server:
   port: 8080
   servlet:
     context-path: /api/v1
+
+app:
+  kafka:
+    topic:
+      device-events: radio-registry.device.events
