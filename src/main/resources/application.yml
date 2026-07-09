@@ -16,6 +16,7 @@ spring:
 
     properties:
       hibernate:
+        default_schema: ${HIBERNATE_DEFAULT_SCHEMA:radio_registry}
         format_sql: ${HIBERNATE_FORMAT_SQL:true}
         default_batch_fetch_size: ${HIBERNATE_DEFAULT_BATCH_FETCH_SIZE:20}
 
