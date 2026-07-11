@@ -17,10 +17,10 @@ logging:
         security: ${SPRING_SECURITY_LOG_LEVEL:ERROR}
 
 server:
-  port: 8443
+  port: ${SERVER_PORT:8443}
   ssl:
     enabled: true
-    key-store: "file:${SSL_KEYSTORE_PATH:./certs/keystore.p12}"
+    key-store: "file:${SSL_KEYSTORE_PATH:./radio-registry/certs/keystore.p12}"
     key-store-password: "${SSL_KEYSTORE_PASSWORD}"
     key-store-type: PKCS12
     key-alias: "radio-registry"

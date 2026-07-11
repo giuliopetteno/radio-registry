@@ -69,7 +69,7 @@ logging:
         security: ${SPRING_SECURITY_LOG_LEVEL:TRACE}
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
   servlet:
     context-path: /api/v1
 

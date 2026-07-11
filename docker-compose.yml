@@ -3,8 +3,8 @@ services:
     build: .
     image: ${CONTAINER_REGISTRY_REPO}/radio-registry:latest
     container_name: radio-registry
-    ports:
-      - "8080:8080"
     restart: unless-stopped
+    networks:
+      - radio-net
     env_file:
       - .env
