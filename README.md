@@ -2,7 +2,7 @@
 
 A modern backend application for managing medical imaging equipment (CT scanners, X-ray systems, MRI devices, etc.) within healthcare organizations.
 
-The system allows healthcare providers to register and manage medical devices, associate them with hospitals, and organize them within specific hospital departments such as Radiology, Nuclear Medicine, and Diagnostic Imaging.
+The system allows healthcare providers to register and manage medical devices, associate them with hospitals, and organize them within specific hospital departments.
 
 > **⚠️ Work in Progress**
 >
