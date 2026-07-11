@@ -2,7 +2,7 @@ package com.gp.radioregistry.device.service;
 
 import com.gp.radioregistry.department.domain.Department;
 import com.gp.radioregistry.department.repository.DepartmentRepository;
-import com.gp.radioregistry.device.DeviceStatus;
+import com.gp.radioregistry.device.enums.DeviceStatus;
 import com.gp.radioregistry.device.domain.Device;
 import com.gp.radioregistry.device.dto.request.CreateDeviceRequest;
 import com.gp.radioregistry.device.dto.request.UpdateDeviceRequest;

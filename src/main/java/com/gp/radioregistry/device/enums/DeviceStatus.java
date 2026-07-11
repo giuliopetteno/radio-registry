@@ -1,4 +1,4 @@
-package com.gp.radioregistry.device;
+package com.gp.radioregistry.device.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

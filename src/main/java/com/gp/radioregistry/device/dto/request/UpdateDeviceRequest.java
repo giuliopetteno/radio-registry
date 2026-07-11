@@ -1,7 +1,7 @@
 package com.gp.radioregistry.device.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.gp.radioregistry.device.DeviceStatus;
+import com.gp.radioregistry.device.enums.DeviceStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;

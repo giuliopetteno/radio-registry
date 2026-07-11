@@ -1,7 +1,7 @@
 package com.gp.radioregistry.device.domain;
 
 import com.gp.radioregistry.department.domain.Department;
-import com.gp.radioregistry.device.DeviceStatus;
+import com.gp.radioregistry.device.enums.DeviceStatus;
 import com.gp.radioregistry.devicetype.domain.DeviceType;
 import com.gp.radioregistry.exception.InvalidEntityStateException;
 import com.gp.radioregistry.organization.domain.Organization;
