@@ -1,8 +1,8 @@
 package com.gp.radioregistry.user.service;
 
 import com.gp.radioregistry.audit.annotation.Auditable;
-import com.gp.radioregistry.audit.enums.AuditAction;
-import com.gp.radioregistry.audit.enums.AuditEntityType;
+import com.gp.radioregistry.enums.EntityType;
+import com.gp.radioregistry.enums.EventType;
 import com.gp.radioregistry.exception.ResourceAlreadyExistsException;
 import com.gp.radioregistry.role.repository.RoleRepository;
 import com.gp.radioregistry.security.auth.dto.request.RegisterUserRequest;
@@ -32,7 +32,7 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Auditable(action = AuditAction.CREATE, entityType = AuditEntityType.USER, entityId = "#result.id", description = "User creation attempt")
+    @Auditable(eventType = EventType.CREATE, entityType = EntityType.USER, entityId = "#result.id", description = "User creation attempt")
     public User createUser(RegisterUserRequest request) {
         if (userRepository.existsByUsername(request.username())) {
             throw new ResourceAlreadyExistsException("User with username " + request.username() + " already exists");
@@ -54,7 +54,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    @Auditable(action = AuditAction.UPDATE, entityType = AuditEntityType.USER, entityId = "#id", description = "User update attempt")
+    @Auditable(eventType = EventType.UPDATE, entityType = EntityType.USER, entityId = "#id", description = "User update attempt")
     public User updateUser(Long id, UpdateUserRequest request) {
         var user = getUserById(id);
         Optional.ofNullable(request.username()).ifPresent(user::setUsername);
@@ -63,7 +63,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    @Auditable(action = AuditAction.UPDATE, entityType = AuditEntityType.USER, entityId = "#id", description = "User password update attempt")
+    @Auditable(eventType = EventType.UPDATE, entityType = EntityType.USER, entityId = "#id", description = "User password update attempt")
     public void updateUserPassword(Long id, UpdateUserPasswordRequest request) {
         var user = getUserById(id);
         user.setPassword(passwordEncoder.encode(request.password()));
@@ -71,7 +71,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    @Auditable(action = AuditAction.UPDATE, entityType = AuditEntityType.USER, entityId = "#id", description = "User roles update attempt")
+    @Auditable(eventType = EventType.UPDATE, entityType = EntityType.USER, entityId = "#id", description = "User roles update attempt")
     public User updateUserRoles(Long id, UpdateUserRolesRequest request) {
         var user = getUserById(id);
 
@@ -83,7 +83,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    @Auditable(action = AuditAction.DELETE, entityType = AuditEntityType.USER, entityId = "#id", description = "User deletion attempt")
+    @Auditable(eventType = EventType.DELETE, entityType = EntityType.USER, entityId = "#id", description = "User deletion attempt")
     public void deleteUser(Long id) {
         var user = userRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));

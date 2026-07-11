@@ -10,3 +10,5 @@ services:
       - radio-net
     env_file:
       - .env
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092

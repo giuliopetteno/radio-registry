@@ -19,8 +19,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class AuditLogRepositoryTest extends AbstractPostgresContainerTest {
 
     private static final String AUDIT_USERNAME = "username";
-    private static final String AUDIT_ACTION = "CREATE";
-    private static final String AUDIT_ACTION_SECONDARY = "DELETE";
+    private static final String AUDIT_EVENT_TYPE = "CREATE";
+    private static final String AUDIT_EVENT_TYPE_SECONDARY = "DELETE";
     private static final String AUDIT_ENTITY_TYPE = "Department";
     private static final String AUDIT_ENTITY_ID = "1";
     private static final String AUDIT_DESCRIPTION = "Created a department";
@@ -37,7 +37,7 @@ class AuditLogRepositoryTest extends AbstractPostgresContainerTest {
     void savePersistsAuditLogAndGeneratesId() {
         var auditLog = AuditLog.builder()
                 .username(AUDIT_USERNAME)
-                .action(AUDIT_ACTION)
+                .eventType(AUDIT_EVENT_TYPE)
                 .entityType(AUDIT_ENTITY_TYPE)
                 .entityId(AUDIT_ENTITY_ID)
                 .description(AUDIT_DESCRIPTION)
@@ -56,7 +56,7 @@ class AuditLogRepositoryTest extends AbstractPostgresContainerTest {
     void findByIdReturnsPersistedAuditLog() {
         var saved = auditLogRepository.save(AuditLog.builder()
                 .username(AUDIT_USERNAME)
-                .action(AUDIT_ACTION)
+                .eventType(AUDIT_EVENT_TYPE)
                 .entityType(AUDIT_ENTITY_TYPE)
                 .entityId(AUDIT_ENTITY_ID)
                 .description(AUDIT_DESCRIPTION)
@@ -69,7 +69,7 @@ class AuditLogRepositoryTest extends AbstractPostgresContainerTest {
 
         assertThat(found).isPresent();
         assertThat(found.get().getUsername()).isEqualTo(AUDIT_USERNAME);
-        assertThat(found.get().getAction()).isEqualTo(AUDIT_ACTION);
+        assertThat(found.get().getEventType()).isEqualTo(AUDIT_EVENT_TYPE);
         assertThat(found.get().isSuccess()).isTrue();
     }
 
@@ -86,12 +86,12 @@ class AuditLogRepositoryTest extends AbstractPostgresContainerTest {
     void findAllReturnsAllPersistedAuditLogs() {
         auditLogRepository.save(AuditLog.builder()
                 .username(AUDIT_USERNAME)
-                .action(AUDIT_ACTION)
+                .eventType(AUDIT_EVENT_TYPE)
                 .success(true)
                 .build());
         auditLogRepository.save(AuditLog.builder()
                 .username(AUDIT_USERNAME)
-                .action(AUDIT_ACTION_SECONDARY)
+                .eventType(AUDIT_EVENT_TYPE_SECONDARY)
                 .success(false)
                 .build());
 
@@ -99,15 +99,15 @@ class AuditLogRepositoryTest extends AbstractPostgresContainerTest {
 
         assertThat(auditLogs)
                 .hasSize(2)
-                .extracting(AuditLog::getAction)
-                .containsExactlyInAnyOrder(AUDIT_ACTION, AUDIT_ACTION_SECONDARY);
+                .extracting(AuditLog::getEventType)
+                .containsExactlyInAnyOrder(AUDIT_EVENT_TYPE, AUDIT_EVENT_TYPE_SECONDARY);
     }
 
     @Test
     @DisplayName("should return the number of audit logs")
     void countReturnsNumberOfAuditLogs() {
         auditLogRepository.save(AuditLog.builder()
-                .action(AUDIT_ACTION)
+                .eventType(AUDIT_EVENT_TYPE)
                 .success(true)
                 .build());
 
@@ -118,7 +118,7 @@ class AuditLogRepositoryTest extends AbstractPostgresContainerTest {
     @DisplayName("should remove the audit log")
     void deleteRemovesAuditLog() {
         var saved = auditLogRepository.save(AuditLog.builder()
-                .action(AUDIT_ACTION)
+                .eventType(AUDIT_EVENT_TYPE)
                 .success(true)
                 .build());
         entityManager.flush();
@@ -130,8 +130,8 @@ class AuditLogRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
-    @DisplayName("should violate not-null constraint when saving audit log without action")
-    void savingAuditLogWithoutActionViolatesNotNullConstraint() {
+    @DisplayName("should violate not-null constraint when saving audit log without event type")
+    void savingAuditLogWithoutEventTypeViolatesNotNullConstraint() {
         var auditLog = AuditLog.builder()
                 .username(AUDIT_USERNAME)
                 .success(true)

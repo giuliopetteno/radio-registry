@@ -1,5 +1,6 @@
 package com.gp.radioregistry.device.dto.response;
 
+import com.gp.radioregistry.device.DeviceStatus;
 import com.gp.radioregistry.device.domain.Device;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -25,6 +26,12 @@ public record DeviceResponse(
     @Schema(description = "Installation date")
     LocalDate installationDate,
 
+    @Schema(description = "Device status")
+	DeviceStatus deviceStatus,
+
+    @Schema(description = "Decommission date")
+    LocalDate decommissionDate,
+
     @Schema(description = "Organization to which the device belongs")
     Long organizationId,
 
@@ -49,6 +56,8 @@ public record DeviceResponse(
                 device.getSerialNumber(),
                 device.getDescription(),
                 device.getInstallationDate(),
+                device.getDeviceStatus(),
+                device.getDecommissionDate(),
                 device.getOrganization() != null ? device.getOrganization().getId() : null,
                 device.getDepartment() != null ? device.getDepartment().getId() : null,
                 device.getCreatedAt(),

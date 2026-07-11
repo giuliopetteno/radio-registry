@@ -1,5 +1,6 @@
 package com.gp.radioregistry.device.controller;
 
+import com.gp.radioregistry.device.DeviceStatus;
 import com.gp.radioregistry.device.domain.Device;
 import com.gp.radioregistry.device.dto.request.CreateDeviceRequest;
 import com.gp.radioregistry.device.dto.request.UpdateDeviceRequest;
@@ -41,10 +42,14 @@ class DeviceControllerTest {
     private static final String DEVICE_NAME = "X-ray machine XR3600";
     private static final String DEVICE_SERIAL_NUMBER = "SN-XR3600";
     private static final String DEVICE_DESCRIPTION = "X-ray machine 1st generation";
+    private static final DeviceStatus DEVICE_STATUS = DeviceStatus.ACTIVE;
+    private static final LocalDate DEVICE_DECOMMISSION_DATE = null;
 
     private static final String DEVICE_NAME_UPDATE = "X-ray machine XR3800";
     private static final String DEVICE_SERIAL_NUMBER_UPDATE = "SN-XR3800";
     private static final String DEVICE_DESCRIPTION_UPDATE = "X-ray machine 2nd generation";
+    private static final DeviceStatus DEVICE_STATUS_UPDATE = DeviceStatus.MAINTENANCE;
+    private static final LocalDate DEVICE_DECOMMISSION_DATE_UPDATE = null;
 
     @Mock
     private DeviceService deviceService;
@@ -69,12 +74,12 @@ class DeviceControllerTest {
 
     private CreateDeviceRequest createRequest() {
         return new CreateDeviceRequest(DEVICE_NAME, DEVICE_TYPE_ID, DEVICE_SERIAL_NUMBER, DEVICE_DESCRIPTION,
-                LocalDate.of(2024, 1, 15), ORGANIZATION_ID, null);
+                LocalDate.of(2024, 1, 15), DEVICE_STATUS, DEVICE_DECOMMISSION_DATE, ORGANIZATION_ID, null);
     }
 
     private UpdateDeviceRequest updateRequest() {
         return new UpdateDeviceRequest(DEVICE_NAME_UPDATE, DEVICE_TYPE_ID, DEVICE_SERIAL_NUMBER_UPDATE, DEVICE_DESCRIPTION_UPDATE,
-                LocalDate.of(2024, 1, 15), ORGANIZATION_ID, null);
+                LocalDate.of(2024, 1, 15), DEVICE_STATUS_UPDATE, DEVICE_DECOMMISSION_DATE_UPDATE, ORGANIZATION_ID, null);
     }
 
     @Nested

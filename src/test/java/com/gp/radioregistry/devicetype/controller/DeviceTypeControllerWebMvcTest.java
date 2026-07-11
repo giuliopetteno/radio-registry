@@ -1,6 +1,5 @@
 package com.gp.radioregistry.devicetype.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gp.radioregistry.devicetype.domain.DeviceType;
 import com.gp.radioregistry.devicetype.dto.request.CreateDeviceTypeRequest;
 import com.gp.radioregistry.devicetype.dto.request.UpdateDeviceTypeRequest;
@@ -22,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -47,7 +47,8 @@ class DeviceTypeControllerWebMvcTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private ObjectMapper objectMapper;
+    @Autowired
+    private JsonMapper jsonMapper;
 
     @MockitoBean
     private DeviceTypeService deviceTypeService;
@@ -56,8 +57,6 @@ class DeviceTypeControllerWebMvcTest {
 
     @BeforeEach
     void setUp() {
-        this.objectMapper = new ObjectMapper();
-
         OffsetDateTime now = OffsetDateTime.now();
 
         deviceType = DeviceType.builder()
@@ -89,7 +88,7 @@ class DeviceTypeControllerWebMvcTest {
         void createUnauthenticatedReturns401() throws Exception {
             mockMvc.perform(post(DEVICE_TYPES_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(validCreateRequest())))
+                            .content(jsonMapper.writeValueAsString(validCreateRequest())))
                     .andExpect(status().isUnauthorized());
         }
 
@@ -99,7 +98,7 @@ class DeviceTypeControllerWebMvcTest {
             mockMvc.perform(post(DEVICE_TYPES_PATH)
                             .with(user("operator").roles(Role.OPERATOR.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(validCreateRequest())))
+                            .content(jsonMapper.writeValueAsString(validCreateRequest())))
                     .andExpect(status().isForbidden());
         }
 
@@ -110,7 +109,7 @@ class DeviceTypeControllerWebMvcTest {
 
             mockMvc.perform(put(DEVICE_TYPES_PATH + "/{id}", DEVICE_TYPE_ID)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
+                            .content(jsonMapper.writeValueAsString(request)))
                     .andExpect(status().isUnauthorized());
         }
 
@@ -122,7 +121,7 @@ class DeviceTypeControllerWebMvcTest {
             mockMvc.perform(put(DEVICE_TYPES_PATH + "/{id}", DEVICE_TYPE_ID)
                             .with(user("operator").roles(Role.OPERATOR.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
+                            .content(jsonMapper.writeValueAsString(request)))
                     .andExpect(status().isForbidden());
         }
 
@@ -164,7 +163,7 @@ class DeviceTypeControllerWebMvcTest {
             mockMvc.perform(post(DEVICE_TYPES_PATH)
                             .with(user("tech").roles(Role.TECHNICIAN.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(invalid)))
+                            .content(jsonMapper.writeValueAsString(invalid)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", "application/problem+json"))
                     .andExpect(jsonPath("$.status").value(400))
@@ -180,7 +179,7 @@ class DeviceTypeControllerWebMvcTest {
             mockMvc.perform(put(DEVICE_TYPES_PATH + "/{id}", DEVICE_TYPE_ID)
                             .with(user("tech").roles(Role.TECHNICIAN.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(invalid)))
+                            .content(jsonMapper.writeValueAsString(invalid)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errors.name").exists());
         }
@@ -246,7 +245,7 @@ class DeviceTypeControllerWebMvcTest {
             mockMvc.perform(post(DEVICE_TYPES_PATH)
                             .with(user("tech").roles(Role.TECHNICIAN.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(validCreateRequest())))
+                            .content(jsonMapper.writeValueAsString(validCreateRequest())))
                     .andExpect(status().isCreated())
                     .andExpect(header().string("Location", DEVICE_TYPES_PATH + "/" + DEVICE_TYPE_ID))
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))

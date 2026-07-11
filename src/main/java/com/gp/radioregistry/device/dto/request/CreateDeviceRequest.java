@@ -1,6 +1,7 @@
 package com.gp.radioregistry.device.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.gp.radioregistry.device.DeviceStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
@@ -36,6 +37,14 @@ public record CreateDeviceRequest(
     @JsonFormat(pattern = DEFAULT_DATE_FORMAT)
     LocalDate installationDate,
 
+    @Schema(description = "Status of the device, ACTIVE is default")
+    @NotNull(message = "Device status must not be null")
+    DeviceStatus deviceStatus,
+
+    @Schema(description = "Decommission date, required if the device status is DECOMMISSIONED or PENDING_DECOMMISSIONING")
+    @JsonFormat(pattern = DEFAULT_DATE_FORMAT)
+    LocalDate decommissionDate,
+
     @Schema(description = "ID of the organization to which the device belongs")
     Long organizationId,
 
@@ -45,7 +54,14 @@ public record CreateDeviceRequest(
     @AssertTrue(message = "Either an organization or a department must be specified")
     public boolean orgOrCompValid() {
         return (organizationId != null && organizationId > 0) != (departmentId != null && departmentId > 0);
-  }
+    }
+
+    @AssertTrue(message = "A decommission date must be specified if the status is DECOMMISSIONED or PENDING_DECOMMISSIONING")
+    public boolean decommissionDateValid() {
+        boolean isDecommissionState = deviceStatus == DeviceStatus.DECOMMISSIONED
+            || deviceStatus == DeviceStatus.PENDING_DECOMMISSIONING;
+        return isDecommissionState == (decommissionDate != null);
+    }
 }
 
 

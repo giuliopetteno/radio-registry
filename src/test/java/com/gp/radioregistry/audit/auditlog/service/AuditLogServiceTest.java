@@ -29,7 +29,7 @@ class AuditLogServiceTest {
     void setUp() {
         auditLog = AuditLog.builder()
                 .username("technician1")
-                .action("CREATE")
+                .eventType("CREATE")
                 .entityType("USER")
                 .success(true)
                 .build();

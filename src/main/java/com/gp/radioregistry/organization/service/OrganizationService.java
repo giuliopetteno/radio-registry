@@ -1,8 +1,8 @@
 package com.gp.radioregistry.organization.service;
 
 import com.gp.radioregistry.audit.annotation.Auditable;
-import com.gp.radioregistry.audit.enums.AuditAction;
-import com.gp.radioregistry.audit.enums.AuditEntityType;
+import com.gp.radioregistry.enums.EntityType;
+import com.gp.radioregistry.enums.EventType;
 import com.gp.radioregistry.organization.domain.Organization;
 import com.gp.radioregistry.organization.dto.request.CreateOrganizationRequest;
 import com.gp.radioregistry.organization.dto.request.UpdateOrganizationRequest;
@@ -20,7 +20,7 @@ import java.util.Optional;
 public class OrganizationService {
     private final OrganizationRepository organizationRepository;
 
-    @Auditable(action = AuditAction.CREATE, entityType = AuditEntityType.ORGANIZATION, entityId = "#result.id", description = "Organization creation attempt")
+    @Auditable(eventType = EventType.CREATE, entityType = EntityType.ORGANIZATION, entityId = "#result.id", description = "Organization creation attempt")
     public Organization createOrganization(CreateOrganizationRequest request) {
         var organization = Organization.builder()
                 .name(request.name())
@@ -31,7 +31,7 @@ public class OrganizationService {
         return organizationRepository.save(organization);
     }
 
-    @Auditable(action = AuditAction.UPDATE, entityType = AuditEntityType.ORGANIZATION, entityId = "#id", description = "Organization update attempt")
+    @Auditable(eventType = EventType.UPDATE, entityType = EntityType.ORGANIZATION, entityId = "#id", description = "Organization update attempt")
     public Organization updateOrganization(Long id, UpdateOrganizationRequest request) {
         var organization = getOrganizationById(id);
         Optional.ofNullable(request.name()).ifPresent(organization::setName);
@@ -41,7 +41,7 @@ public class OrganizationService {
         return organizationRepository.save(organization);
     }
 
-    @Auditable(action = AuditAction.DELETE, entityType = AuditEntityType.ORGANIZATION, entityId = "#id", description = "Organization deletion attempt")
+    @Auditable(eventType = EventType.DELETE, entityType = EntityType.ORGANIZATION, entityId = "#id", description = "Organization deletion attempt")
     public void deleteOrganization(Long id) {
         var organization = organizationRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Organization not found with id: " + id));

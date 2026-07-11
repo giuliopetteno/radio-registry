@@ -1,8 +1,7 @@
 package com.gp.radioregistry.device.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gp.radioregistry.department.domain.Department;
+import com.gp.radioregistry.device.DeviceStatus;
 import com.gp.radioregistry.device.domain.Device;
 import com.gp.radioregistry.device.dto.request.CreateDeviceRequest;
 import com.gp.radioregistry.device.dto.request.UpdateDeviceRequest;
@@ -26,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -53,11 +53,14 @@ class DeviceControllerWebMvcTest {
     private static final String DEVICE_SERIAL_NUMBER = "SN-123";
     private static final String DEVICE_DESCRIPTION = "Computed tomography scanner";
     private static final LocalDate INSTALLATION_DATE = LocalDate.of(2024, 1, 15);
+    private static final DeviceStatus DEVICE_STATUS = DeviceStatus.ACTIVE;
+    private static final LocalDate DEVICE_DECOMMISSION_DATE = null;
 
     @Autowired
     private MockMvc mockMvc;
 
-    private ObjectMapper objectMapper;
+    @Autowired
+    private JsonMapper jsonMapper;
 
     @MockitoBean
     private DeviceService deviceService;
@@ -66,8 +69,6 @@ class DeviceControllerWebMvcTest {
 
     @BeforeEach
     void setUp() {
-        this.objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
-
         OffsetDateTime now = OffsetDateTime.now();
 
         DeviceType deviceType = DeviceType.builder().id(DEVICE_TYPE_ID).build();
@@ -88,7 +89,7 @@ class DeviceControllerWebMvcTest {
 
     private CreateDeviceRequest validCreateRequest() {
         return new CreateDeviceRequest(DEVICE_NAME, DEVICE_TYPE_ID, DEVICE_SERIAL_NUMBER, DEVICE_DESCRIPTION,
-                INSTALLATION_DATE, ORGANIZATION_ID, null);
+                INSTALLATION_DATE, DEVICE_STATUS, DEVICE_DECOMMISSION_DATE, ORGANIZATION_ID, null);
     }
 
     @Nested
@@ -107,7 +108,7 @@ class DeviceControllerWebMvcTest {
         void createUnauthenticatedReturns401() throws Exception {
             mockMvc.perform(post(DEVICES_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(validCreateRequest())))
+                            .content(jsonMapper.writeValueAsString(validCreateRequest())))
                     .andExpect(status().isUnauthorized());
         }
 
@@ -117,7 +118,7 @@ class DeviceControllerWebMvcTest {
             mockMvc.perform(post(DEVICES_PATH)
                             .with(user("operator").roles(Role.OPERATOR.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(validCreateRequest())))
+                            .content(jsonMapper.writeValueAsString(validCreateRequest())))
                     .andExpect(status().isForbidden());
         }
 
@@ -125,11 +126,11 @@ class DeviceControllerWebMvcTest {
         @DisplayName("PUT returns 401 when unauthenticated")
         void updateUnauthenticatedReturns401() throws Exception {
             var request = new UpdateDeviceRequest(DEVICE_NAME, DEVICE_TYPE_ID, DEVICE_SERIAL_NUMBER, DEVICE_DESCRIPTION,
-                    INSTALLATION_DATE, ORGANIZATION_ID, null);
+                    INSTALLATION_DATE, DEVICE_STATUS, DEVICE_DECOMMISSION_DATE, ORGANIZATION_ID, null);
 
             mockMvc.perform(put(DEVICES_PATH + "/{id}", DEVICE_ID)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
+                            .content(jsonMapper.writeValueAsString(request)))
                     .andExpect(status().isUnauthorized());
         }
 
@@ -137,12 +138,12 @@ class DeviceControllerWebMvcTest {
         @DisplayName("PUT returns 403 for OPERATOR (read-only) role")
         void updateWithOperatorReturns403() throws Exception {
             var request = new UpdateDeviceRequest(DEVICE_NAME, DEVICE_TYPE_ID, DEVICE_SERIAL_NUMBER, DEVICE_DESCRIPTION,
-                    INSTALLATION_DATE, ORGANIZATION_ID, null);
+                    INSTALLATION_DATE, DEVICE_STATUS, DEVICE_DECOMMISSION_DATE, ORGANIZATION_ID, null);
 
             mockMvc.perform(put(DEVICES_PATH + "/{id}", DEVICE_ID)
                             .with(user("operator").roles(Role.OPERATOR.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
+                            .content(jsonMapper.writeValueAsString(request)))
                     .andExpect(status().isForbidden());
         }
 
@@ -179,12 +180,13 @@ class DeviceControllerWebMvcTest {
         @Test
         @DisplayName("POST returns 400 with field errors when required fields are missing")
         void createBlankFieldsReturns400() throws Exception {
-            var invalid = new CreateDeviceRequest("  ", null, "", DEVICE_DESCRIPTION, null, ORGANIZATION_ID, null);
+            var invalid = new CreateDeviceRequest("  ", null, "", DEVICE_DESCRIPTION, null,
+                DEVICE_STATUS, DEVICE_DECOMMISSION_DATE, ORGANIZATION_ID, null);
 
             mockMvc.perform(post(DEVICES_PATH)
                             .with(user("tech").roles(Role.TECHNICIAN.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(invalid)))
+                            .content(jsonMapper.writeValueAsString(invalid)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", "application/problem+json"))
                     .andExpect(jsonPath("$.status").value(400))
@@ -200,12 +202,12 @@ class DeviceControllerWebMvcTest {
         void updateTooLongNameReturns400() throws Exception {
             String tooLongName = "x".repeat(51);
             var invalid = new UpdateDeviceRequest(tooLongName, DEVICE_TYPE_ID, DEVICE_SERIAL_NUMBER, DEVICE_DESCRIPTION,
-                    INSTALLATION_DATE, ORGANIZATION_ID, null);
+                    INSTALLATION_DATE, DEVICE_STATUS, DEVICE_DECOMMISSION_DATE, ORGANIZATION_ID, null);
 
             mockMvc.perform(put(DEVICES_PATH + "/{id}", DEVICE_ID)
                             .with(user("tech").roles(Role.TECHNICIAN.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(invalid)))
+                            .content(jsonMapper.writeValueAsString(invalid)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errors.name").exists());
         }
@@ -271,7 +273,7 @@ class DeviceControllerWebMvcTest {
             mockMvc.perform(post(DEVICES_PATH)
                             .with(user("tech").roles(Role.TECHNICIAN.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(validCreateRequest())))
+                            .content(jsonMapper.writeValueAsString(validCreateRequest())))
                     .andExpect(status().isCreated())
                     .andExpect(header().string("Location", DEVICES_PATH + "/" + DEVICE_ID))
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
