@@ -30,8 +30,8 @@ public class AuditLog {
 	@Column(name = "ip_address", length = 45)
 	private String ipAddress;
 
-	@Column(name = "action", length = 50, nullable = false)
-	private String action;
+	@Column(name = "event_type", length = 50, nullable = false)
+	private String eventType;
 
 	@Column(name = "entity_type", length = 100)
 	private String entityType;

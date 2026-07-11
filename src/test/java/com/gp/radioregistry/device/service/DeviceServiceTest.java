@@ -2,6 +2,7 @@ package com.gp.radioregistry.device.service;
 
 import com.gp.radioregistry.department.domain.Department;
 import com.gp.radioregistry.department.repository.DepartmentRepository;
+import com.gp.radioregistry.device.DeviceStatus;
 import com.gp.radioregistry.device.domain.Device;
 import com.gp.radioregistry.device.dto.request.CreateDeviceRequest;
 import com.gp.radioregistry.device.dto.request.UpdateDeviceRequest;
@@ -43,7 +44,9 @@ class DeviceServiceTest {
     private static final Long DEVICE_TYPE_ID = 5L;
     private static final Long ORGANIZATION_ID = 10L;
     private static final Long DEPARTMENT_ID = 20L;
-    private static final LocalDate INSTALL_DATE = LocalDate.of(2024, 1, 15);
+    private static final LocalDate DEVICE_INSTALLATION_DATE = LocalDate.of(2024, 1, 15);
+    private static final DeviceStatus DEVICE_STATUS = DeviceStatus.ACTIVE;
+    private static final LocalDate DEVICE_DECOMMISSION_DATE = null;
 
     private static final String DEVICE_NAME = "X-ray machine XR3600";
     private static final String DEVICE_SERIAL_NUMBER = "SN-XR3600";
@@ -53,6 +56,8 @@ class DeviceServiceTest {
     private static final String DEVICE_SERIAL_NUMBER_UPDATE = "SN-XR3800";
     private static final String DEVICE_DESCRIPTION_UPDATE = "X-ray machine 2nd generation";
     private static final Long DEVICE_TYPE_ID_UPDATE = 6L;
+    private static final DeviceStatus DEVICE_STATUS_UPDATE = DeviceStatus.MAINTENANCE;
+    private static final LocalDate DEVICE_DECOMMISSION_DATE_UPDATE = null;
 
     @Mock
     private DeviceRepository deviceRepository;
@@ -78,7 +83,7 @@ class DeviceServiceTest {
                 .name(DEVICE_NAME)
                 .serialNumber(DEVICE_SERIAL_NUMBER)
                 .description(DEVICE_DESCRIPTION)
-                .installationDate(INSTALL_DATE)
+                .installationDate(DEVICE_INSTALLATION_DATE)
                 .createdAt(OffsetDateTime.now())
                 .updatedAt(OffsetDateTime.now())
                 .build();
@@ -92,7 +97,7 @@ class DeviceServiceTest {
         @DisplayName("should resolve device type and organization references, build and save")
         void createDevice_withOrganization() {
             var request = new CreateDeviceRequest(DEVICE_NAME, DEVICE_TYPE_ID, DEVICE_SERIAL_NUMBER,
-                    DEVICE_DESCRIPTION, INSTALL_DATE, ORGANIZATION_ID, null);
+                    DEVICE_DESCRIPTION, DEVICE_INSTALLATION_DATE, DEVICE_STATUS, DEVICE_DECOMMISSION_DATE, ORGANIZATION_ID, null);
             var deviceTypeRef = new DeviceType();
             var orgRef = new Organization();
             when(deviceTypeRepository.getReferenceById(DEVICE_TYPE_ID)).thenReturn(deviceTypeRef);
@@ -117,7 +122,7 @@ class DeviceServiceTest {
         @DisplayName("should resolve department reference when departmentId is provided")
         void createDevice_withDepartment() {
             var request = new CreateDeviceRequest(DEVICE_NAME_UPDATE, DEVICE_TYPE_ID_UPDATE, DEVICE_SERIAL_NUMBER_UPDATE,
-                    DEVICE_DESCRIPTION_UPDATE, INSTALL_DATE, null, DEPARTMENT_ID);
+                    DEVICE_DESCRIPTION_UPDATE, DEVICE_INSTALLATION_DATE, DEVICE_STATUS, DEVICE_DECOMMISSION_DATE, null, DEPARTMENT_ID);
             when(deviceTypeRepository.getReferenceById(DEVICE_TYPE_ID_UPDATE)).thenReturn(new DeviceType());
             var deptRef = new Department();
             when(departmentRepository.getReferenceById(DEPARTMENT_ID)).thenReturn(deptRef);
@@ -141,7 +146,7 @@ class DeviceServiceTest {
         @DisplayName("should update fields, resolve references and save")
         void updateDevice_updatesAndSaves() {
             var request = new UpdateDeviceRequest(DEVICE_NAME_UPDATE, DEVICE_TYPE_ID_UPDATE, DEVICE_SERIAL_NUMBER_UPDATE,
-                    DEVICE_DESCRIPTION_UPDATE, INSTALL_DATE, ORGANIZATION_ID, null);
+                    DEVICE_DESCRIPTION_UPDATE, DEVICE_INSTALLATION_DATE, DEVICE_STATUS_UPDATE, DEVICE_DECOMMISSION_DATE_UPDATE, ORGANIZATION_ID, null);
             var deviceTypeRef = new DeviceType();
             var orgRef = new Organization();
             when(deviceRepository.findById(DEVICE_ID)).thenReturn(Optional.of(device));
@@ -164,7 +169,7 @@ class DeviceServiceTest {
         @DisplayName("should throw EntityNotFoundException when device does not exist")
         void updateDevice_notFound() {
             var request = new UpdateDeviceRequest(DEVICE_NAME_UPDATE, DEVICE_TYPE_ID_UPDATE, DEVICE_SERIAL_NUMBER_UPDATE,
-                    DEVICE_DESCRIPTION_UPDATE, INSTALL_DATE, ORGANIZATION_ID, null);
+                    DEVICE_DESCRIPTION_UPDATE, DEVICE_INSTALLATION_DATE, DEVICE_STATUS_UPDATE, DEVICE_DECOMMISSION_DATE_UPDATE, ORGANIZATION_ID, null);
             when(deviceRepository.findById(DEVICE_ID_NOT_FOUND)).thenReturn(Optional.empty());
 
             assertThrows(EntityNotFoundException.class, () -> deviceService.updateDevice(DEVICE_ID_NOT_FOUND, request));

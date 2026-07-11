@@ -1,6 +1,5 @@
 package com.gp.radioregistry.user.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gp.radioregistry.role.domain.Role;
 import com.gp.radioregistry.user.domain.User;
 import com.gp.radioregistry.user.dto.request.UpdateUserPasswordRequest;
@@ -23,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -55,7 +55,8 @@ class UserControllerWebMvcTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private ObjectMapper objectMapper;
+    @Autowired
+    private JsonMapper jsonMapper;
 
     @MockitoBean
     private UserService userService;
@@ -64,8 +65,6 @@ class UserControllerWebMvcTest {
 
     @BeforeEach
     void setUp() {
-        this.objectMapper = new ObjectMapper();
-
         OffsetDateTime now = OffsetDateTime.now();
 
         Role role = Role.builder().id(ROLE_ID).name(ROLE_NAME).build();
@@ -107,7 +106,7 @@ class UserControllerWebMvcTest {
 
             mockMvc.perform(put(USERS_PATH + "/{id}", USER_ID)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
+                            .content(jsonMapper.writeValueAsString(request)))
                     .andExpect(status().isUnauthorized());
         }
 
@@ -119,7 +118,7 @@ class UserControllerWebMvcTest {
             mockMvc.perform(put(USERS_PATH + "/{id}", USER_ID)
                             .with(user("operator").roles(OPERATOR.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
+                            .content(jsonMapper.writeValueAsString(request)))
                     .andExpect(status().isForbidden());
         }
 
@@ -154,7 +153,7 @@ class UserControllerWebMvcTest {
             mockMvc.perform(put(USERS_PATH + "/{id}", USER_ID)
                             .with(user("admin").roles(ADMIN.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(invalid)))
+                            .content(jsonMapper.writeValueAsString(invalid)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", "application/problem+json"))
                     .andExpect(jsonPath("$.status").value(400))
@@ -169,7 +168,7 @@ class UserControllerWebMvcTest {
             mockMvc.perform(put(USERS_PATH + "/{id}/password", USER_ID)
                             .with(user("admin").roles(ADMIN.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(invalid)))
+                            .content(jsonMapper.writeValueAsString(invalid)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errors.password").exists());
         }
@@ -182,7 +181,7 @@ class UserControllerWebMvcTest {
             mockMvc.perform(put(USERS_PATH + "/{id}/roles", USER_ID)
                             .with(user("admin").roles(ADMIN.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(invalid)))
+                            .content(jsonMapper.writeValueAsString(invalid)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errors.roleIds").exists());
         }
@@ -249,7 +248,7 @@ class UserControllerWebMvcTest {
             mockMvc.perform(put(USERS_PATH + "/{id}", USER_ID)
                             .with(user("admin").roles(ADMIN.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
+                            .content(jsonMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.id").value(USER_ID))
@@ -268,7 +267,7 @@ class UserControllerWebMvcTest {
             mockMvc.perform(put(USERS_PATH + "/{id}/password", USER_ID)
                             .with(user("admin").roles(ADMIN.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
+                            .content(jsonMapper.writeValueAsString(request)))
                     .andExpect(status().isNoContent())
                     .andExpect(content().string(""));
 
@@ -284,7 +283,7 @@ class UserControllerWebMvcTest {
             mockMvc.perform(put(USERS_PATH + "/{id}/roles", USER_ID)
                             .with(user("admin").roles(ADMIN.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
+                            .content(jsonMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.id").value(USER_ID))

@@ -1,6 +1,5 @@
 package com.gp.radioregistry.organization.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gp.radioregistry.department.domain.Department;
 import com.gp.radioregistry.device.domain.Device;
 import com.gp.radioregistry.devicetype.domain.DeviceType;
@@ -25,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -55,7 +55,8 @@ class OrganizationControllerWebMvcTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private ObjectMapper objectMapper;
+    @Autowired
+    private JsonMapper jsonMapper;
 
     @MockitoBean
     private OrganizationService organizationService;
@@ -64,8 +65,6 @@ class OrganizationControllerWebMvcTest {
 
     @BeforeEach
     void setUp() {
-        this.objectMapper = new ObjectMapper();
-
         OffsetDateTime now = OffsetDateTime.now();
 
         Department department = Department.builder()
@@ -119,7 +118,7 @@ class OrganizationControllerWebMvcTest {
         void createUnauthenticatedReturns401() throws Exception {
             mockMvc.perform(post(ORGANIZATIONS_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(validCreateRequest())))
+                            .content(jsonMapper.writeValueAsString(validCreateRequest())))
                     .andExpect(status().isUnauthorized());
         }
 
@@ -129,7 +128,7 @@ class OrganizationControllerWebMvcTest {
             mockMvc.perform(post(ORGANIZATIONS_PATH)
                             .with(user("operator").roles(Role.OPERATOR.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(validCreateRequest())))
+                            .content(jsonMapper.writeValueAsString(validCreateRequest())))
                     .andExpect(status().isForbidden());
         }
 
@@ -140,7 +139,7 @@ class OrganizationControllerWebMvcTest {
 
             mockMvc.perform(put(ORGANIZATIONS_PATH + "/{id}", ORGANIZATION_ID)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
+                            .content(jsonMapper.writeValueAsString(request)))
                     .andExpect(status().isUnauthorized());
         }
 
@@ -152,7 +151,7 @@ class OrganizationControllerWebMvcTest {
             mockMvc.perform(put(ORGANIZATIONS_PATH + "/{id}", ORGANIZATION_ID)
                             .with(user("operator").roles(Role.OPERATOR.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
+                            .content(jsonMapper.writeValueAsString(request)))
                     .andExpect(status().isForbidden());
         }
 
@@ -194,7 +193,7 @@ class OrganizationControllerWebMvcTest {
             mockMvc.perform(post(ORGANIZATIONS_PATH)
                             .with(user("tech").roles(Role.TECHNICIAN.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(invalid)))
+                            .content(jsonMapper.writeValueAsString(invalid)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", "application/problem+json"))
                     .andExpect(jsonPath("$.status").value(400))
@@ -211,7 +210,7 @@ class OrganizationControllerWebMvcTest {
             mockMvc.perform(put(ORGANIZATIONS_PATH + "/{id}", ORGANIZATION_ID)
                             .with(user("tech").roles(Role.TECHNICIAN.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(invalid)))
+                            .content(jsonMapper.writeValueAsString(invalid)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errors.name").exists());
         }
@@ -277,7 +276,7 @@ class OrganizationControllerWebMvcTest {
             mockMvc.perform(post(ORGANIZATIONS_PATH)
                             .with(user("tech").roles(Role.TECHNICIAN.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(validCreateRequest())))
+                            .content(jsonMapper.writeValueAsString(validCreateRequest())))
                     .andExpect(status().isCreated())
                     .andExpect(header().string("Location", ORGANIZATIONS_PATH + "/" + ORGANIZATION_ID))
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))

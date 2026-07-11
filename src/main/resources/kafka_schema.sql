@@ -1,0 +1,14 @@
+CREATE TYPE outbox_status AS ENUM ('PENDING', 'PROCESSED', 'FAILED');
+
+CREATE TABLE IF NOT EXISTS outbox_event(
+    id BIGSERIAL PRIMARY KEY,
+    entity_type TEXT NOT NULL,
+    entity_id TEXT NOT NULL,
+    event_type TEXT NOT NULL,
+    payload JSONB NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    processed_at TIMESTAMP WITH TIME ZONE,
+    outbox_status outbox_status NOT NULL DEFAULT 'PENDING'
+);
+
+CREATE INDEX idx_outbox_event_status_created ON outbox_event(outbox_status, created_at) WHERE outbox_status = 'PENDING';

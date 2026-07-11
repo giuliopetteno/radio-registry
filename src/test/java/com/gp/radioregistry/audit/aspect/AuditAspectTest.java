@@ -3,8 +3,8 @@ package com.gp.radioregistry.audit.aspect;
 import com.gp.radioregistry.audit.annotation.Auditable;
 import com.gp.radioregistry.audit.auditlog.domain.AuditLog;
 import com.gp.radioregistry.audit.auditlog.service.AuditLogService;
-import com.gp.radioregistry.audit.enums.AuditAction;
-import com.gp.radioregistry.audit.enums.AuditEntityType;
+import com.gp.radioregistry.enums.EntityType;
+import com.gp.radioregistry.enums.EventType;
 import com.gp.radioregistry.security.auth.dto.request.LoginRequest;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -63,7 +63,7 @@ class AuditAspectTest {
 		RequestContextHolder.resetRequestAttributes();
 	}
 
-	private Auditable auditable(AuditAction action, AuditEntityType entityType, String description) {
+	private Auditable auditable(EventType eventType, EntityType entityType, String description) {
 		return new Auditable() {
 			@Override
 			public Class<? extends Annotation> annotationType() {
@@ -71,12 +71,12 @@ class AuditAspectTest {
 			}
 
 			@Override
-			public AuditAction action() {
-				return action;
+			public EventType eventType() {
+				return eventType;
 			}
 
 			@Override
-			public AuditEntityType entityType() {
+			public EntityType entityType() {
 				return entityType;
 			}
 
@@ -115,7 +115,7 @@ class AuditAspectTest {
 		@Test
 		@DisplayName("proceeds, marks success and saves the audit log")
 		void proceedsAndSavesAuditLog() throws Throwable {
-			Auditable meta = auditable(AuditAction.READ, AuditEntityType.DEVICE, "read device");
+			Auditable meta = auditable(EventType.READ, EntityType.DEVICE, "read device");
 			Object expected = new Object();
 			when(joinPoint.getArgs()).thenReturn(new Object[0]);
 			when(joinPoint.proceed()).thenReturn(expected);
@@ -129,15 +129,15 @@ class AuditAspectTest {
 			AuditLog log = auditLogCaptor.getValue();
 			assertThat(log.isSuccess()).isTrue();
 			assertThat(log.getErrorDetail()).isNull();
-			assertThat(log.getAction()).isEqualTo(AuditAction.READ.toString());
-			assertThat(log.getEntityType()).isEqualTo(AuditEntityType.DEVICE.toString());
+			assertThat(log.getEventType()).isEqualTo(EventType.READ.toString());
+			assertThat(log.getEntityType()).isEqualTo(EntityType.DEVICE.toString());
 			assertThat(log.getDescription()).isEqualTo("read device");
 		}
 
 		@Test
 		@DisplayName("sets entityId from a Long first argument")
 		void setsEntityIdFromLongArgument() throws Throwable {
-			Auditable meta = auditable(AuditAction.DELETE, AuditEntityType.ROLE, "delete role");
+			Auditable meta = auditable(EventType.DELETE, EntityType.ROLE, "delete role");
 			when(joinPoint.getArgs()).thenReturn(new Object[]{ENTITY_ID});
 			when(joinPoint.proceed()).thenReturn(null);
 
@@ -150,7 +150,7 @@ class AuditAspectTest {
 		@Test
 		@DisplayName("resolves entityId via getId() on the result when no Long argument is present")
 		void resolvesEntityIdFromResultGetId() throws Throwable {
-			Auditable meta = auditable(AuditAction.CREATE, AuditEntityType.DEVICE, "create device");
+			Auditable meta = auditable(EventType.CREATE, EntityType.DEVICE, "create device");
 			when(joinPoint.getArgs()).thenReturn(new Object[0]);
 			when(joinPoint.proceed()).thenReturn(new EntityResult(ENTITY_ID));
 
@@ -163,7 +163,7 @@ class AuditAspectTest {
 		@Test
 		@DisplayName("leaves entityId null when getId() cannot be resolved on the result")
 		void leavesEntityIdNullWhenGetIdMissing() throws Throwable {
-			Auditable meta = auditable(AuditAction.CREATE, AuditEntityType.DEVICE, "create device");
+			Auditable meta = auditable(EventType.CREATE, EntityType.DEVICE, "create device");
 			when(joinPoint.getArgs()).thenReturn(new Object[0]);
 			when(joinPoint.proceed()).thenReturn(new Object());
 
@@ -176,7 +176,7 @@ class AuditAspectTest {
 		@Test
 		@DisplayName("captures the request remote address as IP")
 		void capturesRemoteAddress() throws Throwable {
-			Auditable meta = auditable(AuditAction.READ, AuditEntityType.USER, "read user");
+			Auditable meta = auditable(EventType.READ, EntityType.USER, "read user");
 			setRequestWithRemoteAddr(MOCK_IP);
 			when(joinPoint.getArgs()).thenReturn(new Object[0]);
 			when(joinPoint.proceed()).thenReturn(new Object());
@@ -190,7 +190,7 @@ class AuditAspectTest {
 		@Test
 		@DisplayName("leaves IP null when there are no request attributes")
 		void leavesIpNullWithoutRequestAttributes() throws Throwable {
-			Auditable meta = auditable(AuditAction.READ, AuditEntityType.USER, "read user");
+			Auditable meta = auditable(EventType.READ, EntityType.USER, "read user");
 			when(joinPoint.getArgs()).thenReturn(new Object[0]);
 			when(joinPoint.proceed()).thenReturn(new Object());
 
@@ -208,7 +208,7 @@ class AuditAspectTest {
 		@Test
 		@DisplayName("populates username and ROLE_ authorities from the security context")
 		void populatesFromSecurityContext() throws Throwable {
-			Auditable meta = auditable(AuditAction.UPDATE, AuditEntityType.DEPARTMENT, "update department");
+			Auditable meta = auditable(EventType.UPDATE, EntityType.DEPARTMENT, "update department");
 			Authentication authentication = new UsernamePasswordAuthenticationToken(
 					USERNAME,
 					PASSWORD,
@@ -228,7 +228,7 @@ class AuditAspectTest {
 		@Test
 		@DisplayName("ignores anonymous authentication")
 		void ignoresAnonymousUser() throws Throwable {
-			Auditable meta = auditable(AuditAction.READ, AuditEntityType.USER, "read user");
+			Auditable meta = auditable(EventType.READ, EntityType.USER, "read user");
 			Authentication authentication = new UsernamePasswordAuthenticationToken(
 					USERNAME_ANONYMOUS, PASSWORD_ANONYMOUS, List.of(new SimpleGrantedAuthority("ROLE_ANONYMOUS")));
 			setSecurityContext(authentication);
@@ -245,13 +245,13 @@ class AuditAspectTest {
 	}
 
 	@Nested
-	@DisplayName("LOGIN action")
-	class LoginAction {
+	@DisplayName("LOGIN event type")
+	class LoginEventType {
 
 		@Test
 		@DisplayName("takes the username from the LoginRequest argument")
 		void takesUsernameFromLoginRequest() throws Throwable {
-			Auditable meta = auditable(AuditAction.LOGIN, AuditEntityType.USER, "login");
+			Auditable meta = auditable(EventType.LOGIN, EntityType.USER, "login");
 			LoginRequest loginRequest = new LoginRequest(USERNAME, PASSWORD);
 			when(joinPoint.getArgs()).thenReturn(new Object[]{loginRequest});
 			when(joinPoint.proceed()).thenReturn(new Object());
@@ -265,7 +265,7 @@ class AuditAspectTest {
 		@Test
 		@DisplayName("enriches details from the returned Authentication on successful login")
 		void enrichesDetailsFromAuthenticationResult() throws Throwable {
-			Auditable meta = auditable(AuditAction.LOGIN, AuditEntityType.USER, "login");
+			Auditable meta = auditable(EventType.LOGIN, EntityType.USER, "login");
 			LoginRequest loginRequest = new LoginRequest(USERNAME, PASSWORD);
 			Authentication result = new UsernamePasswordAuthenticationToken(
 					USERNAME, PASSWORD, List.of(new SimpleGrantedAuthority("ROLE_OPERATOR")));
@@ -288,7 +288,7 @@ class AuditAspectTest {
 		@Test
 		@DisplayName("marks failure, records the error and rethrows the exception, still saving the log")
 		void marksFailureAndRethrows() throws Throwable {
-			Auditable meta = auditable(AuditAction.DELETE, AuditEntityType.ORGANIZATION, "delete organization");
+			Auditable meta = auditable(EventType.DELETE, EntityType.ORGANIZATION, "delete organization");
 			RuntimeException boom = new RuntimeException("error");
 			when(joinPoint.getArgs()).thenReturn(new Object[0]);
 			when(joinPoint.proceed()).thenThrow(boom);
@@ -305,7 +305,7 @@ class AuditAspectTest {
 		@Test
 		@DisplayName("saves the audit log exactly once")
 		void savesAuditLogOnce() throws Throwable {
-			Auditable meta = auditable(AuditAction.READ, AuditEntityType.DEVICE_TYPE, "read type");
+			Auditable meta = auditable(EventType.READ, EntityType.DEVICE_TYPE, "read type");
 			when(joinPoint.getArgs()).thenReturn(new Object[0]);
 			when(joinPoint.proceed()).thenReturn(new Object());
 

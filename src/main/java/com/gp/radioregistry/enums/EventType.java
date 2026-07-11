@@ -1,11 +1,11 @@
-package com.gp.radioregistry.audit.enums;
+package com.gp.radioregistry.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum AuditAction {
+public enum EventType {
 	CREATE,
 	READ,
 	UPDATE,

@@ -13,5 +13,6 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - SSL_KEYSTORE_PATH=/app/keystore.p12
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     volumes:
       - ./certs/keystore.p12:/app/keystore.p12:ro

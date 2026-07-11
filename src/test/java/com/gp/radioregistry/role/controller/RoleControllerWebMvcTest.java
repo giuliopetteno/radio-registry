@@ -1,6 +1,5 @@
 package com.gp.radioregistry.role.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gp.radioregistry.role.domain.Role;
 import com.gp.radioregistry.role.dto.request.CreateRoleRequest;
 import com.gp.radioregistry.role.dto.request.UpdateRoleRequest;
@@ -21,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -47,7 +47,8 @@ class RoleControllerWebMvcTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private ObjectMapper objectMapper;
+    @Autowired
+    private JsonMapper jsonMapper;
 
     @MockitoBean
     private RoleService roleService;
@@ -56,8 +57,6 @@ class RoleControllerWebMvcTest {
 
     @BeforeEach
     void setUp() {
-        this.objectMapper = new ObjectMapper();
-
         OffsetDateTime now = OffsetDateTime.now();
 
         role = Role.builder()
@@ -96,7 +95,7 @@ class RoleControllerWebMvcTest {
         void createUnauthenticatedReturns401() throws Exception {
             mockMvc.perform(post(ROLES_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(validCreateRequest())))
+                            .content(jsonMapper.writeValueAsString(validCreateRequest())))
                     .andExpect(status().isUnauthorized());
         }
 
@@ -106,7 +105,7 @@ class RoleControllerWebMvcTest {
             mockMvc.perform(post(ROLES_PATH)
                             .with(user("operator").roles(OPERATOR.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(validCreateRequest())))
+                            .content(jsonMapper.writeValueAsString(validCreateRequest())))
                     .andExpect(status().isForbidden());
         }
 
@@ -118,7 +117,7 @@ class RoleControllerWebMvcTest {
             mockMvc.perform(put(ROLES_PATH + "/{id}", ROLE_ID)
                             .with(user("operator").roles(OPERATOR.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
+                            .content(jsonMapper.writeValueAsString(request)))
                     .andExpect(status().isForbidden());
         }
 
@@ -153,7 +152,7 @@ class RoleControllerWebMvcTest {
             mockMvc.perform(post(ROLES_PATH)
                             .with(user("admin").roles(ADMIN.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(invalid)))
+                            .content(jsonMapper.writeValueAsString(invalid)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", "application/problem+json"))
                     .andExpect(jsonPath("$.status").value(400))
@@ -169,7 +168,7 @@ class RoleControllerWebMvcTest {
             mockMvc.perform(put(ROLES_PATH + "/{id}", ROLE_ID)
                             .with(user("admin").roles(ADMIN.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(invalid)))
+                            .content(jsonMapper.writeValueAsString(invalid)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errors.name").exists());
         }
@@ -235,7 +234,7 @@ class RoleControllerWebMvcTest {
             mockMvc.perform(post(ROLES_PATH)
                             .with(user("admin").roles(ADMIN.getName()))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(validCreateRequest())))
+                            .content(jsonMapper.writeValueAsString(validCreateRequest())))
                     .andExpect(status().isCreated())
                     .andExpect(header().string("Location", ROLES_PATH + "/" + ROLE_ID))
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))

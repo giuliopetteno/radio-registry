@@ -41,6 +41,15 @@ CREATE TABLE IF NOT EXISTS device_type(
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+CREATE TYPE device_status AS ENUM (
+    'PENDING_INSTALLATION',
+    'ACTIVE',
+    'MAINTENANCE',
+    'OUT_OF_SERVICE',
+    'PENDING_DECOMMISSIONING',
+    'DECOMMISSIONED'
+);
+
 CREATE TABLE IF NOT EXISTS device(
     id BIGSERIAL PRIMARY KEY,
     name TEXT NOT NULL,
@@ -48,6 +57,8 @@ CREATE TABLE IF NOT EXISTS device(
     serial_number TEXT NOT NULL,
     description TEXT,
     installation_date DATE NOT NULL,
+    device_status device_status NOT NULL DEFAULT 'ACTIVE',
+    decommission_date DATE,
     organization_id BIGINT,
     department_id BIGINT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -71,7 +82,12 @@ CREATE TABLE IF NOT EXISTS device(
     CONSTRAINT chk_device_parent_structure CHECK(
     (organization_id IS NOT NULL AND department_id IS NULL)
     OR
-    (organization_id IS NULL AND department_id IS NOT NULL))
+    (organization_id IS NULL AND department_id IS NOT NULL)),
+
+    CONSTRAINT chk_device_decommission_date CHECK(
+    (device_status IN ('DECOMMISSIONED', 'PENDING_DECOMMISSIONING') AND decommission_date IS NOT NULL)
+    OR
+    (device_status NOT IN ('DECOMMISSIONED', 'PENDING_DECOMMISSIONING') AND decommission_date IS NULL))
 );
 
 CREATE INDEX idx_department_organization ON department(organization_id);
