@@ -1,6 +1,6 @@
 package com.gp.radioregistry.device.dto.response;
 
-import com.gp.radioregistry.device.DeviceStatus;
+import com.gp.radioregistry.device.enums.DeviceStatus;
 import com.gp.radioregistry.device.domain.Device;
 import io.swagger.v3.oas.annotations.media.Schema;
 

@@ -1,6 +1,6 @@
 package com.gp.radioregistry.kafka.outboxevent.domain;
 
-import com.gp.radioregistry.kafka.enums.OutboxStatus;
+import com.gp.radioregistry.kafka.outboxevent.enums.OutboxEventStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -35,8 +35,8 @@ public class OutboxEvent {
 	private String payload;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "outbox_status", nullable = false)
-	private OutboxStatus outboxStatus = OutboxStatus.PENDING;
+	@Column(name = "outbox_event_status", nullable = false)
+	private OutboxEventStatus outboxEventStatus = OutboxEventStatus.PENDING;
 
 	@CreationTimestamp
 	@Column(name = "created_at", nullable = false, updatable = false)

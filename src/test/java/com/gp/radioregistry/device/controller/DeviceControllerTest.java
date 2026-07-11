@@ -1,6 +1,6 @@
 package com.gp.radioregistry.device.controller;
 
-import com.gp.radioregistry.device.DeviceStatus;
+import com.gp.radioregistry.device.enums.DeviceStatus;
 import com.gp.radioregistry.device.domain.Device;
 import com.gp.radioregistry.device.dto.request.CreateDeviceRequest;
 import com.gp.radioregistry.device.dto.request.UpdateDeviceRequest;
