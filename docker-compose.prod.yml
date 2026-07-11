@@ -1,5 +1,13 @@
+name: radio-registry-prod
+
 services:
   radio-registry:
+    build: .
+    image: ${CONTAINER_REGISTRY_REPO}/radio-registry:latest
+    container_name: radio-registry
+    restart: unless-stopped
+    networks:
+      - radio-net
     env_file:
       - .env.prod
     environment:

@@ -1,3 +1,5 @@
+name: radio-registry-default
+
 services:
   radio-registry:
     build: .
