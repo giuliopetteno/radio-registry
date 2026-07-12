@@ -9,7 +9,9 @@ CREATE TABLE IF NOT EXISTS outbox_event(
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     processed_at TIMESTAMP WITH TIME ZONE,
     outbox_event_status outbox_event_status NOT NULL DEFAULT 'PENDING',
-    retry_count INT NOT NULL DEFAULT 0
+    retry_count INT NOT NULL DEFAULT 0.
+    event_id UUID NOT NULL
 );
 
 CREATE INDEX idx_outbox_event_status_created ON outbox_event(outbox_event_status, created_at) WHERE outbox_event_status = 'PENDING';
+CREATE UNIQUE INDEX idx_outbox_event_event_id ON outbox_event(event_id);
