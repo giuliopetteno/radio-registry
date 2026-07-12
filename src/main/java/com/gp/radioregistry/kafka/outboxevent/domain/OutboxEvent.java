@@ -39,6 +39,9 @@ public class OutboxEvent {
 	@Column(name = "outbox_event_status", nullable = false)
 	private OutboxEventStatus outboxEventStatus = OutboxEventStatus.PENDING;
 
+	@Column(name = "retry_count", nullable = false)
+	private int retryCount = 0;
+
 	@CreationTimestamp
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private OffsetDateTime createdAt;
