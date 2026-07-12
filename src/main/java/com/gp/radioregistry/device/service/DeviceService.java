@@ -54,7 +54,9 @@ public class DeviceService {
     @Transactional
     @Auditable(eventType = EventType.UPDATE, entityType = EntityType.DEVICE, entityId = "#id", description = "Device update attempt")
     public Device updateDevice(Long id, UpdateDeviceRequest request) {
-        var device = getDeviceById(id);
+        var device = this.getDeviceById(id);
+        boolean statusChanged = device.getDeviceStatus() != request.deviceStatus();
+
         Optional.ofNullable(request.name()).ifPresent(device::setName);
         Optional.ofNullable(request.deviceTypeId())
             .map(deviceTypeRepository::getReferenceById)
@@ -68,7 +70,7 @@ public class DeviceService {
         device.setDepartment(request.departmentId() != null ? departmentRepository.getReferenceById(request.departmentId()) : null);
 
         var result = deviceRepository.save(device);
-        saveDeviceOutboxEvent(EventType.UPDATE, result);
+        saveDeviceOutboxEvent(statusChanged ? EventType.STATUS_CHANGED : EventType.UPDATE, result);
 
         return result;
     }
@@ -89,7 +91,7 @@ public class DeviceService {
 
     public Device getDeviceById(Long id) {
         return deviceRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Device not found with ID: " + id));
+            .orElseThrow(() -> new EntityNotFoundException("Device not found with id: " + id));
     }
 
     private void saveDeviceOutboxEvent(EventType eventType, Device device) {

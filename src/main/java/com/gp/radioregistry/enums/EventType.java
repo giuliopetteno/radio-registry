@@ -9,6 +9,7 @@ public enum EventType {
 	CREATE,
 	READ,
 	UPDATE,
+	STATUS_CHANGED,
 	DELETE,
 	LOGIN,
 	LOGOUT
