@@ -8,6 +8,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "outbox_event")
@@ -29,6 +30,9 @@ public class OutboxEvent {
 
 	@Column(name = "event_type", nullable = false)
 	private String eventType;
+
+	@Column(name = "event_id", nullable = false, unique = true)
+	private UUID eventId;
 
 	@Column(name = "payload", columnDefinition = "jsonb", nullable = false)
 	@JdbcTypeCode(SqlTypes.JSON)

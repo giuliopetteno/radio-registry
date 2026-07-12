@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -95,11 +96,14 @@ public class DeviceService {
     }
 
     private void saveDeviceOutboxEvent(EventType eventType, Device device) {
+        UUID eventId = UUID.randomUUID();
+
         outboxEventService.save(
             EntityType.DEVICE.name(),
             String.valueOf(device.getId()),
             eventType.name(),
-            DeviceEvent.of(eventType, device)
+            eventId,
+            DeviceEvent.of(eventType, eventId, device)
         );
     }
 }

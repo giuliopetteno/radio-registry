@@ -6,9 +6,11 @@ import com.gp.radioregistry.enums.EventType;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 public record DeviceEvent(
 	EventType eventType,
+	UUID eventId,
 	Long deviceId,
 	String name,
 	Long deviceTypeId,
@@ -21,11 +23,12 @@ public record DeviceEvent(
 	Long departmentId,
 	OffsetDateTime createdAt,
 	OffsetDateTime updatedAt,
-	Instant occurredAt
+	Instant producedAt
 ) {
-	public static DeviceEvent of(EventType eventType, Device device) {
+	public static DeviceEvent of(EventType eventType, UUID eventId, Device device) {
 		return new DeviceEvent(
 			eventType,
+			eventId,
 			device.getId(),
 			device.getName(),
 			device.getDeviceType().getId(),

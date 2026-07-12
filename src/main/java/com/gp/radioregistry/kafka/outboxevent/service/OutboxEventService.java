@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.json.JsonMapper;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class OutboxEventService {
@@ -13,12 +15,14 @@ public class OutboxEventService {
 	private final OutboxEventRepository outboxEventRepository;
 	private final JsonMapper jsonMapper;
 
-	public void save(String entityType, String entityId, String eventType, Object payload) {
+	public void save(String entityType, String entityId, String eventType, UUID eventId, Object payload) {
 		var serializedPayload = jsonMapper.writeValueAsString(payload);
+
 		var outboxEvent = OutboxEvent.builder()
 			.entityType(entityType)
 			.entityId(entityId)
 			.eventType(eventType)
+			.eventId(eventId)
 			.payload(serializedPayload)
 			.build();
 		outboxEventRepository.save(outboxEvent);
