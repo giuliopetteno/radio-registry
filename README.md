@@ -29,6 +29,7 @@ The system allows healthcare providers to register and manage medical devices, a
 - Spring Security with JWT for authentication and role-based access control (Admin, Technician, Operator)
 - Hibernate / JPA
 - PostgreSQL
+- Apache Kafka with Outbox Pattern for event-driven communication
 - Audit logging with AOP & Hibernate Envers
 - Test suite: 
   - Unit tests (JUnit 5 & Mockito)
@@ -42,10 +43,5 @@ The system allows healthcare providers to register and manage medical devices, a
 
 ## Planned Enhancements
 
-- Apache Kafka with Outbox Pattern & Idempotent Consumer for event-driven communication
 - CI/CD pipeline with GitHub Actions
 - Cloud deployment on Oracle Cloud Infrastructure (OCI)
-
-## Purpose
-
-This project was created as a portfolio to demonstrate the development of a production-oriented backend service using modern Java and Spring technologies while applying clean architecture and enterprise development principles.
