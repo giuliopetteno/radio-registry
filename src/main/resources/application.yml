@@ -25,7 +25,6 @@ spring:
   data:
     web:
       pageable:
-        default-page: ${DEFAULT_PAGE:0}
         default-page-size: ${DEFAULT_PAGE_SIZE:20}
         max-page-size: ${MAX_PAGE_SIZE:100}
 
@@ -33,13 +32,12 @@ spring:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
       acks: all
       properties:
         enable.idempotence: true
         max.in.flight.requests.per.connection: 5
         retries: 3
-        spring.json.add.type.headers: false
 
 #  security:
 #    user:
@@ -73,7 +71,10 @@ server:
   servlet:
     context-path: /api/v1
 
-app:
-  kafka:
-    topic:
-      device-events: radio-registry.device.events
+outbox:
+  retention:
+    days: 30
+  publisher:
+    fixed-delay: 5000
+  cleanup:
+    cron: "0 0 3 * * *"

@@ -35,6 +35,7 @@ public class OutboxEvent {
 	private String payload;
 
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.NAMED_ENUM)
 	@Column(name = "outbox_event_status", nullable = false)
 	private OutboxEventStatus outboxEventStatus = OutboxEventStatus.PENDING;
 
