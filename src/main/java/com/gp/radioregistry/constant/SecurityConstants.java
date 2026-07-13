@@ -1,7 +1,6 @@
 package com.gp.radioregistry.constant;
 
 public final class SecurityConstants {
-
 	private SecurityConstants() {}
 
 	public static final int    BCRYPT_STRENGTH      = 12;

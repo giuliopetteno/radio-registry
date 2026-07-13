@@ -1,4 +1,4 @@
-package com.gp.radioregistry.kafka.scheduler;
+package com.gp.radioregistry.kafka.producer;
 
 import com.gp.radioregistry.kafka.outboxevent.domain.OutboxEvent;
 import com.gp.radioregistry.kafka.outboxevent.enums.OutboxEventStatus;
@@ -20,15 +20,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import static com.gp.radioregistry.constant.KafkaConstants.TOPIC_SUFFIX;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class OutboxEventPublisher {
-
 	private final OutboxEventRepository outboxEventRepository;
 	private final KafkaTemplate<String, String> kafkaTemplate;
-
-	private static final String TOPIC_SUFFIX = "-events";
 
 	@Value("${outbox.publisher.max-retries}")
 	private int maxRetries;
@@ -58,15 +57,15 @@ public class OutboxEventPublisher {
 					continue;
 				}
 
-				int attempts = event.getRetryCount() + 1;
-				event.setRetryCount(attempts);
+				int retries = event.getRetryCount() + 1;
+				event.setRetryCount(retries);
 
-				if (attempts >= maxRetries) {
+				if (retries >= maxRetries) {
 					event.setOutboxEventStatus(OutboxEventStatus.DEAD_LETTER);
-					log.error("Outbox event {} moved to DEAD_LETTER after {} attempts", event.getId(), attempts, e);
+					log.error("Outbox event {} moved to DEAD_LETTER after {} attempts", event.getId(), retries, e);
 				} else {
 					event.setOutboxEventStatus(OutboxEventStatus.FAILED);
-					log.warn("Failed to publish outbox event {} (attempt {}/{})", event.getId(), attempts, maxRetries, e);
+					log.warn("Failed to publish outbox event {} (attempt {}/{})", event.getId(), retries, maxRetries, e);
 				}
 				toSave.add(event);
 			}
