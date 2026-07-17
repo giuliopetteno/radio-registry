@@ -1,7 +1,6 @@
 package com.gp.radioregistry.constant;
 
 public final class ValidationConstants {
-
 	private ValidationConstants() {}
 
 	public static final int USERNAME_MIN_LENGTH  	 = 3;

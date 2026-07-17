@@ -1,7 +1,6 @@
 package com.gp.radioregistry.constant;
 
 public final class ApiConstants {
-
 	private ApiConstants() {}
 
 	public static final String PROTOCOL_HTTP    		= "http";

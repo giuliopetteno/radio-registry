@@ -1,7 +1,6 @@
 package com.gp.radioregistry.constant;
 
 public final class DateTimeConstants {
-
 	private DateTimeConstants() {}
 
 	public static final String DEFAULT_DATE_FORMAT      = "yyyy-MM-dd";
