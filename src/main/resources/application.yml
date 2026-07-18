@@ -6,7 +6,7 @@ spring:
     active: ${PROFILE_ACTIVE:default}
 
   datasource:
-    url: ${DB_URL}
+    url: ${DB_URL}?currentSchema=${DB_SCHEMA}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
