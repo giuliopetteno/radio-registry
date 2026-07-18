@@ -42,7 +42,7 @@ public class SecurityConfigProd {
             // Using HTTPS protocol only for production environment
             .redirectToHttps(https -> https.requestMatchers(AnyRequestMatcher.INSTANCE))
             .authorizeHttpRequests(requests -> requests
-                .requestMatchers(AUTH_PATH+WC_ALL).permitAll()
+                .requestMatchers(AUTH_PATH+WC_ALL, SWAGGER_PATH+WC_ALL, V3_API_DOCS_PATH+WC_ALL).permitAll()
                 .requestMatchers(HttpMethod.GET, ORGANIZATIONS_PATH+WC_ALL, DEPARTMENTS_PATH+WC_ALL,
                     DEVICES_PATH+WC_ALL, DEVICE_TYPES_PATH+WC_ALL)
                     .hasAnyRole(Role.OPERATOR.getName(), Role.TECHNICIAN.getName(), Role.ADMIN.getName())

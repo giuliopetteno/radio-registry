@@ -15,5 +15,7 @@ public final class ApiConstants {
 	public static final String DEVICE_TYPES_PATH 		= "/devices-types";
 	public static final String DEPARTMENTS_PATH 		= "/departments";
 	public static final String ORGANIZATIONS_PATH 		= "/organizations";
+	public static final String SWAGGER_PATH 			= "/swagger-ui";
+	public static final String V3_API_DOCS_PATH 		= "/v3/api-docs";
 	public static final String WC_ALL 					= "/**";
 }
