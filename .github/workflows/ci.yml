@@ -66,3 +66,11 @@ jobs:
           docker tag $REGISTRY/${{ env.ECR_REPOSITORY }}:${{ github.sha }} $REGISTRY/${{ env.ECR_REPOSITORY }}:latest
           docker push $REGISTRY/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
           docker push $REGISTRY/${{ env.ECR_REPOSITORY }}:latest
+
+      - name: Trigger radio-infra deploy
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.INFRA_DISPATCH_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/giuliopetteno/radio-infra/dispatches \
+            -d '{"event_type":"deploy"}'
