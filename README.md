@@ -1,8 +1,8 @@
-# Medical Equipment Management System (Radio Registry)
+# Medical Devices Management System (Radio Registry)
 
-A modern backend application for managing medical imaging equipment (CT scanners, X-ray systems, MRI devices, etc.) within healthcare organizations.
+A modern backend application for managing medical imaging devices (CT scanners, X-ray systems, MRI, etc.) within healthcare organizations.
 
-The system allows healthcare providers to register and manage medical devices, associate them with hospitals, and organize them within specific hospital departments.
+The system allows healthcare providers to register and manage medical devices, associate them with organizations, and organize them within specific departments.
 
 > **⚠️ Work in Progress**
 >
