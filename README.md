@@ -24,14 +24,12 @@ API Documentation (Swagger UI) is available at:
 
 ## Features
 
-- Medical devices management
-- Hospital organizations and departments management
-- Association between devices, organizations, and departments
+- Medical devices lifecycle management across organizations and departments, with relational data persistence
 - RESTful API architecture
 - Authentication and authorization with Spring Security
 - API documentation
-- Data persistence
 - Event-driven architecture with Outbox Pattern
+- Full audit trail of entity changes, including automatic versioning history
 - DTO validation and exception handling
 - Layered architecture following enterprise development practices
 - Containerization
@@ -47,7 +45,7 @@ API Documentation (Swagger UI) is available at:
 - Hibernate / JPA
 - PostgreSQL
 - Apache Kafka with Outbox Pattern for event-driven communication
-- Audit logging with AOP & Hibernate Envers
+- Audit logging via custom AOP aspects (action-level) and Hibernate Envers (entity-level versioning)
 - Test suite: 
   - Unit tests (JUnit 5 & Mockito)
   - Slice tests (@WebMvcTest & @DataJpaTest)
