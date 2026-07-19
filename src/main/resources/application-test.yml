@@ -3,11 +3,22 @@ spring:
     hibernate:
       ddl-auto: create-drop
 
-    show-sql: ${JPA_SHOW_SQL:false}
+    show-sql: false
+
+    properties:
+      hibernate:
+        default_schema: public
 
   test:
     database:
       replace: none
 
-  autoconfigure:
-    exclude: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+  endpoint:
+    health:
+      show-details: never
