@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS audit_logs(
+CREATE TABLE IF NOT EXISTS radio_registry.audit_logs(
     id BIGSERIAL PRIMARY KEY,
     username VARCHAR(100),
     user_roles JSONB,
@@ -12,8 +12,8 @@ CREATE TABLE IF NOT EXISTS audit_logs(
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE INDEX idx_audit_logs_username ON audit_logs(username, created_at DESC);
-CREATE INDEX idx_audit_logs_entity ON audit_logs(entity_type, entity_id, created_at DESC);
-CREATE INDEX idx_audit_logs_event_type ON audit_logs(event_type, created_at DESC);
-CREATE INDEX idx_audit_logs_created_at ON audit_logs(created_at DESC);
-CREATE INDEX idx_audit_logs_failures ON audit_logs(created_at DESC) WHERE success = FALSE;
+CREATE INDEX idx_audit_logs_username ON radio_registry.audit_logs(username, created_at DESC);
+CREATE INDEX idx_audit_logs_entity ON radio_registry.audit_logs(entity_type, entity_id, created_at DESC);
+CREATE INDEX idx_audit_logs_event_type ON radio_registry.audit_logs(event_type, created_at DESC);
+CREATE INDEX idx_audit_logs_created_at ON radio_registry.audit_logs(created_at DESC);
+CREATE INDEX idx_audit_logs_failures ON radio_registry.audit_logs(created_at DESC) WHERE success = FALSE;

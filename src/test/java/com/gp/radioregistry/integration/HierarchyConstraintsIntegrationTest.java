@@ -29,8 +29,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureTestRestTemplate
 class HierarchyConstraintsIntegrationTest extends AbstractPostgresContainerTest {
 
-    private static final String ADMIN_USERNAME = "admin";
-    private static final String ADMIN_PASSWORD = "password";
+    private static final String ADMIN_USERNAME = "ADMIN";
+    private static final String ADMIN_PASSWORD = "Xk9#mQ2$vL7pT4nR";
     private static final String ADMIN_EMAIL = "admin@example.com";
     private static final String ORGANIZATION_NAME = "San Joseph Hospital";
     private static final String ORGANIZATION_CODE = "SAN-JSP";

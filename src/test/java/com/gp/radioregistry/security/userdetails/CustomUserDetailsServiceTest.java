@@ -22,12 +22,11 @@ import static org.mockito.Mockito.*;
 @DisplayName("CustomUserDetailsService unit tests")
 class CustomUserDetailsServiceTest {
 
-    private static final String USERNAME = "user";
+    private static final String USERNAME = "USER";
     private static final String EMAIL = "user@example.com";
     private static final String PASSWORD = "right_password";
 
     private static final String USERNAME_WRONG = "wrong_user";
-    private static final String EMAIL_WRONG = "wrong@example.com";
 
     @Mock
     private UserRepository userRepository;
@@ -52,34 +51,34 @@ class CustomUserDetailsServiceTest {
     @Test
     @DisplayName("should return the user details when found by username")
     void loadUserByUsername_foundByUsername() {
-        when(userRepository.findByUsernameOrEmail(USERNAME, EMAIL)).thenReturn(Optional.of(user));
+        when(userRepository.findByUsernameOrEmail(USERNAME, USERNAME)).thenReturn(Optional.of(user));
 
         UserDetails result = customUserDetailsService.loadUserByUsername(USERNAME);
 
         assertSame(user, result);
         assertEquals(USERNAME, result.getUsername());
-        verify(userRepository).findByUsernameOrEmail(USERNAME, EMAIL);
+        verify(userRepository).findByUsernameOrEmail(USERNAME, USERNAME);
     }
 
     @Test
     @DisplayName("should query by the same value for both username and email arguments")
     void loadUserByUsername_foundByEmail() {
-        when(userRepository.findByUsernameOrEmail(USERNAME, EMAIL)).thenReturn(Optional.of(user));
+        when(userRepository.findByUsernameOrEmail(USERNAME, USERNAME)).thenReturn(Optional.of(user));
 
-        UserDetails result = customUserDetailsService.loadUserByUsername(EMAIL);
+        UserDetails result = customUserDetailsService.loadUserByUsername(USERNAME);
 
         assertSame(user, result);
-        verify(userRepository).findByUsernameOrEmail(USERNAME, EMAIL);
+        verify(userRepository).findByUsernameOrEmail(USERNAME, USERNAME);
     }
 
     @Test
     @DisplayName("should throw UsernameNotFoundException when no user matches")
     void loadUserByUsername_notFound() {
-        when(userRepository.findByUsernameOrEmail(USERNAME_WRONG, EMAIL_WRONG)).thenReturn(Optional.empty());
+        when(userRepository.findByUsernameOrEmail(USERNAME_WRONG, USERNAME_WRONG)).thenReturn(Optional.empty());
 
         assertThrows(UsernameNotFoundException.class,
                 () -> customUserDetailsService.loadUserByUsername(USERNAME_WRONG));
-        verify(userRepository).findByUsernameOrEmail(USERNAME_WRONG, EMAIL_WRONG);
+        verify(userRepository).findByUsernameOrEmail(USERNAME_WRONG, USERNAME_WRONG);
     }
 }
 

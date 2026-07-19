@@ -1,7 +1,9 @@
 package com.gp.radioregistry.organization.repository;
 
 import com.gp.radioregistry.base.AbstractPostgresContainerTest;
+import com.gp.radioregistry.department.repository.DepartmentRepository;
 import com.gp.radioregistry.organization.domain.Organization;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +30,16 @@ class OrganizationRepositoryTest extends AbstractPostgresContainerTest {
     private OrganizationRepository organizationRepository;
 
     @Autowired
+    private DepartmentRepository departmentRepository;
+
+    @Autowired
     private TestEntityManager entityManager;
+
+    @BeforeEach
+    void cleanUp() {
+        departmentRepository.deleteAll();
+        organizationRepository.deleteAll();
+    }
 
     @Test
     @DisplayName("should persist organization and generate id")

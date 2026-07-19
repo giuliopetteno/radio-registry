@@ -2,13 +2,14 @@ package com.gp.radioregistry.department.repository;
 
 import com.gp.radioregistry.base.AbstractPostgresContainerTest;
 import com.gp.radioregistry.department.domain.Department;
+import com.gp.radioregistry.exception.InvalidEntityStateException;
 import com.gp.radioregistry.organization.domain.Organization;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
-import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +34,11 @@ class DepartmentRepositoryTest extends AbstractPostgresContainerTest {
 
     @Autowired
     private TestEntityManager entityManager;
+
+    @BeforeEach
+    void cleanUp() {
+        departmentRepository.deleteAll();
+    }
 
     private Organization persistOrganization() {
         var organization = Organization.builder()
@@ -164,7 +170,6 @@ class DepartmentRepositoryTest extends AbstractPostgresContainerTest {
         var child = departmentRepository.save(Department.builder()
                 .name(DEPARTMENT_NAME_SECONDARY)
                 .code(DEPARTMENT_CODE_SECONDARY)
-                .organization(organization)
                 .parentDepartment(parent)
                 .build());
         entityManager.flush();
@@ -177,8 +182,8 @@ class DepartmentRepositoryTest extends AbstractPostgresContainerTest {
     }
 
     @Test
-    @DisplayName("should violate not-null constraint when saving department without organization")
-    void savingDepartmentWithoutOrganizationViolatesNotNullConstraint() {
+    @DisplayName("should violate constraint when saving department without organization or parent department")
+    void savingDepartmentWithoutOrganizationOrParentDepartmentViolatesConstraint() {
         var department = Department.builder()
                 .name(DEPARTMENT_NAME)
                 .code(DEPARTMENT_CODE)
@@ -187,6 +192,29 @@ class DepartmentRepositoryTest extends AbstractPostgresContainerTest {
         assertThatThrownBy(() -> {
             departmentRepository.save(department);
             entityManager.flush();
-        }).isInstanceOf(DataIntegrityViolationException.class);
+        }).isInstanceOf(InvalidEntityStateException.class);
+    }
+
+    @Test
+    @DisplayName("should violate constraint when saving department with both organization or parent department")
+    void savingDepartmentWithBothOrganizationOrParentDepartmentViolatesConstraint() {
+        var organization = persistOrganization();
+
+        var parent = departmentRepository.save(Department.builder()
+            .name(DEPARTMENT_NAME)
+            .code(DEPARTMENT_CODE)
+            .organization(organization)
+            .build());
+
+        assertThatThrownBy(() -> {
+            departmentRepository.save(Department.builder()
+                .name(DEPARTMENT_NAME_SECONDARY)
+                .code(DEPARTMENT_CODE_SECONDARY)
+                .organization(organization)
+                .parentDepartment(parent)
+                .build());
+            entityManager.flush();
+            entityManager.clear();
+        }).isInstanceOf(InvalidEntityStateException.class);
     }
 }

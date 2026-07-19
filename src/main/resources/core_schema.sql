@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS organization(
+CREATE TABLE IF NOT EXISTS radio_registry.organization(
      id SERIAL PRIMARY KEY,
      name TEXT NOT NULL,
      code TEXT NOT NULL,
@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS organization(
      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS department(
+CREATE TABLE IF NOT EXISTS radio_registry.department(
     id BIGSERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     code TEXT NOT NULL,
@@ -19,21 +19,21 @@ CREATE TABLE IF NOT EXISTS department(
 
     CONSTRAINT fk_department_organization
     FOREIGN KEY (organization_id)
-    REFERENCES organization(id)
+    REFERENCES radio_registry.organization(id)
     ON DELETE RESTRICT,
 
     CONSTRAINT fk_department_parent
     FOREIGN KEY (parent_department_id)
-    REFERENCES department(id)
+    REFERENCES radio_registry.department(id)
     ON DELETE SET NULL,
 
-    CONSTRAINT chk_department_parent_structure CHECK(
+    CONSTRAINT radio_registry.chk_department_parent_structure CHECK(
     (organization_id IS NOT NULL AND parent_department_id IS NULL)
     OR
     (organization_id IS NULL AND parent_department_id IS NOT NULL))
 );
 
-CREATE TABLE IF NOT EXISTS device_type(
+CREATE TABLE IF NOT EXISTS radio_registry.device_type(
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT,
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS device_type(
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TYPE device_status AS ENUM (
+CREATE TYPE radio_registry.device_status AS ENUM(
     'PENDING_INSTALLATION',
     'ACTIVE',
     'MAINTENANCE',
@@ -50,14 +50,14 @@ CREATE TYPE device_status AS ENUM (
     'DECOMMISSIONED'
 );
 
-CREATE TABLE IF NOT EXISTS device(
+CREATE TABLE IF NOT EXISTS radio_registry.device(
     id BIGSERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     device_type_id INT NOT NULL,
     serial_number TEXT NOT NULL,
     description TEXT,
     installation_date DATE NOT NULL,
-    device_status device_status NOT NULL DEFAULT 'ACTIVE',
+    device_status radio_registry.device_status NOT NULL DEFAULT 'ACTIVE',
     decommission_date DATE,
     organization_id BIGINT,
     department_id BIGINT,
@@ -66,17 +66,17 @@ CREATE TABLE IF NOT EXISTS device(
 
     CONSTRAINT fk_device_organization
     FOREIGN KEY (organization_id)
-    REFERENCES organization(id)
+    REFERENCES radio_registry.organization(id)
     ON DELETE RESTRICT,
 
     CONSTRAINT fk_device_department
     FOREIGN KEY (department_id)
-    REFERENCES department(id)
+    REFERENCES radio_registry.department(id)
     ON DELETE RESTRICT,
 
     CONSTRAINT fk_device_type
     FOREIGN KEY (device_type_id)
-    REFERENCES device_type(id)
+    REFERENCES radio_registry.device_type(id)
     ON DELETE RESTRICT,
 
     CONSTRAINT chk_device_parent_structure CHECK(
@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS device(
     (device_status NOT IN ('DECOMMISSIONED', 'PENDING_DECOMMISSIONING') AND decommission_date IS NULL))
 );
 
-CREATE INDEX idx_department_organization ON department(organization_id);
-CREATE INDEX idx_device_organization ON device(organization_id);
-CREATE INDEX idx_device_department ON device(department_id);
-CREATE INDEX idx_department_parent ON department(parent_department_id);
+CREATE INDEX idx_department_organization ON radio_registry.department(organization_id);
+CREATE INDEX idx_device_organization ON radio_registry.device(organization_id);
+CREATE INDEX idx_device_department ON radio_registry.device(department_id);
+CREATE INDEX idx_department_parent ON radio_registry.department(parent_department_id);

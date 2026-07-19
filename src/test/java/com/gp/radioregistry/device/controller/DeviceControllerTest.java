@@ -130,7 +130,7 @@ class DeviceControllerTest {
         @DisplayName("should propagate EntityNotFoundException when device does not exist")
         void updateDevice_notFound() {
             var request = updateRequest();
-            when(deviceService.updateDevice(anyLong(), request))
+            when(deviceService.updateDevice(anyLong(), eq(request)))
                     .thenThrow(new EntityNotFoundException("Device not found"));
 
             assertThrows(EntityNotFoundException.class, () -> deviceController.updateDevice(DEVICE_ID_NOT_FOUND, request));

@@ -2,6 +2,8 @@ package com.gp.radioregistry.role.repository;
 
 import com.gp.radioregistry.base.AbstractPostgresContainerTest;
 import com.gp.radioregistry.role.domain.Role;
+import com.gp.radioregistry.user.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @DataJpaTest
 class RoleRepositoryTest extends AbstractPostgresContainerTest {
 
-    private static final String ROLE_NAME = "ADMIN";
+    private static final String ROLE_NAME = "USER";
     private static final String ROLE_NAME_SECONDARY = "OPERATOR";
     private static final String ROLE_NAME_UNKNOWN = "UNKNOWN";
 
@@ -26,7 +28,16 @@ class RoleRepositoryTest extends AbstractPostgresContainerTest {
     private RoleRepository roleRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private TestEntityManager entityManager;
+
+    @BeforeEach
+    void cleanUp() {
+        userRepository.deleteAll();
+        roleRepository.deleteAll();
+    }
 
     @Test
     @DisplayName("should persist role and generate id")

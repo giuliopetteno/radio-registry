@@ -29,7 +29,7 @@ public record CreateDepartmentRequest(
     Long parentDepartmentId
 ) {
     @AssertTrue(message = "Either an organization or a parent department must be specified")
-    public boolean orgOrCompValid() {
+    public boolean isOrgOrCompValid() {
         return (organizationId != null && organizationId > 0) != (parentDepartmentId != null && parentDepartmentId > 0);
   }
 }

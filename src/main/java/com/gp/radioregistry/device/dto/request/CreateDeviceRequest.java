@@ -52,12 +52,12 @@ public record CreateDeviceRequest(
     Long departmentId
 ) {
     @AssertTrue(message = "Either an organization or a department must be specified")
-    public boolean orgOrCompValid() {
+    public boolean isOrgOrCompValid() {
         return (organizationId != null && organizationId > 0) != (departmentId != null && departmentId > 0);
     }
 
     @AssertTrue(message = "A decommission date must be specified if the status is DECOMMISSIONED or PENDING_DECOMMISSIONING")
-    public boolean decommissionDateValid() {
+    public boolean idDecommissionDateValid() {
         boolean isDecommissionState = deviceStatus == DeviceStatus.DECOMMISSIONED
             || deviceStatus == DeviceStatus.PENDING_DECOMMISSIONING;
         return isDecommissionState == (decommissionDate != null);

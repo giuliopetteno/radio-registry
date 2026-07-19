@@ -2,6 +2,7 @@ package com.gp.radioregistry.devicetype.repository;
 
 import com.gp.radioregistry.base.AbstractPostgresContainerTest;
 import com.gp.radioregistry.devicetype.domain.DeviceType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,11 @@ class DeviceTypeRepositoryTest extends AbstractPostgresContainerTest {
 
     @Autowired
     private TestEntityManager entityManager;
+
+    @BeforeEach
+    void cleanUp() {
+        deviceTypeRepository.deleteAll();
+    }
 
     @Test
     @DisplayName("should persist device type and generate id")

@@ -52,7 +52,6 @@ class UserServiceTest {
     private static final String PASSWORD_UPDATE = "updated_password";
 
     private static final String USERNAME_WRONG = "wrong_user";
-    private static final String EMAIL_WRONG = "wrong@example.com";
 
     @Mock
     private UserRepository userRepository;
@@ -296,7 +295,7 @@ class UserServiceTest {
         @Test
         @DisplayName("should throw UsernameNotFoundException when not found")
         void findByUsernameOrEmail_notFound() {
-            when(userRepository.findByUsernameOrEmail(USERNAME_WRONG, EMAIL_WRONG)).thenReturn(Optional.empty());
+            when(userRepository.findByUsernameOrEmail(USERNAME_WRONG, USERNAME_WRONG)).thenReturn(Optional.empty());
 
             assertThrows(UsernameNotFoundException.class,
                     () -> userService.findByUsernameOrEmail(USERNAME_WRONG));

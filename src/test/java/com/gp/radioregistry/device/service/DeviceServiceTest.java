@@ -2,13 +2,14 @@ package com.gp.radioregistry.device.service;
 
 import com.gp.radioregistry.department.domain.Department;
 import com.gp.radioregistry.department.repository.DepartmentRepository;
-import com.gp.radioregistry.device.enums.DeviceStatus;
 import com.gp.radioregistry.device.domain.Device;
 import com.gp.radioregistry.device.dto.request.CreateDeviceRequest;
 import com.gp.radioregistry.device.dto.request.UpdateDeviceRequest;
+import com.gp.radioregistry.device.enums.DeviceStatus;
 import com.gp.radioregistry.device.repository.DeviceRepository;
 import com.gp.radioregistry.devicetype.domain.DeviceType;
 import com.gp.radioregistry.devicetype.repository.DeviceTypeRepository;
+import com.gp.radioregistry.kafka.outboxevent.service.OutboxEventService;
 import com.gp.radioregistry.organization.domain.Organization;
 import com.gp.radioregistry.organization.repository.OrganizationRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -42,8 +43,13 @@ class DeviceServiceTest {
     private static final Long DEVICE_ID = 1L;
     private static final Long DEVICE_ID_NOT_FOUND = 99L;
     private static final Long DEVICE_TYPE_ID = 5L;
+    private static final String DEVICE_TYPE_NAME = "RX";
     private static final Long ORGANIZATION_ID = 10L;
+    private static final String ORGANIZATION_NAME = "Organization";
+    private static final String ORGANIZATION_CODE = "Org";
     private static final Long DEPARTMENT_ID = 20L;
+    private static final String DEPARTMENT_NAME = "Department";
+    private static final String DEPARTMENT_CODE = "Dept";
     private static final LocalDate DEVICE_INSTALLATION_DATE = LocalDate.of(2024, 1, 15);
     private static final DeviceStatus DEVICE_STATUS = DeviceStatus.ACTIVE;
     private static final LocalDate DEVICE_DECOMMISSION_DATE = null;
@@ -71,22 +77,56 @@ class DeviceServiceTest {
     @Mock
     private DepartmentRepository departmentRepository;
 
+    @Mock
+    private OutboxEventService outboxEventService;
+
     @InjectMocks
     private DeviceService deviceService;
 
     private Device device;
 
+    private DeviceType deviceType;
+
+    private Organization organization;
+
+    private Department department;
+
     @BeforeEach
     void setUp() {
+        deviceType = DeviceType.builder()
+            .id(DEVICE_TYPE_ID)
+            .name(DEVICE_TYPE_NAME)
+            .createdAt(OffsetDateTime.now())
+            .updatedAt(OffsetDateTime.now())
+            .build();
+
+        organization = Organization.builder()
+            .id(ORGANIZATION_ID)
+            .name(ORGANIZATION_NAME)
+            .code(ORGANIZATION_CODE)
+            .createdAt(OffsetDateTime.now())
+            .updatedAt(OffsetDateTime.now())
+            .build();
+
+        department = Department.builder()
+            .id(DEPARTMENT_ID)
+            .name(DEPARTMENT_NAME)
+            .code(DEPARTMENT_CODE)
+            .createdAt(OffsetDateTime.now())
+            .updatedAt(OffsetDateTime.now())
+            .build();
+
         device = Device.builder()
-                .id(DEVICE_ID)
-                .name(DEVICE_NAME)
-                .serialNumber(DEVICE_SERIAL_NUMBER)
-                .description(DEVICE_DESCRIPTION)
-                .installationDate(DEVICE_INSTALLATION_DATE)
-                .createdAt(OffsetDateTime.now())
-                .updatedAt(OffsetDateTime.now())
-                .build();
+            .id(DEVICE_ID)
+            .name(DEVICE_NAME)
+            .deviceType(deviceType)
+            .deviceStatus(DEVICE_STATUS)
+            .serialNumber(DEVICE_SERIAL_NUMBER)
+            .description(DEVICE_DESCRIPTION)
+            .installationDate(DEVICE_INSTALLATION_DATE)
+            .createdAt(OffsetDateTime.now())
+            .updatedAt(OffsetDateTime.now())
+            .build();
     }
 
     @Nested
@@ -98,10 +138,9 @@ class DeviceServiceTest {
         void createDevice_withOrganization() {
             var request = new CreateDeviceRequest(DEVICE_NAME, DEVICE_TYPE_ID, DEVICE_SERIAL_NUMBER,
                     DEVICE_DESCRIPTION, DEVICE_INSTALLATION_DATE, DEVICE_STATUS, DEVICE_DECOMMISSION_DATE, ORGANIZATION_ID, null);
-            var deviceTypeRef = new DeviceType();
-            var orgRef = new Organization();
-            when(deviceTypeRepository.getReferenceById(DEVICE_TYPE_ID)).thenReturn(deviceTypeRef);
-            when(organizationRepository.getReferenceById(ORGANIZATION_ID)).thenReturn(orgRef);
+            when(deviceTypeRepository.getReferenceById(DEVICE_TYPE_ID)).thenReturn(deviceType);
+            when(organizationRepository.getReferenceById(ORGANIZATION_ID)).thenReturn(organization);
+            device.setOrganization(organization);
             when(deviceRepository.save(any(Device.class))).thenReturn(device);
 
             Device result = deviceService.createDevice(request);
@@ -112,8 +151,8 @@ class DeviceServiceTest {
             Device saved = captor.getValue();
             assertEquals(DEVICE_NAME, saved.getName());
             assertEquals(DEVICE_SERIAL_NUMBER, saved.getSerialNumber());
-            assertSame(deviceTypeRef, saved.getDeviceType());
-            assertSame(orgRef, saved.getOrganization());
+            assertSame(deviceType, saved.getDeviceType());
+            assertSame(organization, saved.getOrganization());
             assertNull(saved.getDepartment());
             verify(departmentRepository, never()).getReferenceById(any());
         }
@@ -123,16 +162,16 @@ class DeviceServiceTest {
         void createDevice_withDepartment() {
             var request = new CreateDeviceRequest(DEVICE_NAME_UPDATE, DEVICE_TYPE_ID_UPDATE, DEVICE_SERIAL_NUMBER_UPDATE,
                     DEVICE_DESCRIPTION_UPDATE, DEVICE_INSTALLATION_DATE, DEVICE_STATUS, DEVICE_DECOMMISSION_DATE, null, DEPARTMENT_ID);
-            when(deviceTypeRepository.getReferenceById(DEVICE_TYPE_ID_UPDATE)).thenReturn(new DeviceType());
-            var deptRef = new Department();
-            when(departmentRepository.getReferenceById(DEPARTMENT_ID)).thenReturn(deptRef);
+            when(deviceTypeRepository.getReferenceById(DEVICE_TYPE_ID_UPDATE)).thenReturn(deviceType);
+            when(departmentRepository.getReferenceById(DEPARTMENT_ID)).thenReturn(department);
+            device.setDepartment(department);
             when(deviceRepository.save(any(Device.class))).thenReturn(device);
 
             deviceService.createDevice(request);
 
             ArgumentCaptor<Device> captor = ArgumentCaptor.forClass(Device.class);
             verify(deviceRepository).save(captor.capture());
-            assertSame(deptRef, captor.getValue().getDepartment());
+            assertSame(department, captor.getValue().getDepartment());
             assertNull(captor.getValue().getOrganization());
             verify(organizationRepository, never()).getReferenceById(any());
         }

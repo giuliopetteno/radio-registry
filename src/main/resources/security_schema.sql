@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS users(
+CREATE TABLE IF NOT EXISTS radio_registry.users(
    id BIGSERIAL PRIMARY KEY,
    username TEXT NOT NULL UNIQUE,
    email TEXT NOT NULL UNIQUE,
@@ -9,19 +9,19 @@ CREATE TABLE IF NOT EXISTS users(
    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS roles(
+CREATE TABLE IF NOT EXISTS radio_registry.roles(
    id BIGSERIAL PRIMARY KEY,
    name TEXT NOT NULL UNIQUE,
    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS users_roles(
+CREATE TABLE IF NOT EXISTS radio_registry.users_roles(
     user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     role_id BIGINT NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, role_id)
 );
 
-CREATE INDEX idx_users_roles_role_id ON users_roles(role_id);
+CREATE INDEX idx_users_roles_role_id ON radio_registry.users_roles(role_id);
 
-INSERT INTO roles (name) VALUES ('ADMIN'), ('USER');
+INSERT INTO radio_registry.roles(name) VALUES ('ADMIN'), ('USER');

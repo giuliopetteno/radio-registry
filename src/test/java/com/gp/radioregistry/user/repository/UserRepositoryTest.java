@@ -2,7 +2,9 @@ package com.gp.radioregistry.user.repository;
 
 import com.gp.radioregistry.base.AbstractPostgresContainerTest;
 import com.gp.radioregistry.role.domain.Role;
+import com.gp.radioregistry.role.repository.RoleRepository;
 import com.gp.radioregistry.user.domain.User;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +22,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @DataJpaTest
 class UserRepositoryTest extends AbstractPostgresContainerTest {
 
-    private static final String USERNAME = "username";
+    private static final String USERNAME = "USER_TEST";
     private static final String EMAIL = "username@example.com";
     private static final String PASSWORD = "password";
-    private static final String USERNAME_SECONDARY = "user2";
+    private static final String USERNAME_SECONDARY = "USER_TEST2";
     private static final String EMAIL_SECONDARY = "user2@example.com";
     private static final String UNKNOWN_VALUE = "unknown";
     private static final String ROLE_NAME = "ADMIN";
@@ -32,7 +34,16 @@ class UserRepositoryTest extends AbstractPostgresContainerTest {
     private UserRepository userRepository;
 
     @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
     private TestEntityManager entityManager;
+
+    @BeforeEach
+    void cleanUp() {
+        userRepository.deleteAll();
+        roleRepository.deleteAll();
+    }
 
     private User.UserBuilder baseUser() {
         return User.builder()
