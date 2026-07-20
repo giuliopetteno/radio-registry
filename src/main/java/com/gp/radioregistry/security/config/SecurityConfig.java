@@ -1,7 +1,6 @@
 package com.gp.radioregistry.security.config;
 
 import com.gp.radioregistry.security.enums.Role;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +25,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 import static com.gp.radioregistry.constant.ApiConstants.*;
-import static com.gp.radioregistry.constant.SecurityConstants.SESSION_COOKIE;
 import static com.gp.radioregistry.constant.SecurityConstants.SESSION_TIMEOUT_SEC;
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -42,27 +40,18 @@ public class SecurityConfig {
             // Using HTTP protocol only for non-production environments
             .redirectToHttps(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(requests -> requests
-                .requestMatchers(AUTH_PATH+WC_ALL, SWAGGER_PATH+WC_ALL, V3_API_DOCS_PATH+WC_ALL).permitAll()
-                .requestMatchers(HttpMethod.GET, ORGANIZATIONS_PATH+WC_ALL, DEPARTMENTS_PATH+WC_ALL,
-                    DEVICES_PATH+WC_ALL, DEVICE_TYPES_PATH+WC_ALL)
+                    .requestMatchers(AUTH_PATH + "/logout").authenticated()
+                    .requestMatchers(AUTH_PATH + "/register", AUTH_PATH + "/login", "/swagger-ui" + WC_ALL, "/v3/api-docs" + WC_ALL).permitAll()
+                    .requestMatchers(HttpMethod.GET, ORGANIZATIONS_PATH + WC_ALL, DEPARTMENTS_PATH + WC_ALL, DEVICES_PATH + WC_ALL, DEVICE_TYPES_PATH + WC_ALL)
                     .hasAnyRole(Role.OPERATOR.getName(), Role.TECHNICIAN.getName(), Role.ADMIN.getName())
-                .requestMatchers(ORGANIZATIONS_PATH+WC_ALL, DEPARTMENTS_PATH+WC_ALL, DEVICES_PATH+WC_ALL,
-                    DEVICE_TYPES_PATH+WC_ALL).hasAnyRole(Role.TECHNICIAN.getName(), Role.ADMIN.getName())
-                .anyRequest().hasRole(Role.ADMIN.getName()))
+                    .requestMatchers(ORGANIZATIONS_PATH + WC_ALL, DEPARTMENTS_PATH + WC_ALL, DEVICES_PATH + WC_ALL, DEVICE_TYPES_PATH + WC_ALL)
+                    .hasAnyRole(Role.TECHNICIAN.getName(), Role.ADMIN.getName())
+                    .anyRequest().hasRole(Role.ADMIN.getName()))
             .formLogin(withDefaults())
             .httpBasic(withDefaults()).sessionManagement(session -> session
                 // Temporary setup before migrating to JWT auth: maintaining session state via JSESSIONID to avoid re-sending Basic auth credentials
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-            .logout(logout -> logout
-                .logoutUrl(AUTH_PATH+LOGOUT_PATH)
-                .invalidateHttpSession(true)
-                .clearAuthentication(true)
-                .deleteCookies(SESSION_COOKIE)
-                .logoutSuccessHandler((_, response, authentication) -> {
-                    log.info("Logout successful for the user {}", authentication != null ? authentication.getName() : "");
-                    response.setStatus(HttpServletResponse.SC_OK);
-                })
-            );
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                );
         return http.build();
     }
 

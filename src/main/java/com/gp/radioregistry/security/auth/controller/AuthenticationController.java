@@ -9,11 +9,15 @@ import com.gp.radioregistry.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.CookieClearingLogoutHandler;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,6 +29,7 @@ import java.time.Instant;
 
 import static com.gp.radioregistry.constant.ApiConstants.AUTH_PATH;
 import static com.gp.radioregistry.constant.ApiConstants.USERS_PATH;
+import static com.gp.radioregistry.constant.SecurityConstants.SESSION_COOKIE;
 
 @Slf4j
 @RestController
@@ -58,5 +63,15 @@ public class AuthenticationController {
 
         return ResponseEntity.ok(new AuthResponse(UserResponse.fromEntity(user), Instant.now()));
     }
-}
 
+    @PostMapping("/logout")
+    @Operation(summary = "Performs logout", description = "Invalidates the current session and clears authentication.")
+    public ResponseEntity<Void> doLogout(HttpServletRequest request, HttpServletResponse response,
+                                         Authentication authentication) {
+        new SecurityContextLogoutHandler().logout(request, response, authentication);
+        new CookieClearingLogoutHandler(SESSION_COOKIE).logout(request, response, authentication);
+
+        log.info("Logout successful for the user {}", authentication != null ? authentication.getName() : "");
+        return ResponseEntity.noContent().build();
+    }
+}

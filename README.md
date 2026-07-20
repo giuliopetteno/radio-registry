@@ -12,7 +12,7 @@ The system allows healthcare providers to register and manage medical devices, a
 ## Live Demo
 
 API Documentation (Swagger UI) is available at:
-[radio-registry.giuliopetteno.dev](https://radio-registry.giuliopetteno.dev:8443/api/v1/swagger-ui/index.html)
+[radio-registry.giuliopetteno.dev](https://giuliopetteno.s.gy/radio-registry)
 
 > **Note:** Most endpoints require authentication and role-based access control (**Operator, Technician, Admin**).
 > 
