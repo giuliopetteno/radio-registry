@@ -1,12 +1,12 @@
 # Medical Devices Management System (Radio Registry)
 
-A modern backend application for managing medical imaging devices (CT scanners, X-ray systems, MRI, etc.) within healthcare organizations.
+A modern Java backend microservice for managing medical imaging devices (CT scanners, X-ray systems, MRI, etc.) within healthcare organizations.
 
 The system allows healthcare providers to register and manage medical devices, associate them with organizations, and organize them within specific departments.
 
 It integrates with Apache Kafka to publish domain events for every relevant change, which are consumed by the [`radio-analytics`](https://github.com/giuliopetteno/radio-analytics) microservice to build and maintain a dedicated analytics read-model.
 
-> **⚠️ Work in Progress**
+> **🚧 Work in Progress**
 >
 > This project is currently under active development and serves as a demonstration of modern Java backend development practices.
 > New features, improvements, and additional integrations will be added over time.
