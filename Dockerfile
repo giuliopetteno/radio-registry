@@ -1,5 +1,4 @@
-# ---- Build stage ----
-FROM gradle:9.5-jdk25 AS build
+FROM --platform=$BUILDPLATFORM gradle:9.5-jdk25 AS build
 WORKDIR /app
 
 COPY build.gradle.kts settings.gradle.kts gradle.properties* ./
@@ -12,8 +11,7 @@ RUN ./gradlew dependencies --no-daemon || return 0
 COPY src ./src
 RUN ./gradlew bootJar --no-daemon -x test
 
-# ---- Runtime stage ----
-FROM eclipse-temurin:25-jre-alpine AS runtime
+FROM --platform=$TARGETPLATFORM eclipse-temurin:25-jre-alpine AS runtime
 WORKDIR /app
 
 RUN addgroup -S radio-registry-group && adduser -S radio-registry-user -G radio-registry-group
