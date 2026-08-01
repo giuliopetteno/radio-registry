@@ -2,12 +2,10 @@ spring:
   config:
     activate:
       on-profile: prod
-
   jpa:
     properties:
       hibernate:
         format_sql: ${HIBERNATE_FORMAT_SQL:false}
-
     show-sql: ${JPA_SHOW_SQL:false}
 
 logging:

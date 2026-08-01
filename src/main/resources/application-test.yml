@@ -2,13 +2,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
-
     show-sql: false
-
     properties:
       hibernate:
         default_schema: public
-
   test:
     database:
       replace: none
@@ -18,7 +15,6 @@ management:
     web:
       exposure:
         include: "*"
-
   endpoint:
     health:
       show-details: never
