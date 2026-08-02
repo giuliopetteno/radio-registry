@@ -11,7 +11,7 @@ public final class ApiConstants {
 	public static final String USERS_PATH 				= "/users";
 	public static final String ROLES_PATH 				= "/roles";
 	public static final String DEVICES_PATH 			= "/devices";
-	public static final String DEVICE_TYPES_PATH 		= "/devices-types";
+	public static final String DEVICE_TYPES_PATH 		= "/device-types";
 	public static final String DEPARTMENTS_PATH 		= "/departments";
 	public static final String ORGANIZATIONS_PATH 		= "/organizations";
 	public static final String WC_ALL 					= "/**";

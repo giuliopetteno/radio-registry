@@ -50,8 +50,12 @@ public record DepartmentResponse(
                 department.getDescription(),
                 department.getOrganization() != null ? department.getOrganization().getId() : null,
                 department.getParentDepartment() != null ? department.getParentDepartment().getId() : null,
-                department.getChildDepartments().stream().map(DepartmentResponse::fromEntity).toList(),
-                department.getDevices().stream().map(DeviceResponse::fromEntity).toList(),
+                department.getChildDepartments().stream()
+                    .map(DepartmentResponse::fromEntity)
+                    .toList(),
+                department.getDevices().stream()
+                    .map(DeviceResponse::fromEntity)
+                    .toList(),
                 department.getCreatedAt(),
                 department.getUpdatedAt()
         );
