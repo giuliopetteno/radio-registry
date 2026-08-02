@@ -59,7 +59,7 @@ API Documentation (Swagger UI) is available at:
   - ECR for container image registry
   - Automated CI/CD: GitHub Actions → OIDC → ECR → SSM Run Command deploy
   - Secrets management via AWS Systems Manager Parameter Store
-  - TLS via Let's Encrypt with automated renewal
+  - Nginx reverse proxy for name-based routing, with TLS via Let's Encrypt and automated renewal
 - Gradle build system with Kotlin DSL
 - Swagger / OpenAPI for interactive API documentation & endpoint testing
 - Lombok for boilerplate code reduction
