@@ -38,6 +38,7 @@ public class OutboxEvent {
 	@JdbcTypeCode(SqlTypes.JSON)
 	private String payload;
 
+	@Builder.Default
 	@Enumerated(EnumType.STRING)
 	@JdbcTypeCode(SqlTypes.NAMED_ENUM)
 	@Column(name = "outbox_event_status", nullable = false)

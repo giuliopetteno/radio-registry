@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.*;
 import org.hibernate.envers.Audited;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -61,7 +62,9 @@ public class Device {
     @Column(name = "installation_date", nullable = false)
     private LocalDate installationDate;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "device_status", nullable = false)
     private DeviceStatus deviceStatus = DeviceStatus.ACTIVE;
 
