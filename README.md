@@ -4,7 +4,9 @@ Java backend microservice for managing medical imaging devices (CT scanners, X-r
 
 The system allows healthcare providers to register and manage medical devices, associate them with organizations, and organize them within specific departments.
 
-It integrates with Apache Kafka to publish domain events for every relevant change, which are consumed by the [`radio-analytics`](https://github.com/giuliopetteno/radio-analytics) microservice to build and maintain a dedicated analytics read-model.
+It integrates with **Apache Kafka** to publish domain events for every relevant change, which are consumed by the [`radio-analytics`](https://github.com/giuliopetteno/radio-analytics) microservice to build and maintain a dedicated analytics read-model.
+
+Application traces, metrics, and logs are exported via **OpenTelemetry** (OTLP) for consumption by the observability stack deployed in [`radio-infra`](https://github.com/giuliopetteno/radio-infra).
 
 > **🚧 Work in Progress**
 >
@@ -14,7 +16,7 @@ It integrates with Apache Kafka to publish domain events for every relevant chan
 ## Live Demo
 
 API Documentation (Swagger UI) is available at:
-[radio-registry.giuliopetteno.dev](https://giuliopetteno.s.gy/radio-registry)
+[radio-registry.giuliopetteno.dev](https://giuliopetteno.s.gy/radio-registry) *(short link for click tracking)*
 
 > **Note:** Most endpoints require authentication and role-based access control (**Operator, Technician, Admin**).
 > 
@@ -37,6 +39,7 @@ API Documentation (Swagger UI) is available at:
 - Containerization
 - Automated CI/CD pipeline
 - Cloud deployment
+- Full telemetry emission, designed for consumption by an external observability stack
 
 ## Technology Stack
 
@@ -59,7 +62,7 @@ API Documentation (Swagger UI) is available at:
   - ECR for container image registry
   - Automated CI/CD: GitHub Actions → OIDC → ECR → SSM Run Command deploy
   - Secrets management via AWS Systems Manager Parameter Store
-  - Nginx reverse proxy for name-based routing, with TLS via Let's Encrypt and automated renewal
+- OpenTelemetry (OTLP) integration for distributed tracing, metrics, and structured logging
 - Gradle build system with Kotlin DSL
 - Swagger / OpenAPI for interactive API documentation & endpoint testing
 - Lombok for boilerplate code reduction
