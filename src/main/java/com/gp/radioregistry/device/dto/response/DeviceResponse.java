@@ -2,7 +2,7 @@ package com.gp.radioregistry.device.dto.response;
 
 import com.gp.radioregistry.device.domain.Device;
 import com.gp.radioregistry.device.enums.DeviceStatus;
-import com.gp.radioregistry.devicetype.domain.DeviceType;
+import com.gp.radioregistry.devicetype.dto.response.DeviceTypeResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
@@ -16,7 +16,7 @@ public record DeviceResponse(
     String name,
 
     @Schema(description = "Device type")
-    DeviceType deviceType,
+    DeviceTypeResponse deviceType,
 
     @Schema(description = "Serial number")
     String serialNumber,
@@ -53,7 +53,7 @@ public record DeviceResponse(
         return new DeviceResponse(
                 device.getId(),
                 device.getName(),
-                device.getDeviceType(),
+                DeviceTypeResponse.fromEntity(device.getDeviceType()),
                 device.getSerialNumber(),
                 device.getDescription(),
                 device.getInstallationDate(),
