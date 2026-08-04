@@ -300,7 +300,7 @@ class OrganizationControllerWebMvcTest {
                     .andExpect(jsonPath("$.departments[0].name").value("Radiology"))
                     .andExpect(jsonPath("$.devices").isArray())
                     .andExpect(jsonPath("$.devices[0].id").value(DEVICE_ID))
-                    .andExpect(jsonPath("$.devices[0].deviceTypeId").value(DEVICE_TYPE_ID))
+                    .andExpect(jsonPath("$.devices[0].deviceType.id").value(DEVICE_TYPE_ID))
                     .andExpect(jsonPath("$.devices[0].serialNumber").value("SN-123"));
         }
 

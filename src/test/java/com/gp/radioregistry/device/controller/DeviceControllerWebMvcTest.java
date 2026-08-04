@@ -292,7 +292,7 @@ class DeviceControllerWebMvcTest {
                     .andExpect(status().isOk())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.id").value(DEVICE_ID))
-                    .andExpect(jsonPath("$.deviceTypeId").value(DEVICE_TYPE_ID))
+                    .andExpect(jsonPath("$.deviceType.id").value(DEVICE_TYPE_ID))
                     .andExpect(jsonPath("$.organizationId").value(ORGANIZATION_ID))
                     .andExpect(jsonPath("$.serialNumber").value(DEVICE_SERIAL_NUMBER));
         }
@@ -331,7 +331,7 @@ class DeviceControllerWebMvcTest {
                     .andExpect(jsonPath("$.content").isArray())
                     .andExpect(jsonPath("$.content[0].id").value(DEVICE_ID))
                     .andExpect(jsonPath("$.content[0].name").value(DEVICE_NAME))
-                    .andExpect(jsonPath("$.content[0].deviceTypeId").value(DEVICE_TYPE_ID))
+                    .andExpect(jsonPath("$.content[0].deviceType.id").value(DEVICE_TYPE_ID))
                     .andExpect(jsonPath("$.totalElements").value(1))
                     .andExpect(jsonPath("$.totalPages").value(1))
                     .andExpect(jsonPath("$.number").value(0))
