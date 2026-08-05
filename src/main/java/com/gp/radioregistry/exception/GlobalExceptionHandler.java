@@ -2,6 +2,7 @@ package com.gp.radioregistry.exception;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.validation.FieldError;
@@ -67,6 +68,39 @@ public class GlobalExceptionHandler {
 		problemDetail.setTitle("Validation error");
 		problemDetail.setProperty("timestamp", Instant.now());
 		problemDetail.setProperty("errors", errors);
+		return problemDetail;
+	}
+
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	public ProblemDetail handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+		log.warn("Data integrity violation: {}", ex.getMessage());
+
+		String detail = "The request violates a data integrity constraint";
+		String rootMessage = ex.getMostSpecificCause().getMessage();
+
+		if (rootMessage != null) {
+			if (rootMessage.contains("fk_device_organization")) {
+				detail = "The specified organization does not exist";
+			} else if (rootMessage.contains("fk_device_department")) {
+				detail = "The specified department does not exist";
+			} else if (rootMessage.contains("fk_device_type")) {
+				detail = "The specified device type does not exist";
+			} else if (rootMessage.contains("fk_department_organization")) {
+				detail = "The specified organization does not exist";
+			} else if (rootMessage.contains("fk_department_parent")) {
+				detail = "The specified parent department does not exist";
+			} else if (rootMessage.contains("chk_device_parent_structure")) {
+				detail = "Either an organization or a department must be specified, not both";
+			} else if (rootMessage.contains("chk_device_decommission_date")) {
+				detail = "A decommission date is required for DECOMMISSIONED or PENDING_DECOMMISSIONING status, and must be omitted otherwise";
+			} else if (rootMessage.contains("chk_department_parent_structure")) {
+				detail = "Either an organization or a parent department must be specified, not both";
+			}
+		}
+
+		ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, detail);
+		problemDetail.setTitle("Invalid reference or constraint violation");
+		problemDetail.setProperty("timestamp", Instant.now());
 		return problemDetail;
 	}
 }
