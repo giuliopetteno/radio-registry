@@ -3,6 +3,8 @@ package com.gp.radioregistry.organization.service;
 import com.gp.radioregistry.audit.annotation.Auditable;
 import com.gp.radioregistry.enums.EntityType;
 import com.gp.radioregistry.enums.EventType;
+import com.gp.radioregistry.kafka.event.OrganizationEvent;
+import com.gp.radioregistry.kafka.outboxevent.service.OutboxEventService;
 import com.gp.radioregistry.organization.domain.Organization;
 import com.gp.radioregistry.organization.dto.request.CreateOrganizationRequest;
 import com.gp.radioregistry.organization.dto.request.UpdateOrganizationRequest;
@@ -19,6 +21,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OrganizationService {
     private final OrganizationRepository organizationRepository;
+    private final OutboxEventService outboxEventService;
 
     @Auditable(eventType = EventType.CREATE, entityType = EntityType.ORGANIZATION, entityId = "#result.id", description = "Organization creation attempt")
     public Organization createOrganization(CreateOrganizationRequest request) {
@@ -28,7 +31,11 @@ public class OrganizationService {
                 .description(request.description())
                 .build();
 
-        return organizationRepository.save(organization);
+        var result = organizationRepository.save(organization);
+        outboxEventService.saveOutboxEvent(EntityType.ORGANIZATION, result.getId(), EventType.CREATE,
+                                    eventId -> OrganizationEvent.of(EventType.CREATE, eventId, result));
+
+        return result;
     }
 
     @Auditable(eventType = EventType.UPDATE, entityType = EntityType.ORGANIZATION, entityId = "#id", description = "Organization update attempt")
@@ -38,13 +45,20 @@ public class OrganizationService {
         Optional.ofNullable(request.code()).ifPresent(organization::setCode);
         organization.setDescription(request.description());
 
-        return organizationRepository.save(organization);
+        var result = organizationRepository.save(organization);
+        outboxEventService.saveOutboxEvent(EntityType.ORGANIZATION, result.getId(), EventType.UPDATE,
+                                    eventId -> OrganizationEvent.of(EventType.UPDATE, eventId, result));
+
+        return result;
     }
 
     @Auditable(eventType = EventType.DELETE, entityType = EntityType.ORGANIZATION, entityId = "#id", description = "Organization deletion attempt")
     public void deleteOrganization(Long id) {
         var organization = organizationRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Organization not found with id: " + id));
+
+        outboxEventService.saveOutboxEvent(EntityType.ORGANIZATION, organization.getId(), EventType.DELETE,
+                                    eventId -> OrganizationEvent.of(EventType.DELETE, eventId, organization));
         organizationRepository.delete(organization);
     }
 

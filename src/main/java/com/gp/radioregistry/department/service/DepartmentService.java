@@ -7,6 +7,8 @@ import com.gp.radioregistry.department.dto.request.UpdateDepartmentRequest;
 import com.gp.radioregistry.department.repository.DepartmentRepository;
 import com.gp.radioregistry.enums.EntityType;
 import com.gp.radioregistry.enums.EventType;
+import com.gp.radioregistry.kafka.event.DepartmentEvent;
+import com.gp.radioregistry.kafka.outboxevent.service.OutboxEventService;
 import com.gp.radioregistry.organization.repository.OrganizationRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ import java.util.Optional;
 public class DepartmentService {
     private final DepartmentRepository departmentRepository;
     private final OrganizationRepository organizationRepository;
+    private final OutboxEventService outboxEventService;
 
     @Auditable(eventType = EventType.CREATE, entityType = EntityType.DEPARTMENT, entityId = "#result.id", description = "Department creation attempt")
     public Department createDepartment(CreateDepartmentRequest request) {
@@ -32,7 +35,11 @@ public class DepartmentService {
                 .parentDepartment(request.parentDepartmentId() != null ? departmentRepository.getReferenceById(request.parentDepartmentId()) : null)
                 .build();
 
-        return departmentRepository.save(department);
+        var result = departmentRepository.save(department);
+        outboxEventService.saveOutboxEvent(EntityType.DEPARTMENT, result.getId(), EventType.CREATE,
+                                    eventId -> DepartmentEvent.of(EventType.CREATE, eventId, result));
+
+        return result;
     }
 
     @Auditable(eventType = EventType.UPDATE, entityType = EntityType.DEPARTMENT, entityId = "#id", description = "Department update attempt")
@@ -44,13 +51,20 @@ public class DepartmentService {
         department.setOrganization(request.organizationId() != null ? organizationRepository.getReferenceById(request.organizationId()) : null);
         department.setParentDepartment(request.parentDepartmentId() != null ? departmentRepository.getReferenceById(request.parentDepartmentId()) : null);
 
-        return departmentRepository.save(department);
+        var result = departmentRepository.save(department);
+        outboxEventService.saveOutboxEvent(EntityType.DEPARTMENT, result.getId(), EventType.UPDATE,
+                                    eventId -> DepartmentEvent.of(EventType.UPDATE, eventId, result));
+
+        return result;
     }
 
     @Auditable(eventType = EventType.DELETE, entityType = EntityType.DEPARTMENT, entityId = "#id", description = "Department deletion attempt")
     public void deleteDepartment(Long id) {
         var department = departmentRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Department not found with id: " + id));
+
+        outboxEventService.saveOutboxEvent(EntityType.DEPARTMENT, department.getId(), EventType.DELETE,
+                                    eventId -> DepartmentEvent.of(EventType.DELETE, eventId, department));
         departmentRepository.delete(department);
     }
 

@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -47,7 +46,8 @@ public class DeviceService {
                 .build();
 
         var result = deviceRepository.save(device);
-        saveDeviceOutboxEvent(EventType.CREATE, result);
+        outboxEventService.saveOutboxEvent(EntityType.DEVICE, result.getId(), EventType.CREATE,
+                                    eventId -> DeviceEvent.of(EventType.CREATE, eventId, result));
 
         return result;
     }
@@ -56,7 +56,7 @@ public class DeviceService {
     @Auditable(eventType = EventType.UPDATE, entityType = EntityType.DEVICE, entityId = "#id", description = "Device update attempt")
     public Device updateDevice(Long id, UpdateDeviceRequest request) {
         var device = this.getDeviceById(id);
-        boolean statusChanged = device.getDeviceStatus() != request.deviceStatus();
+        EventType eventType = device.getDeviceStatus() != request.deviceStatus() ? EventType.STATUS_CHANGED : EventType.UPDATE;
 
         Optional.ofNullable(request.name()).ifPresent(device::setName);
         Optional.ofNullable(request.deviceTypeId())
@@ -71,7 +71,8 @@ public class DeviceService {
         device.setDepartment(request.departmentId() != null ? departmentRepository.getReferenceById(request.departmentId()) : null);
 
         var result = deviceRepository.save(device);
-        saveDeviceOutboxEvent(statusChanged ? EventType.STATUS_CHANGED : EventType.UPDATE, result);
+        outboxEventService.saveOutboxEvent(EntityType.DEVICE, result.getId(), eventType,
+                                    eventId -> DeviceEvent.of(eventType, eventId, result));
 
         return result;
     }
@@ -82,7 +83,8 @@ public class DeviceService {
         var device = deviceRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Device not found with id: " + id));
 
-        saveDeviceOutboxEvent(EventType.DELETE, device);
+        outboxEventService.saveOutboxEvent(EntityType.DEVICE, device.getId(), EventType.DELETE,
+                                    eventId -> DeviceEvent.of(EventType.DELETE, eventId, device));
         deviceRepository.delete(device);
     }
 
@@ -93,18 +95,6 @@ public class DeviceService {
     public Device getDeviceById(Long id) {
         return deviceRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Device not found with id: " + id));
-    }
-
-    private void saveDeviceOutboxEvent(EventType eventType, Device device) {
-        UUID eventId = UUID.randomUUID();
-
-        outboxEventService.save(
-            EntityType.DEVICE.name(),
-            String.valueOf(device.getId()),
-            eventType.name(),
-            eventId,
-            DeviceEvent.of(eventType, eventId, device)
-        );
     }
 }
 

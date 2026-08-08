@@ -43,7 +43,7 @@ public class OutboxEventPublisher {
 		for (OutboxEvent event : outboxEvents) {
 			try {
 				kafkaTemplate.send(
-					event.getEntityType().toLowerCase(Locale.ROOT) + TOPIC_SUFFIX,
+					event.getEntityType().toLowerCase(Locale.ROOT).replace("_", "-") + TOPIC_SUFFIX,
 					event.getEntityId(),
 					event.getPayload()
 				).get(10, TimeUnit.SECONDS);
