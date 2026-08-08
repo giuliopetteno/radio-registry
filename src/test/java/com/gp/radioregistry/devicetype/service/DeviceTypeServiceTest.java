@@ -4,6 +4,7 @@ import com.gp.radioregistry.devicetype.domain.DeviceType;
 import com.gp.radioregistry.devicetype.dto.request.CreateDeviceTypeRequest;
 import com.gp.radioregistry.devicetype.dto.request.UpdateDeviceTypeRequest;
 import com.gp.radioregistry.devicetype.repository.DeviceTypeRepository;
+import com.gp.radioregistry.kafka.outboxevent.service.OutboxEventService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,9 +33,17 @@ import static org.mockito.Mockito.*;
 class DeviceTypeServiceTest {
 
     private static final Long DEVICE_TYPE_ID = 1L;
+    private static final String DEVICE_TYPE_NAME = "X-Ray";
+    private static final String DEVICE_TYPE_DESCRIPTION = "X-Ray machine for medical imaging";
+
+    private static final String DEVICE_TYPE_NAME_UPDATE = "CAT";
+    private static final String DEVICE_TYPE_DESCRIPTION_UPDATE = "CAT machine for medical imaging";
 
     @Mock
     private DeviceTypeRepository deviceTypeRepository;
+
+    @Mock
+    private OutboxEventService outboxEventService;
 
     @InjectMocks
     private DeviceTypeService deviceTypeService;
@@ -45,8 +54,8 @@ class DeviceTypeServiceTest {
     void setUp() {
         deviceType = DeviceType.builder()
                 .id(DEVICE_TYPE_ID)
-                .name("Handheld Radio")
-                .description("Portable handheld radio")
+                .name(DEVICE_TYPE_NAME)
+                .description(DEVICE_TYPE_DESCRIPTION)
                 .createdAt(OffsetDateTime.now())
                 .updatedAt(OffsetDateTime.now())
                 .build();
@@ -59,7 +68,7 @@ class DeviceTypeServiceTest {
         @Test
         @DisplayName("should trim the name, build and save the device type")
         void createDeviceType_savesTrimmedName() {
-            var request = new CreateDeviceTypeRequest("  Handheld Radio  ", "Portable handheld radio");
+            var request = new CreateDeviceTypeRequest(DEVICE_TYPE_NAME, DEVICE_TYPE_DESCRIPTION);
             when(deviceTypeRepository.save(any(DeviceType.class))).thenReturn(deviceType);
 
             DeviceType result = deviceTypeService.createDeviceType(request);
@@ -67,8 +76,8 @@ class DeviceTypeServiceTest {
             assertSame(deviceType, result);
             ArgumentCaptor<DeviceType> captor = ArgumentCaptor.forClass(DeviceType.class);
             verify(deviceTypeRepository).save(captor.capture());
-            assertEquals("Handheld Radio", captor.getValue().getName());
-            assertEquals("Portable handheld radio", captor.getValue().getDescription());
+            assertEquals(DEVICE_TYPE_NAME, captor.getValue().getName());
+            assertEquals(DEVICE_TYPE_DESCRIPTION, captor.getValue().getDescription());
         }
     }
 
@@ -79,34 +88,34 @@ class DeviceTypeServiceTest {
         @Test
         @DisplayName("should update fields and save")
         void updateDeviceType_updatesAndSaves() {
-            var request = new UpdateDeviceTypeRequest("New Name", "New description");
+            var request = new UpdateDeviceTypeRequest(DEVICE_TYPE_NAME_UPDATE, DEVICE_TYPE_DESCRIPTION_UPDATE);
             when(deviceTypeRepository.findById(DEVICE_TYPE_ID)).thenReturn(Optional.of(deviceType));
             when(deviceTypeRepository.save(deviceType)).thenReturn(deviceType);
 
             DeviceType result = deviceTypeService.updateDeviceType(DEVICE_TYPE_ID, request);
 
-            assertEquals("New Name", result.getName());
-            assertEquals("New description", result.getDescription());
+            assertEquals(DEVICE_TYPE_NAME_UPDATE, result.getName());
+            assertEquals(DEVICE_TYPE_DESCRIPTION_UPDATE, result.getDescription());
             verify(deviceTypeRepository).save(deviceType);
         }
 
         @Test
         @DisplayName("should keep existing name when request name is null")
         void updateDeviceType_keepsNameWhenNull() {
-            var request = new UpdateDeviceTypeRequest(null, "New description");
+            var request = new UpdateDeviceTypeRequest(null, DEVICE_TYPE_DESCRIPTION_UPDATE);
             when(deviceTypeRepository.findById(DEVICE_TYPE_ID)).thenReturn(Optional.of(deviceType));
             when(deviceTypeRepository.save(deviceType)).thenReturn(deviceType);
 
             DeviceType result = deviceTypeService.updateDeviceType(DEVICE_TYPE_ID, request);
 
-            assertEquals("Handheld Radio", result.getName());
-            assertEquals("New description", result.getDescription());
+            assertEquals(DEVICE_TYPE_NAME, result.getName());
+            assertEquals(DEVICE_TYPE_DESCRIPTION_UPDATE, result.getDescription());
         }
 
         @Test
         @DisplayName("should throw EntityNotFoundException when device type does not exist")
         void updateDeviceType_notFound() {
-            var request = new UpdateDeviceTypeRequest("New Name", null);
+            var request = new UpdateDeviceTypeRequest(DEVICE_TYPE_NAME_UPDATE, null);
             when(deviceTypeRepository.findById(99L)).thenReturn(Optional.empty());
 
             assertThrows(EntityNotFoundException.class,

@@ -1,5 +1,6 @@
 package com.gp.radioregistry.organization.service;
 
+import com.gp.radioregistry.kafka.outboxevent.service.OutboxEventService;
 import com.gp.radioregistry.organization.domain.Organization;
 import com.gp.radioregistry.organization.dto.request.CreateOrganizationRequest;
 import com.gp.radioregistry.organization.dto.request.UpdateOrganizationRequest;
@@ -43,6 +44,9 @@ class OrganizationServiceTest {
 
     @Mock
     private OrganizationRepository organizationRepository;
+
+    @Mock
+    private OutboxEventService outboxEventService;
 
     @InjectMocks
     private OrganizationService organizationService;

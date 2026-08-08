@@ -4,6 +4,7 @@ import com.gp.radioregistry.department.domain.Department;
 import com.gp.radioregistry.department.dto.request.CreateDepartmentRequest;
 import com.gp.radioregistry.department.dto.request.UpdateDepartmentRequest;
 import com.gp.radioregistry.department.repository.DepartmentRepository;
+import com.gp.radioregistry.kafka.outboxevent.service.OutboxEventService;
 import com.gp.radioregistry.organization.domain.Organization;
 import com.gp.radioregistry.organization.repository.OrganizationRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -50,6 +51,9 @@ class DepartmentServiceTest {
 
     @Mock
     private OrganizationRepository organizationRepository;
+
+    @Mock
+    private OutboxEventService outboxEventService;
 
     @InjectMocks
     private DepartmentService departmentService;
