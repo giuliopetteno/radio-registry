@@ -15,14 +15,13 @@ import java.time.OffsetDateTime;
 @Component
 @RequiredArgsConstructor
 public class OutboxEventCleanup {
-
-	@Value("${outbox.retention.days}")
-	private int retentionDays;
-
 	private final OutboxEventRepository outboxEventRepository;
 
-	@Scheduled(cron = "${outbox.cleanup.cron}")
+	@Value("${kafka.outboxevent.cleanup.retention.days}")
+	private int retentionDays;
+
 	@Transactional
+	@Scheduled(cron = "${kafka.outboxevent.cleanup.cron}")
 	public void cleanupProcessedEvents() {
 		try {
 			int numEventsDeleted = outboxEventRepository.deleteByOutboxEventStatusAndProcessedAtBefore(

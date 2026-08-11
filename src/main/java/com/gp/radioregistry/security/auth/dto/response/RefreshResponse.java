@@ -1,17 +1,10 @@
 package com.gp.radioregistry.security.auth.dto.response;
 
-import com.gp.radioregistry.user.dto.response.UserResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.Instant;
 
-public record AuthResponse(
-	@Schema(description = "Authenticated user details")
-	UserResponse user,
-
-	@Schema(description = "Timestamp of the login operation")
-	Instant loginTime,
-
+public record RefreshResponse(
 	@Schema(description = "Newly issued access token")
 	String accessToken,
 
@@ -19,5 +12,8 @@ public record AuthResponse(
 	String refreshToken,
 
 	@Schema(description = "Access token validity in seconds")
-	long expiresIn
+	long expiresIn,
+
+	@Schema(description = "Timestamp of the refresh operation")
+	Instant refreshTime
 ) {}

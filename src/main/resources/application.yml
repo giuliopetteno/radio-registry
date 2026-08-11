@@ -34,10 +34,34 @@ spring:
     template:
       observation-enabled: true
 
+kafka:
+  outboxevent:
+    publisher:
+      fixed:
+        delay: 5000
+      max:
+        retries: 3
+    cleanup:
+      retention:
+        days: 90
+      cron: "0 0 3 * * *"
+
 #  security:
 #    user:
 #      name: ${SECURITY_USERNAME}
 #      password: ${SECURITY_PASSWORD}
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token:
+    expiration-seconds: 900 # 15 minutes
+  refresh-token:
+    expiration-seconds: 604800 # 7 days
+  refreshtoken:
+    cleanup:
+      retention:
+        days: 90
+      cron: 0 0 5 * * *
 
 management:
   endpoints:
@@ -78,12 +102,3 @@ server:
   port: ${SERVER_PORT:8080}
   servlet:
     context-path: /api/v1
-
-outbox:
-  retention:
-    days: 30
-  publisher:
-    fixed-delay: 5000
-    max-retries: 3
-  cleanup:
-    cron: "0 0 3 * * *"

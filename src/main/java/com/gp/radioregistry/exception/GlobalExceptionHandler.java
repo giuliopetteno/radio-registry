@@ -1,5 +1,6 @@
 package com.gp.radioregistry.exception;
 
+import com.gp.radioregistry.security.exception.InvalidRefreshTokenException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -100,6 +101,16 @@ public class GlobalExceptionHandler {
 
 		ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, detail);
 		problemDetail.setTitle("Invalid reference or constraint violation");
+		problemDetail.setProperty("timestamp", Instant.now());
+		return problemDetail;
+	}
+
+	@ExceptionHandler(InvalidRefreshTokenException.class)
+	public ProblemDetail handleInvalidRefreshToken(InvalidRefreshTokenException ex) {
+		log.warn("Invalid refresh token: {}", ex.getMessage());
+
+		ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+		problemDetail.setTitle("Invalid refresh token");
 		problemDetail.setProperty("timestamp", Instant.now());
 		return problemDetail;
 	}

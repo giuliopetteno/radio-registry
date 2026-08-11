@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-import static com.gp.radioregistry.constant.KafkaConstants.TOPIC_SUFFIX;
+import static com.gp.radioregistry.kafka.constant.KafkaConstants.TOPIC_SUFFIX;
 
 @Slf4j
 @Component
@@ -29,10 +29,10 @@ public class OutboxEventPublisher {
 	private final OutboxEventRepository outboxEventRepository;
 	private final KafkaTemplate<String, String> kafkaTemplate;
 
-	@Value("${outbox.publisher.max-retries}")
+	@Value("${kafka.outboxevent.publisher.max.retries}")
 	private int maxRetries;
 
-	@Scheduled(fixedDelayString = "${outbox.publisher.fixed-delay}")
+	@Scheduled(fixedDelayString = "${kafka.outboxevent.publisher.fixed.delay}")
 	@Transactional
 	public void publishOutboxEvents() {
 		List<OutboxEvent> toSave = new ArrayList<>();

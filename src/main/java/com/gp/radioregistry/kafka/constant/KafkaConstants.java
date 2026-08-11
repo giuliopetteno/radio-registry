@@ -1,4 +1,4 @@
-package com.gp.radioregistry.constant;
+package com.gp.radioregistry.kafka.constant;
 
 public class KafkaConstants {
     private KafkaConstants() {}

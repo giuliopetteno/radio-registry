@@ -1,6 +1,7 @@
 package com.gp.radioregistry.security.config;
 
 import com.gp.radioregistry.security.enums.Role;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,23 +16,24 @@ import org.springframework.security.config.annotation.web.configurers.CsrfConfig
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.password.HaveIBeenPwnedRestApiPasswordChecker;
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
-import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
 import static com.gp.radioregistry.constant.ApiConstants.*;
-import static com.gp.radioregistry.constant.SecurityConstants.SESSION_TIMEOUT_SEC;
-import static org.springframework.security.config.Customizer.withDefaults;
+import static com.gp.radioregistry.security.util.SecurityUtils.buildCorsConfigurationSource;
 
 @Slf4j
 @Configuration
 @Profile("prod")
+@RequiredArgsConstructor
 public class SecurityConfigProd {
+    private final JwtAuthenticationConverter jwtAuthenticationConverter;
+
    @Bean
    SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.cors(Customizer.withDefaults())
@@ -40,18 +42,17 @@ public class SecurityConfigProd {
             // Using HTTPS protocol only for production environment
             .redirectToHttps(https -> https.requestMatchers(AnyRequestMatcher.INSTANCE))
             .authorizeHttpRequests(requests -> requests
-                    .requestMatchers(AUTH_PATH + "/logout").authenticated()
-                    .requestMatchers(AUTH_PATH + "/register", AUTH_PATH + "/login", "/swagger-ui" + WC_ALL, "/v3/api-docs" + WC_ALL).permitAll()
-                    .requestMatchers(HttpMethod.GET, ORGANIZATIONS_PATH + WC_ALL, DEPARTMENTS_PATH + WC_ALL, DEVICES_PATH + WC_ALL, DEVICE_TYPES_PATH + WC_ALL)
-                    .hasAnyRole(Role.OPERATOR.getName(), Role.TECHNICIAN.getName(), Role.ADMIN.getName())
-                    .requestMatchers(ORGANIZATIONS_PATH + WC_ALL, DEPARTMENTS_PATH + WC_ALL, DEVICES_PATH + WC_ALL, DEVICE_TYPES_PATH + WC_ALL)
-                    .hasAnyRole(Role.TECHNICIAN.getName(), Role.ADMIN.getName())
+                    .requestMatchers(AUTH_PATH + "/register", AUTH_PATH + "/login", AUTH_PATH + "/refresh", AUTH_PATH + "/logout",
+                        "/swagger-ui" + WC_ALL, "/v3/api-docs" + WC_ALL).permitAll()
+                    .requestMatchers(HttpMethod.GET, ORGANIZATIONS_PATH + WC_ALL, DEPARTMENTS_PATH + WC_ALL, DEVICES_PATH + WC_ALL,
+                        DEVICE_TYPES_PATH + WC_ALL).hasAnyRole(Role.OPERATOR.getName(), Role.TECHNICIAN.getName(), Role.ADMIN.getName())
+                    .requestMatchers(ORGANIZATIONS_PATH + WC_ALL, DEPARTMENTS_PATH + WC_ALL, DEVICES_PATH + WC_ALL,
+                        DEVICE_TYPES_PATH + WC_ALL).hasAnyRole(Role.TECHNICIAN.getName(), Role.ADMIN.getName())
                     .anyRequest().hasRole(Role.ADMIN.getName()))
-            .formLogin(withDefaults())
-            .httpBasic(withDefaults()).sessionManagement(session -> session
-                // Temporary setup before migrating to JWT auth: maintaining session state via JSESSIONID to avoid re-sending Basic auth credentials
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                );
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(
+                jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter))
+            );
         return http.build();
     }
 
@@ -80,15 +81,6 @@ public class SecurityConfigProd {
     // Allowed origins must be configured for the trusted frontend.
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOrigins(List.of(String.format("%s://%s:%s", PROTOCOL_HTTPS, DOMAIN, PORT)));
-        corsConfig.setAllowedMethods(List.of("*"));
-        corsConfig.setAllowCredentials(true);
-        corsConfig.setAllowedHeaders(List.of("*"));
-        corsConfig.setMaxAge(SESSION_TIMEOUT_SEC);
-
-        UrlBasedCorsConfigurationSource corsConfigSource = new UrlBasedCorsConfigurationSource();
-        corsConfigSource.registerCorsConfiguration("/**", corsConfig);
-        return corsConfigSource;
+        return buildCorsConfigurationSource(List.of(String.format("%s://%s:%s", PROTOCOL_HTTPS, DOMAIN, PORT)));
     }
 }

@@ -17,7 +17,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.gp.radioregistry.constant.SecurityConstants.ROLE_PREFIX;
+import static com.gp.radioregistry.security.constant.SecurityConstants.ROLE_PREFIX;
 import static com.gp.radioregistry.constant.ValidationConstants.*;
 
 @Entity

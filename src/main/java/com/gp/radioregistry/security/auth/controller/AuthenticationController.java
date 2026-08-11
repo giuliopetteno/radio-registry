@@ -1,24 +1,20 @@
 package com.gp.radioregistry.security.auth.controller;
 
 import com.gp.radioregistry.security.auth.dto.request.LoginRequest;
+import com.gp.radioregistry.security.auth.dto.request.LogoutRequest;
+import com.gp.radioregistry.security.auth.dto.request.RefreshRequest;
 import com.gp.radioregistry.security.auth.dto.request.RegisterUserRequest;
 import com.gp.radioregistry.security.auth.dto.response.AuthResponse;
+import com.gp.radioregistry.security.auth.dto.response.RefreshResponse;
 import com.gp.radioregistry.security.auth.service.AuthenticationService;
 import com.gp.radioregistry.user.dto.response.UserResponse;
 import com.gp.radioregistry.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.logout.CookieClearingLogoutHandler;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +25,6 @@ import java.time.Instant;
 
 import static com.gp.radioregistry.constant.ApiConstants.AUTH_PATH;
 import static com.gp.radioregistry.constant.ApiConstants.USERS_PATH;
-import static com.gp.radioregistry.constant.SecurityConstants.SESSION_COOKIE;
 
 @Slf4j
 @RestController
@@ -42,36 +37,48 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     @Operation(summary = "Register a new user", description = "Receives a new user, validates it and register it.")
-    public ResponseEntity<AuthResponse> registerUser(@Valid @RequestBody RegisterUserRequest request) {
+    public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody RegisterUserRequest request) {
         log.info("Creation request received for user with username: {}", request.username());
         var user = userService.createUser(request);
 
         return ResponseEntity.created(URI.create(String.format("%s/%d", USERS_PATH, user.getId())))
-            .body(new AuthResponse(UserResponse.fromEntity(user), Instant.now()));
+            .body(UserResponse.fromEntity(user));
     }
 
     @PostMapping("/login")
     @Operation(summary = "Performs login", description = "Authenticates a user and returns a response with user details.")
-    public ResponseEntity<AuthResponse> doLogin(@Valid @RequestBody LoginRequest loginRequest, HttpServletRequest servletRequest) {
-        var authentication = authenticationService.doAuthentication(loginRequest);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        servletRequest.getSession().setAttribute(
-            HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-            SecurityContextHolder.getContext());
+    public ResponseEntity<AuthResponse> doLogin(@Valid @RequestBody LoginRequest request) {
+        var authentication = authenticationService.doAuthentication(request);
+        var tokensDTO = authenticationService.generateTokens(authentication);
 
-        var user = userService.findByUsernameOrEmail(authentication.getName());
+        return ResponseEntity.ok(new AuthResponse(
+            UserResponse.fromEntity(tokensDTO.user()),
+            Instant.now(),
+            tokensDTO.accessToken(),
+            tokensDTO.refreshToken(),
+            tokensDTO.expiresIn()
+        ));
+    }
 
-        return ResponseEntity.ok(new AuthResponse(UserResponse.fromEntity(user), Instant.now()));
+    @PostMapping("/refresh")
+    @Operation(summary = "Refresh access token", description = "Exchanges a valid refresh token for a new access/refresh token pair.")
+    public ResponseEntity<RefreshResponse> doRefresh(@Valid @RequestBody RefreshRequest request) {
+        var tokensDTO = authenticationService.refreshTokens(request.refreshToken());
+
+        log.info("Access token refreshed successfully for user {}", tokensDTO.user().getUsername());
+        return ResponseEntity.ok(new RefreshResponse(
+            tokensDTO.accessToken(),
+            tokensDTO.refreshToken(),
+            tokensDTO.expiresIn(),
+            Instant.now()));
     }
 
     @PostMapping("/logout")
-    @Operation(summary = "Performs logout", description = "Invalidates the current session and clears authentication.")
-    public ResponseEntity<Void> doLogout(HttpServletRequest request, HttpServletResponse response,
-                                         Authentication authentication) {
-        new SecurityContextLogoutHandler().logout(request, response, authentication);
-        new CookieClearingLogoutHandler(SESSION_COOKIE).logout(request, response, authentication);
+    @Operation(summary = "Performs logout", description = "Revokes the given refresh token.")
+    public ResponseEntity<Void> doLogout(@Valid @RequestBody LogoutRequest request) {
+        var username = authenticationService.logout(request.refreshToken());
 
-        log.info("Logout successful for the user {}", authentication != null ? authentication.getName() : "");
+        log.info("Logout successful for the user {}", username);
         return ResponseEntity.noContent().build();
     }
 }
