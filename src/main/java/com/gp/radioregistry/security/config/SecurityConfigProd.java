@@ -1,12 +1,11 @@
 package com.gp.radioregistry.security.config;
 
-import com.gp.radioregistry.security.enums.Role;
+import com.gp.radioregistry.security.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.password.CompromisedPasswordChecker;
 import org.springframework.security.config.Customizer;
@@ -41,14 +40,7 @@ public class SecurityConfigProd {
             .csrf(CsrfConfigurer::disable)
             // Using HTTPS protocol only for production environment
             .redirectToHttps(https -> https.requestMatchers(AnyRequestMatcher.INSTANCE))
-            .authorizeHttpRequests(requests -> requests
-                    .requestMatchers(AUTH_PATH + "/register", AUTH_PATH + "/login", AUTH_PATH + "/refresh", AUTH_PATH + "/logout",
-                        "/swagger-ui" + WC_ALL, "/v3/api-docs" + WC_ALL).permitAll()
-                    .requestMatchers(HttpMethod.GET, ORGANIZATIONS_PATH + WC_ALL, DEPARTMENTS_PATH + WC_ALL, DEVICES_PATH + WC_ALL,
-                        DEVICE_TYPES_PATH + WC_ALL).hasAnyRole(Role.OPERATOR.getName(), Role.TECHNICIAN.getName(), Role.ADMIN.getName())
-                    .requestMatchers(ORGANIZATIONS_PATH + WC_ALL, DEPARTMENTS_PATH + WC_ALL, DEVICES_PATH + WC_ALL,
-                        DEVICE_TYPES_PATH + WC_ALL).hasAnyRole(Role.TECHNICIAN.getName(), Role.ADMIN.getName())
-                    .anyRequest().hasRole(Role.ADMIN.getName()))
+            .authorizeHttpRequests(SecurityUtils::getAuthorizationRules)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(
                 jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter))
