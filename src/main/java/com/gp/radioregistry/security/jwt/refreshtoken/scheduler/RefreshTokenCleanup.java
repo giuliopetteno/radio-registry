@@ -1,6 +1,6 @@
-package com.gp.radioregistry.security.scheduler;
+package com.gp.radioregistry.security.jwt.refreshtoken.scheduler;
 
-import com.gp.radioregistry.security.refreshtoken.repository.RefreshTokenRepository;
+import com.gp.radioregistry.security.jwt.refreshtoken.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

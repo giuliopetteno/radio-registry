@@ -5,6 +5,8 @@ import com.gp.radioregistry.role.dto.request.CreateRoleRequest;
 import com.gp.radioregistry.role.dto.request.UpdateRoleRequest;
 import com.gp.radioregistry.role.service.RoleService;
 import com.gp.radioregistry.security.config.SecurityConfig;
+import com.gp.radioregistry.security.constant.SecurityConstants;
+import com.gp.radioregistry.security.jwt.config.JwtConfig;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.json.JsonMapper;
@@ -30,12 +33,12 @@ import static com.gp.radioregistry.security.enums.Role.ADMIN;
 import static com.gp.radioregistry.security.enums.Role.OPERATOR;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(RoleController.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, JwtConfig.class})
 @DisplayName("RoleController @WebMvcTest")
 class RoleControllerWebMvcTest {
 
@@ -86,7 +89,7 @@ class RoleControllerWebMvcTest {
         @DisplayName("GET returns 403 for non-admin (OPERATOR) role")
         void getWithOperatorReturns403() throws Exception {
             mockMvc.perform(get(ROLES_PATH)
-                            .with(user("operator").roles(OPERATOR.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + OPERATOR.getName()))))
                     .andExpect(status().isForbidden());
         }
 
@@ -103,9 +106,9 @@ class RoleControllerWebMvcTest {
         @DisplayName("POST returns 403 for non-admin (OPERATOR) role")
         void createWithOperatorReturns403() throws Exception {
             mockMvc.perform(post(ROLES_PATH)
-                            .with(user("operator").roles(OPERATOR.getName()))
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(validCreateRequest())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + OPERATOR.getName())))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(validCreateRequest())))
                     .andExpect(status().isForbidden());
         }
 
@@ -115,9 +118,9 @@ class RoleControllerWebMvcTest {
             var request = new UpdateRoleRequest(ROLE_NAME);
 
             mockMvc.perform(put(ROLES_PATH + "/{id}", ROLE_ID)
-                            .with(user("operator").roles(OPERATOR.getName()))
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(request)))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + OPERATOR.getName())))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(request)))
                     .andExpect(status().isForbidden());
         }
 
@@ -125,7 +128,7 @@ class RoleControllerWebMvcTest {
         @DisplayName("DELETE returns 403 for non-admin (OPERATOR) role")
         void deleteWithOperatorReturns403() throws Exception {
             mockMvc.perform(delete(ROLES_PATH + "/{id}", ROLE_ID)
-                            .with(user("operator").roles(OPERATOR.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + OPERATOR.getName()))))
                     .andExpect(status().isForbidden());
         }
 
@@ -135,7 +138,7 @@ class RoleControllerWebMvcTest {
             when(roleService.getRoleById(ROLE_ID)).thenReturn(role);
 
             mockMvc.perform(get(ROLES_PATH + "/{id}", ROLE_ID)
-                            .with(user("admin").roles(ADMIN.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + ADMIN.getName()))))
                     .andExpect(status().isOk());
         }
     }
@@ -150,9 +153,9 @@ class RoleControllerWebMvcTest {
             var invalid = new CreateRoleRequest("  ");
 
             mockMvc.perform(post(ROLES_PATH)
-                            .with(user("admin").roles(ADMIN.getName()))
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(invalid)))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + ADMIN.getName())))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(invalid)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", "application/problem+json"))
                     .andExpect(jsonPath("$.status").value(400))
@@ -166,9 +169,9 @@ class RoleControllerWebMvcTest {
             var invalid = new UpdateRoleRequest(tooLongName);
 
             mockMvc.perform(put(ROLES_PATH + "/{id}", ROLE_ID)
-                            .with(user("admin").roles(ADMIN.getName()))
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(invalid)))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + ADMIN.getName())))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(invalid)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errors.name").exists());
         }
@@ -185,7 +188,7 @@ class RoleControllerWebMvcTest {
                     .thenThrow(new EntityNotFoundException("Role not found with id: " + ROLE_ID_NOT_FOUND));
 
             mockMvc.perform(get(ROLES_PATH + "/{id}", ROLE_ID_NOT_FOUND)
-                            .with(user("admin").roles(ADMIN.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + ADMIN.getName()))))
                     .andExpect(status().isNotFound())
                     .andExpect(header().string("Content-Type", "application/problem+json"))
                     .andExpect(jsonPath("$.status").value(404))
@@ -198,7 +201,7 @@ class RoleControllerWebMvcTest {
         @DisplayName("DELETE returns 204 No Content on success (no response body)")
         void deleteReturns204() throws Exception {
             mockMvc.perform(delete(ROLES_PATH + "/{id}", ROLE_ID)
-                            .with(user("admin").roles(ADMIN.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + ADMIN.getName()))))
                     .andExpect(status().isNoContent())
                     .andExpect(content().string(""));
 
@@ -212,7 +215,7 @@ class RoleControllerWebMvcTest {
                     .when(roleService).deleteRole(ROLE_ID_NOT_FOUND);
 
             mockMvc.perform(delete(ROLES_PATH + "/{id}", ROLE_ID_NOT_FOUND)
-                            .with(user("admin").roles(ADMIN.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + ADMIN.getName()))))
                     .andExpect(status().isNotFound())
                     .andExpect(header().string("Content-Type", "application/problem+json"))
                     .andExpect(jsonPath("$.status").value(404))
@@ -232,9 +235,9 @@ class RoleControllerWebMvcTest {
             when(roleService.createRole(any(CreateRoleRequest.class))).thenReturn(role);
 
             mockMvc.perform(post(ROLES_PATH)
-                            .with(user("admin").roles(ADMIN.getName()))
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(validCreateRequest())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + ADMIN.getName())))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(validCreateRequest())))
                     .andExpect(status().isCreated())
                     .andExpect(header().string("Location", ROLES_PATH + "/" + ROLE_ID))
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -248,7 +251,7 @@ class RoleControllerWebMvcTest {
             when(roleService.getRoleById(ROLE_ID)).thenReturn(role);
 
             mockMvc.perform(get(ROLES_PATH + "/{id}", ROLE_ID)
-                            .with(user("admin").roles(ADMIN.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + ADMIN.getName()))))
                     .andExpect(status().isOk())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.id").value(ROLE_ID))
@@ -263,7 +266,7 @@ class RoleControllerWebMvcTest {
             when(roleService.getRoles(any(Pageable.class))).thenReturn(page);
 
             mockMvc.perform(get(ROLES_PATH)
-                            .with(user("admin").roles(ADMIN.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + ADMIN.getName()))))
                     .andExpect(status().isOk())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.content").isArray())
@@ -282,7 +285,7 @@ class RoleControllerWebMvcTest {
             when(roleService.getRoles(any(Pageable.class))).thenReturn(Page.empty(pageable));
 
             mockMvc.perform(get(ROLES_PATH)
-                            .with(user("admin").roles(ADMIN.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + ADMIN.getName()))))
                     .andExpect(status().isOk())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.content").isArray())

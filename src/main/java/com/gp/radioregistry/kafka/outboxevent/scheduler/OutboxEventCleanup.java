@@ -1,4 +1,4 @@
-package com.gp.radioregistry.kafka.scheduler;
+package com.gp.radioregistry.kafka.outboxevent.scheduler;
 
 import com.gp.radioregistry.kafka.outboxevent.enums.OutboxEventStatus;
 import com.gp.radioregistry.kafka.outboxevent.repository.OutboxEventRepository;

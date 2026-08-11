@@ -61,6 +61,8 @@ class HierarchyConstraintsIntegrationTest extends AbstractPostgresContainerTest 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    private String cachedAccessToken;
+
     @BeforeEach
     void seedAdminUser() {
 
@@ -319,20 +321,28 @@ class HierarchyConstraintsIntegrationTest extends AbstractPostgresContainerTest 
     }
 
     private <T> ResponseEntity<T> post(String path, Object body, Class<T> responseType) {
-        return authenticated().postForEntity(url(path), new HttpEntity<>(body, jsonHeaders()), responseType);
+        return restTemplate.postForEntity(url(path), new HttpEntity<>(body, authenticatedJsonHeaders()), responseType);
     }
 
     private <T> ResponseEntity<T> get(String path, Class<T> responseType) {
-        return authenticated().getForEntity(url(path), responseType);
+        return restTemplate.exchange(url(path), HttpMethod.GET, new HttpEntity<>(authenticatedJsonHeaders()), responseType);
     }
 
     private ResponseEntity<String> delete(String path) {
-        return authenticated().exchange(
-                url(path), HttpMethod.DELETE, new HttpEntity<>(jsonHeaders()), String.class);
+        return restTemplate.exchange(url(path), HttpMethod.DELETE, new HttpEntity<>(authenticatedJsonHeaders()), String.class);
     }
 
-    private TestRestTemplate authenticated() {
-        return restTemplate.withBasicAuth(ADMIN_USERNAME, ADMIN_PASSWORD);
+    private HttpHeaders authenticatedJsonHeaders() {
+        var headers = jsonHeaders();
+        if (cachedAccessToken == null) {
+            var loginRequest = Map.of("username", ADMIN_USERNAME, "password", ADMIN_PASSWORD);
+            var response = restTemplate.postForEntity(url(AUTH_PATH + "/login"), new HttpEntity<>(loginRequest, jsonHeaders()), Map.class);
+            cachedAccessToken = (String) response.getBody().get("accessToken");
+        }
+        var accessToken = cachedAccessToken;
+
+        headers.setBearerAuth(accessToken);
+        return headers;
     }
 
     private HttpHeaders jsonHeaders() {

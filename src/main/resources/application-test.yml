@@ -10,6 +10,9 @@ spring:
     database:
       replace: none
 
+jwt:
+  secret: test-secret-key-with-at-least-32-characters-for-hmac-signing
+
 management:
   endpoints:
     web:

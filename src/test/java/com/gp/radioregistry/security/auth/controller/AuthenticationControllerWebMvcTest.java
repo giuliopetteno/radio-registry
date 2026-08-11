@@ -1,24 +1,21 @@
 package com.gp.radioregistry.security.auth.controller;
 
 import com.gp.radioregistry.exception.ResourceAlreadyExistsException;
+import com.gp.radioregistry.security.auth.dto.TokensDTO;
 import com.gp.radioregistry.security.auth.dto.request.LoginRequest;
 import com.gp.radioregistry.security.auth.dto.request.RegisterUserRequest;
 import com.gp.radioregistry.security.auth.service.AuthenticationService;
 import com.gp.radioregistry.security.config.SecurityConfig;
+import com.gp.radioregistry.security.jwt.config.JwtConfig;
 import com.gp.radioregistry.user.domain.User;
 import com.gp.radioregistry.user.service.UserService;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -30,11 +27,11 @@ import static com.gp.radioregistry.constant.ApiConstants.AUTH_PATH;
 import static com.gp.radioregistry.constant.ApiConstants.USERS_PATH;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AuthenticationController.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, JwtConfig.class})
 @DisplayName("AuthenticationController @WebMvcTest")
 class AuthenticationControllerWebMvcTest {
 
@@ -94,21 +91,23 @@ class AuthenticationControllerWebMvcTest {
             when(userService.createUser(any(RegisterUserRequest.class))).thenReturn(user);
 
             mockMvc.perform(post(AUTH_PATH + "/register")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(validRegisterRequest())))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(validRegisterRequest())))
                     .andExpect(status().isCreated());
         }
 
         @Test
         @DisplayName("POST /login is accessible without authentication")
         void loginIsPublic() throws Exception {
-            Authentication authentication = new UsernamePasswordAuthenticationToken(USERNAME, PASSWORD);
+            var authentication = new UsernamePasswordAuthenticationToken(USERNAME, PASSWORD);
+            var tokensDTO = new TokensDTO("access-token-value", "refresh-token-value", 900L, user);
+
             when(authenticationService.doAuthentication(any(LoginRequest.class))).thenReturn(authentication);
-            when(userService.findByUsernameOrEmail(USERNAME)).thenReturn(user);
+            when(authenticationService.generateTokens(authentication)).thenReturn(tokensDTO);
 
             mockMvc.perform(post(AUTH_PATH + "/login")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(validLoginRequest())))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(validLoginRequest())))
                     .andExpect(status().isOk());
         }
     }
@@ -123,8 +122,8 @@ class AuthenticationControllerWebMvcTest {
             var invalid = new RegisterUserRequest("  ", "not-an-email", "");
 
             mockMvc.perform(post(AUTH_PATH + "/register")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(invalid)))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(invalid)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", "application/problem+json"))
                     .andExpect(jsonPath("$.status").value(400))
@@ -139,8 +138,8 @@ class AuthenticationControllerWebMvcTest {
             var invalid = new RegisterUserRequest(USERNAME, "invalid-email", PASSWORD);
 
             mockMvc.perform(post(AUTH_PATH + "/register")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(invalid)))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(invalid)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errors.email").exists());
         }
@@ -151,8 +150,8 @@ class AuthenticationControllerWebMvcTest {
             var invalid = new LoginRequest("  ", "");
 
             mockMvc.perform(post(AUTH_PATH + "/login")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(invalid)))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(invalid)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errors.username").exists())
                     .andExpect(jsonPath("$.errors.password").exists());
@@ -170,8 +169,8 @@ class AuthenticationControllerWebMvcTest {
                     .thenThrow(new ResourceAlreadyExistsException("User with username " + USERNAME + " already exists"));
 
             mockMvc.perform(post(AUTH_PATH + "/register")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(validRegisterRequest())))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(validRegisterRequest())))
                     .andExpect(status().isConflict())
                     .andExpect(header().string("Content-Type", "application/problem+json"))
                     .andExpect(jsonPath("$.status").value(409))
@@ -191,28 +190,29 @@ class AuthenticationControllerWebMvcTest {
             when(userService.createUser(any(RegisterUserRequest.class))).thenReturn(user);
 
             mockMvc.perform(post(AUTH_PATH + "/register")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(validRegisterRequest())))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(validRegisterRequest())))
                     .andExpect(status().isCreated())
                     .andExpect(header().string("Location", USERS_PATH + "/" + USER_ID))
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath("$.user.id").value(USER_ID))
-                    .andExpect(jsonPath("$.user.username").value(USERNAME))
-                    .andExpect(jsonPath("$.user.email").value(EMAIL))
-                    .andExpect(jsonPath("$.user.password").doesNotExist())
-                    .andExpect(jsonPath("$.loginTime").exists());
+                    .andExpect(jsonPath("$.id").value(USER_ID))
+                    .andExpect(jsonPath("$.username").value(USERNAME))
+                    .andExpect(jsonPath("$.email").value(EMAIL))
+                    .andExpect(jsonPath("$.password").doesNotExist());
         }
 
         @Test
         @DisplayName("POST /login returns 200 with AuthResponse body and stores the security context")
         void loginReturns200WithBody() throws Exception {
-            Authentication authentication = new UsernamePasswordAuthenticationToken(USERNAME, PASSWORD);
+            var authentication = new UsernamePasswordAuthenticationToken(USERNAME, PASSWORD);
+            var tokensDTO = new TokensDTO("access-token-value", "refresh-token-value", 900L, user);
+
             when(authenticationService.doAuthentication(any(LoginRequest.class))).thenReturn(authentication);
-            when(userService.findByUsernameOrEmail(USERNAME)).thenReturn(user);
+            when(authenticationService.generateTokens(authentication)).thenReturn(tokensDTO);
 
             mockMvc.perform(post(AUTH_PATH + "/login")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(validLoginRequest())))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(validLoginRequest())))
                     .andExpect(status().isOk())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.user.id").value(USER_ID))
@@ -221,7 +221,7 @@ class AuthenticationControllerWebMvcTest {
                     .andExpect(jsonPath("$.loginTime").exists());
 
             verify(authenticationService).doAuthentication(any(LoginRequest.class));
-            verify(userService).findByUsernameOrEmail(USERNAME);
+            verify(authenticationService).generateTokens(authentication);
         }
 
         @Test
@@ -231,8 +231,8 @@ class AuthenticationControllerWebMvcTest {
                     .thenThrow(new BadCredentialsException("Bad credentials"));
 
             mockMvc.perform(post(AUTH_PATH + "/login")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(validLoginRequest())))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(validLoginRequest())))
                     .andExpect(status().is4xxClientError());
 
             verify(userService, never()).findByUsernameOrEmail(any());

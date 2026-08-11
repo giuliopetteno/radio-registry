@@ -1,15 +1,17 @@
 package com.gp.radioregistry.device.controller;
 
 import com.gp.radioregistry.department.domain.Department;
-import com.gp.radioregistry.device.enums.DeviceStatus;
 import com.gp.radioregistry.device.domain.Device;
 import com.gp.radioregistry.device.dto.request.CreateDeviceRequest;
 import com.gp.radioregistry.device.dto.request.UpdateDeviceRequest;
+import com.gp.radioregistry.device.enums.DeviceStatus;
 import com.gp.radioregistry.device.service.DeviceService;
 import com.gp.radioregistry.devicetype.domain.DeviceType;
 import com.gp.radioregistry.organization.domain.Organization;
 import com.gp.radioregistry.security.config.SecurityConfig;
+import com.gp.radioregistry.security.constant.SecurityConstants;
 import com.gp.radioregistry.security.enums.Role;
+import com.gp.radioregistry.security.jwt.config.JwtConfig;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,6 +25,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.json.JsonMapper;
@@ -34,12 +37,12 @@ import java.util.List;
 import static com.gp.radioregistry.constant.ApiConstants.DEVICES_PATH;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(DeviceController.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, JwtConfig.class})
 @DisplayName("DeviceController @WebMvcTest")
 class DeviceControllerWebMvcTest {
 
@@ -107,8 +110,8 @@ class DeviceControllerWebMvcTest {
         @DisplayName("POST returns 401 when unauthenticated")
         void createUnauthenticatedReturns401() throws Exception {
             mockMvc.perform(post(DEVICES_PATH)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(validCreateRequest())))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(validCreateRequest())))
                     .andExpect(status().isUnauthorized());
         }
 
@@ -116,9 +119,9 @@ class DeviceControllerWebMvcTest {
         @DisplayName("POST returns 403 for OPERATOR (read-only) role")
         void createWithOperatorReturns403() throws Exception {
             mockMvc.perform(post(DEVICES_PATH)
-                            .with(user("operator").roles(Role.OPERATOR.getName()))
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(validCreateRequest())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.OPERATOR.getName())))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(validCreateRequest())))
                     .andExpect(status().isForbidden());
         }
 
@@ -129,8 +132,8 @@ class DeviceControllerWebMvcTest {
                     INSTALLATION_DATE, DEVICE_STATUS, DEVICE_DECOMMISSION_DATE, ORGANIZATION_ID, null);
 
             mockMvc.perform(put(DEVICES_PATH + "/{id}", DEVICE_ID)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(request)))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(request)))
                     .andExpect(status().isUnauthorized());
         }
 
@@ -141,9 +144,9 @@ class DeviceControllerWebMvcTest {
                     INSTALLATION_DATE, DEVICE_STATUS, DEVICE_DECOMMISSION_DATE, ORGANIZATION_ID, null);
 
             mockMvc.perform(put(DEVICES_PATH + "/{id}", DEVICE_ID)
-                            .with(user("operator").roles(Role.OPERATOR.getName()))
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(request)))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.OPERATOR.getName())))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(request)))
                     .andExpect(status().isForbidden());
         }
 
@@ -158,7 +161,7 @@ class DeviceControllerWebMvcTest {
         @DisplayName("DELETE returns 403 for OPERATOR (read-only) role")
         void deleteWithOperatorReturns403() throws Exception {
             mockMvc.perform(delete(DEVICES_PATH + "/{id}", DEVICE_ID)
-                            .with(user("operator").roles(Role.OPERATOR.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.OPERATOR.getName()))))
                     .andExpect(status().isForbidden());
         }
 
@@ -168,7 +171,7 @@ class DeviceControllerWebMvcTest {
             when(deviceService.getDeviceById(DEVICE_ID)).thenReturn(device);
 
             mockMvc.perform(get(DEVICES_PATH + "/{id}", DEVICE_ID)
-                            .with(user("operator").roles(Role.OPERATOR.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.OPERATOR.getName()))))
                     .andExpect(status().isOk());
         }
     }
@@ -184,9 +187,9 @@ class DeviceControllerWebMvcTest {
                 DEVICE_STATUS, DEVICE_DECOMMISSION_DATE, ORGANIZATION_ID, null);
 
             mockMvc.perform(post(DEVICES_PATH)
-                            .with(user("tech").roles(Role.TECHNICIAN.getName()))
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(invalid)))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.TECHNICIAN.getName())))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(invalid)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", "application/problem+json"))
                     .andExpect(jsonPath("$.status").value(400))
@@ -205,9 +208,9 @@ class DeviceControllerWebMvcTest {
                     INSTALLATION_DATE, DEVICE_STATUS, DEVICE_DECOMMISSION_DATE, ORGANIZATION_ID, null);
 
             mockMvc.perform(put(DEVICES_PATH + "/{id}", DEVICE_ID)
-                            .with(user("tech").roles(Role.TECHNICIAN.getName()))
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(invalid)))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.TECHNICIAN.getName())))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(invalid)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errors.name").exists());
         }
@@ -224,7 +227,7 @@ class DeviceControllerWebMvcTest {
                     .thenThrow(new EntityNotFoundException("Device not found with id: " + DEVICE_ID_NOT_FOUND));
 
             mockMvc.perform(get(DEVICES_PATH + "/{id}", DEVICE_ID_NOT_FOUND)
-                            .with(user("operator").roles(Role.OPERATOR.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.OPERATOR.getName()))))
                     .andExpect(status().isNotFound())
                     .andExpect(header().string("Content-Type", "application/problem+json"))
                     .andExpect(jsonPath("$.status").value(404))
@@ -237,7 +240,7 @@ class DeviceControllerWebMvcTest {
         @DisplayName("DELETE returns 204 No Content on success (no response body)")
         void deleteReturns204() throws Exception {
             mockMvc.perform(delete(DEVICES_PATH + "/{id}", DEVICE_ID)
-                            .with(user("tech").roles(Role.TECHNICIAN.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.TECHNICIAN.getName()))))
                     .andExpect(status().isNoContent())
                     .andExpect(content().string(""));
 
@@ -251,7 +254,7 @@ class DeviceControllerWebMvcTest {
                     .when(deviceService).deleteDevice(DEVICE_ID_NOT_FOUND);
 
             mockMvc.perform(delete(DEVICES_PATH + "/{id}", DEVICE_ID_NOT_FOUND)
-                            .with(user("tech").roles(Role.TECHNICIAN.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.TECHNICIAN.getName()))))
                     .andExpect(status().isNotFound())
                     .andExpect(header().string("Content-Type", "application/problem+json"))
                     .andExpect(jsonPath("$.status").value(404))
@@ -271,9 +274,9 @@ class DeviceControllerWebMvcTest {
             when(deviceService.createDevice(any(CreateDeviceRequest.class))).thenReturn(device);
 
             mockMvc.perform(post(DEVICES_PATH)
-                            .with(user("tech").roles(Role.TECHNICIAN.getName()))
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(validCreateRequest())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.TECHNICIAN.getName())))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(validCreateRequest())))
                     .andExpect(status().isCreated())
                     .andExpect(header().string("Location", DEVICES_PATH + "/" + DEVICE_ID))
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -288,7 +291,7 @@ class DeviceControllerWebMvcTest {
             when(deviceService.getDeviceById(DEVICE_ID)).thenReturn(device);
 
             mockMvc.perform(get(DEVICES_PATH + "/{id}", DEVICE_ID)
-                            .with(user("operator").roles(Role.OPERATOR.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.OPERATOR.getName()))))
                     .andExpect(status().isOk())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.id").value(DEVICE_ID))
@@ -312,7 +315,7 @@ class DeviceControllerWebMvcTest {
             when(deviceService.getDeviceById(DEVICE_ID)).thenReturn(deviceInDepartment);
 
             mockMvc.perform(get(DEVICES_PATH + "/{id}", DEVICE_ID)
-                            .with(user("operator").roles(Role.OPERATOR.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.OPERATOR.getName()))))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.departmentId").value(DEPARTMENT_ID));
         }
@@ -325,7 +328,7 @@ class DeviceControllerWebMvcTest {
             when(deviceService.getDevices(any(Pageable.class))).thenReturn(page);
 
             mockMvc.perform(get(DEVICES_PATH)
-                            .with(user("operator").roles(Role.OPERATOR.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.OPERATOR.getName()))))
                     .andExpect(status().isOk())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.content").isArray())
@@ -345,7 +348,7 @@ class DeviceControllerWebMvcTest {
             when(deviceService.getDevices(any(Pageable.class))).thenReturn(Page.empty(pageable));
 
             mockMvc.perform(get(DEVICES_PATH)
-                            .with(user("operator").roles(Role.OPERATOR.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.OPERATOR.getName()))))
                     .andExpect(status().isOk())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.content").isArray())

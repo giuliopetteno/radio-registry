@@ -1,4 +1,4 @@
-package com.gp.radioregistry.security.refreshtoken.domain;
+package com.gp.radioregistry.security.jwt.refreshtoken.domain;
 
 import com.gp.radioregistry.user.domain.User;
 import jakarta.persistence.*;

@@ -1,6 +1,6 @@
-package com.gp.radioregistry.security.refreshtoken.repository;
+package com.gp.radioregistry.security.jwt.refreshtoken.repository;
 
-import com.gp.radioregistry.security.refreshtoken.domain.RefreshToken;
+import com.gp.radioregistry.security.jwt.refreshtoken.domain.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

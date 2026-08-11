@@ -5,6 +5,7 @@ import com.gp.radioregistry.user.domain.User;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
@@ -12,8 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
-import static com.gp.radioregistry.security.constant.SecurityConstants.JWT_ISSUER;
-import static com.gp.radioregistry.security.constant.SecurityConstants.JWT_ROLES_CLAIM;
+import static com.gp.radioregistry.security.jwt.constant.JwtConstants.*;
 
 @Service
 @RequiredArgsConstructor
@@ -26,9 +26,11 @@ public class AccessTokenService {
 
 	public String generateAccessToken(User user) {
 		var now = Instant.now();
+		var jwsHeader = JwsHeader.with(ACCESS_TOKEN_JWS_ALGORITHM).build();
+
 		var roles = user.getRoles().stream()
-								.map(Role::getName)
-								.toList();
+			.map(Role::getName)
+			.toList();
 
 		var jwtClaimsSet = JwtClaimsSet.builder()
 			.issuer(JWT_ISSUER)
@@ -38,6 +40,6 @@ public class AccessTokenService {
 			.claim(JWT_ROLES_CLAIM, roles)
 			.build();
 
-		return jwtEncoder.encode(JwtEncoderParameters.from(jwtClaimsSet)).getTokenValue();
+		return jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, jwtClaimsSet)).getTokenValue();
 	}
 }

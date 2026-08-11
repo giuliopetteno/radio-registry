@@ -1,5 +1,6 @@
 package com.gp.radioregistry.security.auth.controller;
 
+import com.gp.radioregistry.security.auth.dto.TokensDTO;
 import com.gp.radioregistry.security.auth.dto.request.LoginRequest;
 import com.gp.radioregistry.security.auth.dto.request.RegisterUserRequest;
 import com.gp.radioregistry.security.auth.dto.response.AuthResponse;
@@ -20,7 +21,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
@@ -28,7 +28,6 @@ import java.time.OffsetDateTime;
 import static com.gp.radioregistry.constant.ApiConstants.USERS_PATH;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -104,20 +103,19 @@ class AuthenticationControllerTest {
     class DoLogin {
 
         @Test
-        @DisplayName("should authenticate, store context in session and return 200 OK with user")
+        @DisplayName("should authenticate and return 200 OK with user")
         void doLogin_returnsOk() {
             var loginRequest = new LoginRequest(USERNAME, PASSWORD);
-            Authentication authentication =
-                    new UsernamePasswordAuthenticationToken(USERNAME, PASSWORD);
+            Authentication authentication = new UsernamePasswordAuthenticationToken(USERNAME, PASSWORD);
+            var tokensDTO = new TokensDTO("access-token-value", "refresh-token-value", 900L, user);
+
             HttpServletRequest servletRequest = mock(HttpServletRequest.class);
             HttpSession session = mock(HttpSession.class);
 
             when(authenticationService.doAuthentication(loginRequest)).thenReturn(authentication);
-            when(servletRequest.getSession()).thenReturn(session);
-            when(userService.findByUsernameOrEmail(USERNAME)).thenReturn(user);
+            when(authenticationService.generateTokens(authentication)).thenReturn(tokensDTO);
 
-            ResponseEntity<AuthResponse> response =
-                    authenticationController.doLogin(loginRequest);
+            ResponseEntity<AuthResponse> response = authenticationController.doLogin(loginRequest);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertNotNull(response.getBody());
@@ -126,11 +124,8 @@ class AuthenticationControllerTest {
             assertEquals(USERNAME, response.getBody().user().username());
             assertNotNull(response.getBody().loginTime());
 
-            assertEquals(authentication, SecurityContextHolder.getContext().getAuthentication());
-            verify(session).setAttribute(
-                    eq(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY), any());
             verify(authenticationService).doAuthentication(loginRequest);
-            verify(userService).findByUsernameOrEmail(USERNAME);
+            verify(authenticationService).generateTokens(authentication);
         }
 
         @Test

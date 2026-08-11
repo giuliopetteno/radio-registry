@@ -18,9 +18,11 @@ Application traces, metrics, and logs are exported via **OpenTelemetry** (OTLP) 
 API Documentation (Swagger UI) is available at:
 [radio-registry.giuliopetteno.dev](https://giuliopetteno.s.gy/radio-registry) *(short link for click tracking)*
 
-> **Note:** Most endpoints require authentication and role-based access control (**Operator, Technician, Admin**).
+> **Note:** Most endpoints require authentication and role-based authorization (**Operator, Technician, Admin**).
 > 
-> See the `/auth` endpoints in Swagger UI to register or log in.
+> See the `/auth` endpoints in Swagger UI to register or log in. `/auth/login` returns a short-lived access token and a longer-lived refresh token. 
+> 
+> Use the `/auth/refresh` endpoint to obtain a new access token once it expires, and `/auth/logout` to revoke the refresh token.
 > 
 > New accounts register with **Operator** access by default, allowing read-only exploration of devices, device types, organizations, and departments.
 > 
@@ -30,7 +32,7 @@ API Documentation (Swagger UI) is available at:
 
 - Medical devices lifecycle management across organizations and departments, with relational data persistence
 - RESTful API architecture
-- Authentication and authorization with Spring Security
+- Authentication and role-based authorization (Operator, Technician, Admin)
 - API documentation
 - Event-driven architecture with Outbox Pattern
 - Full audit trail of entity changes, including automatic versioning history
@@ -46,7 +48,7 @@ API Documentation (Swagger UI) is available at:
 - Java 25
 - Spring Boot 4
 - Spring Boot Actuator for health, info & metrics endpoints, enabling production monitoring
-- Spring Security with JWT for authentication and role-based access control (Admin, Technician, Operator)
+- Spring Security with JWT (refresh token rotation with reuse detection and cascading revocation for session security)
 - Hibernate / JPA
 - PostgreSQL
 - Apache Kafka with Outbox Pattern for event-driven communication

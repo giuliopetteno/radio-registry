@@ -1,6 +1,5 @@
 package com.gp.radioregistry.security.jwt.config;
 
-import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,7 +15,8 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 
-import static com.gp.radioregistry.security.constant.SecurityConstants.*;
+import static com.gp.radioregistry.security.constant.SecurityConstants.ROLE_PREFIX;
+import static com.gp.radioregistry.security.jwt.constant.JwtConstants.*;
 
 @Configuration
 public class JwtConfig {
@@ -29,7 +29,7 @@ public class JwtConfig {
 		var secretKey = jwtSecret.getBytes(StandardCharsets.UTF_8);
 
 		var jwk = new OctetSequenceKey.Builder(secretKey)
-			.algorithm(JWSAlgorithm.HS256)
+			.algorithm(ACCESS_TOKEN_JWK_ALGORITHM)
 			.build();
 
 		return new NimbusJwtEncoder(new ImmutableJWKSet<>(new com.nimbusds.jose.jwk.JWKSet(jwk)));

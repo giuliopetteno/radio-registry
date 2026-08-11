@@ -5,8 +5,8 @@ import com.gp.radioregistry.enums.EntityType;
 import com.gp.radioregistry.enums.EventType;
 import com.gp.radioregistry.security.auth.dto.TokensDTO;
 import com.gp.radioregistry.security.auth.dto.request.LoginRequest;
+import com.gp.radioregistry.security.jwt.refreshtoken.service.RefreshTokenService;
 import com.gp.radioregistry.security.jwt.service.AccessTokenService;
-import com.gp.radioregistry.security.refreshtoken.service.RefreshTokenService;
 import com.gp.radioregistry.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 
-import static com.gp.radioregistry.security.util.SecurityUtils.hashToken;
+import static com.gp.radioregistry.security.jwt.util.JwtUtils.hashToken;
 
 @Service
 @RequiredArgsConstructor

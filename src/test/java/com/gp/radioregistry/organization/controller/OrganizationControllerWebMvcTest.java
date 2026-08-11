@@ -8,7 +8,9 @@ import com.gp.radioregistry.organization.dto.request.CreateOrganizationRequest;
 import com.gp.radioregistry.organization.dto.request.UpdateOrganizationRequest;
 import com.gp.radioregistry.organization.service.OrganizationService;
 import com.gp.radioregistry.security.config.SecurityConfig;
+import com.gp.radioregistry.security.constant.SecurityConstants;
 import com.gp.radioregistry.security.enums.Role;
+import com.gp.radioregistry.security.jwt.config.JwtConfig;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,6 +24,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.json.JsonMapper;
@@ -33,12 +36,12 @@ import java.util.List;
 import static com.gp.radioregistry.constant.ApiConstants.ORGANIZATIONS_PATH;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(OrganizationController.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, JwtConfig.class})
 @DisplayName("OrganizationController @WebMvcTest")
 class OrganizationControllerWebMvcTest {
 
@@ -117,8 +120,8 @@ class OrganizationControllerWebMvcTest {
         @DisplayName("POST returns 401 when unauthenticated")
         void createUnauthenticatedReturns401() throws Exception {
             mockMvc.perform(post(ORGANIZATIONS_PATH)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(validCreateRequest())))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(validCreateRequest())))
                     .andExpect(status().isUnauthorized());
         }
 
@@ -126,9 +129,9 @@ class OrganizationControllerWebMvcTest {
         @DisplayName("POST returns 403 for OPERATOR (read-only) role")
         void createWithOperatorReturns403() throws Exception {
             mockMvc.perform(post(ORGANIZATIONS_PATH)
-                            .with(user("operator").roles(Role.OPERATOR.getName()))
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(validCreateRequest())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.OPERATOR.getName())))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(validCreateRequest())))
                     .andExpect(status().isForbidden());
         }
 
@@ -138,8 +141,8 @@ class OrganizationControllerWebMvcTest {
             var request = new UpdateOrganizationRequest(ORGANIZATION_NAME, ORGANIZATION_CODE, ORGANIZATION_DESCRIPTION);
 
             mockMvc.perform(put(ORGANIZATIONS_PATH + "/{id}", ORGANIZATION_ID)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(request)))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(request)))
                     .andExpect(status().isUnauthorized());
         }
 
@@ -149,9 +152,9 @@ class OrganizationControllerWebMvcTest {
             var request = new UpdateOrganizationRequest(ORGANIZATION_NAME, ORGANIZATION_CODE, ORGANIZATION_DESCRIPTION);
 
             mockMvc.perform(put(ORGANIZATIONS_PATH + "/{id}", ORGANIZATION_ID)
-                            .with(user("operator").roles(Role.OPERATOR.getName()))
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(request)))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.OPERATOR.getName())))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(request)))
                     .andExpect(status().isForbidden());
         }
 
@@ -166,7 +169,7 @@ class OrganizationControllerWebMvcTest {
         @DisplayName("DELETE returns 403 for OPERATOR (read-only) role")
         void deleteWithOperatorReturns403() throws Exception {
             mockMvc.perform(delete(ORGANIZATIONS_PATH + "/{id}", ORGANIZATION_ID)
-                            .with(user("operator").roles(Role.OPERATOR.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.OPERATOR.getName()))))
                     .andExpect(status().isForbidden());
         }
 
@@ -176,7 +179,7 @@ class OrganizationControllerWebMvcTest {
             when(organizationService.getOrganizationById(ORGANIZATION_ID)).thenReturn(organization);
 
             mockMvc.perform(get(ORGANIZATIONS_PATH + "/{id}/tree", ORGANIZATION_ID)
-                            .with(user("operator").roles(Role.OPERATOR.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.OPERATOR.getName()))))
                     .andExpect(status().isOk());
         }
     }
@@ -191,9 +194,9 @@ class OrganizationControllerWebMvcTest {
             var invalid = new CreateOrganizationRequest("  ", "", ORGANIZATION_DESCRIPTION);
 
             mockMvc.perform(post(ORGANIZATIONS_PATH)
-                            .with(user("tech").roles(Role.TECHNICIAN.getName()))
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(invalid)))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.TECHNICIAN.getName())))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(invalid)))
                     .andExpect(status().isBadRequest())
                     .andExpect(header().string("Content-Type", "application/problem+json"))
                     .andExpect(jsonPath("$.status").value(400))
@@ -208,9 +211,9 @@ class OrganizationControllerWebMvcTest {
             var invalid = new UpdateOrganizationRequest(tooLongName, ORGANIZATION_CODE, ORGANIZATION_DESCRIPTION);
 
             mockMvc.perform(put(ORGANIZATIONS_PATH + "/{id}", ORGANIZATION_ID)
-                            .with(user("tech").roles(Role.TECHNICIAN.getName()))
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(invalid)))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.TECHNICIAN.getName())))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(invalid)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errors.name").exists());
         }
@@ -227,7 +230,7 @@ class OrganizationControllerWebMvcTest {
                     .thenThrow(new EntityNotFoundException("Organization not found with id: " + ORGANIZATION_ID_NOT_FOUND));
 
             mockMvc.perform(get(ORGANIZATIONS_PATH + "/{id}/tree", ORGANIZATION_ID_NOT_FOUND)
-                            .with(user("operator").roles(Role.OPERATOR.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.OPERATOR.getName()))))
                     .andExpect(status().isNotFound())
                     .andExpect(header().string("Content-Type", "application/problem+json"))
                     .andExpect(jsonPath("$.status").value(404))
@@ -240,7 +243,7 @@ class OrganizationControllerWebMvcTest {
         @DisplayName("DELETE returns 204 No Content on success (no response body)")
         void deleteReturns204() throws Exception {
             mockMvc.perform(delete(ORGANIZATIONS_PATH + "/{id}", ORGANIZATION_ID)
-                            .with(user("tech").roles(Role.TECHNICIAN.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.TECHNICIAN.getName()))))
                     .andExpect(status().isNoContent())
                     .andExpect(content().string(""));
 
@@ -254,7 +257,7 @@ class OrganizationControllerWebMvcTest {
                     .when(organizationService).deleteOrganization(ORGANIZATION_ID_NOT_FOUND);
 
             mockMvc.perform(delete(ORGANIZATIONS_PATH + "/{id}", ORGANIZATION_ID_NOT_FOUND)
-                            .with(user("tech").roles(Role.TECHNICIAN.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.TECHNICIAN.getName()))))
                     .andExpect(status().isNotFound())
                     .andExpect(header().string("Content-Type", "application/problem+json"))
                     .andExpect(jsonPath("$.status").value(404))
@@ -274,9 +277,9 @@ class OrganizationControllerWebMvcTest {
             when(organizationService.createOrganization(any(CreateOrganizationRequest.class))).thenReturn(organization);
 
             mockMvc.perform(post(ORGANIZATIONS_PATH)
-                            .with(user("tech").roles(Role.TECHNICIAN.getName()))
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonMapper.writeValueAsString(validCreateRequest())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.TECHNICIAN.getName())))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(jsonMapper.writeValueAsString(validCreateRequest())))
                     .andExpect(status().isCreated())
                     .andExpect(header().string("Location", ORGANIZATIONS_PATH + "/" + ORGANIZATION_ID))
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -291,7 +294,7 @@ class OrganizationControllerWebMvcTest {
             when(organizationService.getOrganizationById(ORGANIZATION_ID)).thenReturn(organization);
 
             mockMvc.perform(get(ORGANIZATIONS_PATH + "/{id}/tree", ORGANIZATION_ID)
-                            .with(user("operator").roles(Role.OPERATOR.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.OPERATOR.getName()))))
                     .andExpect(status().isOk())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.id").value(ORGANIZATION_ID))
@@ -312,7 +315,7 @@ class OrganizationControllerWebMvcTest {
             when(organizationService.getOrganizations(any(Pageable.class))).thenReturn(page);
 
             mockMvc.perform(get(ORGANIZATIONS_PATH)
-                            .with(user("operator").roles(Role.OPERATOR.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.OPERATOR.getName()))))
                     .andExpect(status().isOk())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.content").isArray())
@@ -332,7 +335,7 @@ class OrganizationControllerWebMvcTest {
             when(organizationService.getOrganizations(any(Pageable.class))).thenReturn(Page.empty(pageable));
 
             mockMvc.perform(get(ORGANIZATIONS_PATH)
-                            .with(user("operator").roles(Role.OPERATOR.getName())))
+                    .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.OPERATOR.getName()))))
                     .andExpect(status().isOk())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.content").isArray())

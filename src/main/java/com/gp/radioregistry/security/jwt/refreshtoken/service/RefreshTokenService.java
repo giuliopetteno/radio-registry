@@ -1,8 +1,8 @@
-package com.gp.radioregistry.security.refreshtoken.service;
+package com.gp.radioregistry.security.jwt.refreshtoken.service;
 
 import com.gp.radioregistry.security.exception.InvalidRefreshTokenException;
-import com.gp.radioregistry.security.refreshtoken.domain.RefreshToken;
-import com.gp.radioregistry.security.refreshtoken.repository.RefreshTokenRepository;
+import com.gp.radioregistry.security.jwt.refreshtoken.domain.RefreshToken;
+import com.gp.radioregistry.security.jwt.refreshtoken.repository.RefreshTokenRepository;
 import com.gp.radioregistry.user.domain.User;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 
-import static com.gp.radioregistry.security.util.SecurityUtils.generateSecureRandomToken;
-import static com.gp.radioregistry.security.util.SecurityUtils.hashToken;
+import static com.gp.radioregistry.security.jwt.util.JwtUtils.generateSecureRandomToken;
+import static com.gp.radioregistry.security.jwt.util.JwtUtils.hashToken;
 
 @Service
 @RequiredArgsConstructor
