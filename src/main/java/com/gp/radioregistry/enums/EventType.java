@@ -6,8 +6,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum EventType {
-	CREATE,
 	READ,
+	CREATE,
 	UPDATE,
 	STATUS_CHANGED,
 	DELETE,

@@ -20,5 +20,5 @@ server:
     enabled: true
     key-store: "file:${SSL_KEYSTORE_PATH:./radio-registry/certs/keystore.p12}"
     key-store-password: "${SSL_KEYSTORE_PASSWORD}"
-    key-store-type: PKCS12
-    key-alias: "radio-registry"
+    key-store-type: ${SSL_KEYSTORE_TYPE:PKCS12}
+    key-alias: "${SSL_KEY_ALIAS:radio-registry}"

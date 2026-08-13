@@ -26,11 +26,11 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
-      acks: all
+      acks: ${KAFKA_PRODUCER_ACKS:all}
       properties:
-        enable.idempotence: true
-        max.in.flight.requests.per.connection: 5
-        retries: 3
+        enable.idempotence: ${KAFKA_PRODUCER_ENABLE_IDEMPOTENCE:true}
+        max.in.flight.requests.per.connection: ${KAFKA_PRODUCER_MAX_IN_FLIGHT_REQUESTS:5}
+        retries: ${KAFKA_PRODUCER_RETRIES:3}
     template:
       observation-enabled: true
 
@@ -38,13 +38,13 @@ kafka:
   outboxevent:
     publisher:
       fixed:
-        delay: 5000
+        delay: ${KAFKA_OUTBOXEVENT_PUBLISHER_FIXED_DELAY:5000}
       max:
-        retries: 3
+        retries: ${KAFKA_OUTBOXEVENT_PUBLISHER_MAX_RETRIES:3}
     cleanup:
       retention:
-        days: 90
-      cron: "0 0 3 * * *"
+        days: ${KAFKA_OUTBOXEVENT_CLEANUP_RETENTION_DAYS:90}
+      cron: ${KAFKA_OUTBOXEVENT_CLEANUP_CRON:0 0 3 * * *}
 
 #  security:
 #    user:
@@ -54,14 +54,14 @@ kafka:
 jwt:
   secret: ${JWT_SECRET}
   access-token:
-    expiration-seconds: 900 # 15 minutes
+    expiration-seconds: ${JWT_ACCESS_TOKEN_EXPIRATION_SECONDS:900} # 15 minutes
   refresh-token:
-    expiration-seconds: 604800 # 7 days
+    expiration-seconds: ${JWT_REFRESH_TOKEN_EXPIRATION_SECONDS:604800} # 7 days
   refreshtoken:
     cleanup:
       retention:
-        days: 90
-      cron: 0 0 5 * * *
+        days: ${JWT_REFRESHTOKEN_CLEANUP_RETENTION_DAYS:90}
+      cron: ${JWT_REFRESHTOKEN_CLEANUP_CRON:0 0 5 * * *}
 
 management:
   endpoints:
@@ -101,4 +101,4 @@ logging:
 server:
   port: ${SERVER_PORT:8080}
   servlet:
-    context-path: /api/v1
+    context-path: ${SERVER_CONTEXT_PATH:/api/v1}

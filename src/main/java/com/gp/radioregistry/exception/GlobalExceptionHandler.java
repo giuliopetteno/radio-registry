@@ -18,7 +18,6 @@ import java.util.Map;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
 	@ExceptionHandler(EntityNotFoundException.class)
 	public ProblemDetail handleEntityNotFound(EntityNotFoundException ex) {
 		log.warn("Entity not found: {}", ex.getMessage());
