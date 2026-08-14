@@ -45,7 +45,7 @@ API Documentation (Swagger UI) is available at:
 
 ## Technology Stack
 
-- Java 25
+- Java 26
 - Spring Boot 4
 - Spring Boot Actuator for health, info & metrics endpoints, enabling production monitoring
 - Spring Security with JWT (refresh token rotation with reuse detection and cascading revocation for session security)

@@ -42,9 +42,9 @@ CREATE TABLE IF NOT EXISTS radio_registry.device_type(
 );
 
 CREATE TYPE radio_registry.device_status AS ENUM(
-    'PENDING_INSTALLATION',
     'ACTIVE',
-    'MAINTENANCE',
+    'PENDING_INSTALLATION',
+    'UNDER_MAINTENANCE',
     'OUT_OF_SERVICE',
     'PENDING_DECOMMISSIONING',
     'DECOMMISSIONED'

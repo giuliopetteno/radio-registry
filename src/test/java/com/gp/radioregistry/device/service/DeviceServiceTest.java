@@ -62,7 +62,7 @@ class DeviceServiceTest {
     private static final String DEVICE_SERIAL_NUMBER_UPDATE = "SN-XR3800";
     private static final String DEVICE_DESCRIPTION_UPDATE = "X-ray machine 2nd generation";
     private static final Long DEVICE_TYPE_ID_UPDATE = 6L;
-    private static final DeviceStatus DEVICE_STATUS_UPDATE = DeviceStatus.MAINTENANCE;
+    private static final DeviceStatus DEVICE_STATUS_UPDATE = DeviceStatus.UNDER_MAINTENANCE;
     private static final LocalDate DEVICE_DECOMMISSION_DATE_UPDATE = null;
 
     @Mock
