@@ -62,6 +62,7 @@ API Documentation (Swagger UI) is available at:
 - Amazon Web Services (AWS) deployment:
   - EC2 (Docker Compose orchestration, IAM-only access via SSM)
   - ECR for container image registry
+  - RDS (PostgreSQL, private subnet, EC2-scoped security group, SSM tunnel for local dev)
   - Automated CI/CD: GitHub Actions → OIDC → ECR → SSM Run Command deploy
   - Secrets management via AWS Systems Manager Parameter Store
 - OpenTelemetry (OTLP) integration for distributed tracing, metrics, and structured logging
