@@ -31,41 +31,41 @@ API Documentation (Swagger UI) is available at:
 ## Features
 
 - Medical devices lifecycle management across organizations and departments, with relational data persistence
-- RESTful API architecture
+- RESTful APIs with layered architecture
+- DTO validation and exception handling
 - Authentication and role-based authorization (Operator, Technician, Admin)
-- API documentation
 - Event-driven architecture with Outbox Pattern
 - Full audit trail of entity changes, including automatic versioning history
-- DTO validation and exception handling
-- Layered architecture following enterprise development practices
 - Containerization
 - Automated CI/CD pipeline
 - Cloud deployment
 - Full telemetry emission, designed for consumption by an external observability stack
+- API documentation
 
 ## Technology Stack
 
 - Java 26
 - Spring Boot 4
-- Spring Boot Actuator for health, info & metrics endpoints, enabling production monitoring
 - Spring Security with JWT (refresh token rotation with reuse detection and cascading revocation for session security)
 - Hibernate / JPA
 - PostgreSQL
 - Apache Kafka with Outbox Pattern for event-driven communication
 - Audit logging via custom AOP aspects (action-level) and Hibernate Envers (entity-level versioning)
+- Environment-based configuration for default and production profiles
+- Spring Boot Actuator for health, info and metrics endpoints, enabling production monitoring
 - Test suite: 
-  - Unit tests (JUnit 5 & Mockito)
-  - Slice tests (@WebMvcTest & @DataJpaTest)
-  - Integration tests (@SpringBootTest & Testcontainers)
-- Environment-based configuration for default & production profiles
-- Containerization with Docker & Docker Compose
+  - Unit tests (JUnit 5 and Mockito)
+  - Slice tests (@WebMvcTest and @DataJpaTest)
+  - Integration tests (@SpringBootTest and Testcontainers)
+- Containerization with Docker and Docker Compose
+- Automated CI/CD with GitHub Actions
 - Amazon Web Services (AWS) deployment:
   - EC2 (Docker Compose orchestration, IAM-only access via SSM)
   - ECR for container image registry
   - RDS (PostgreSQL, private subnet, EC2-scoped security group, SSM tunnel for local dev)
-  - Automated CI/CD: GitHub Actions → OIDC → ECR → SSM Run Command deploy
+  - GitHub Actions → OIDC → ECR → SSM Run Command deploy
   - Secrets management via AWS Systems Manager Parameter Store
 - OpenTelemetry (OTLP) integration for distributed tracing, metrics, and structured logging
 - Gradle build system with Kotlin DSL
-- Swagger / OpenAPI for interactive API documentation & endpoint testing
+- Swagger / OpenAPI for interactive API documentation and endpoint testing
 - Lombok for boilerplate code reduction
