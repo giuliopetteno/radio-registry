@@ -16,7 +16,7 @@ Application traces, metrics, and logs are exported via **OpenTelemetry** (OTLP) 
 ## Live Demo
 
 API Documentation (Swagger UI) is available at:
-[radio-registry.giuliopetteno.dev](https://giuliopetteno.s.gy/radio-registry) *(short link for click tracking)*
+[`radio-registry.giuliopetteno.dev`](https://giuliopetteno.s.gy/radio-registry) *(short link for click tracking)*
 
 > **Note:** Most endpoints require authentication and role-based authorization (**Operator, Technician, Admin**).
 > 
