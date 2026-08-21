@@ -48,6 +48,10 @@ public class Organization {
     @OneToMany(mappedBy = "organization", fetch = FetchType.LAZY)
     private List<Device> devices = new ArrayList<>();
 
+    @Version
+    @Column(nullable = false)
+    private Long version;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;

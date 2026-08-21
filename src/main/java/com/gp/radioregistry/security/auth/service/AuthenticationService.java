@@ -5,6 +5,7 @@ import com.gp.radioregistry.enums.EntityType;
 import com.gp.radioregistry.enums.EventType;
 import com.gp.radioregistry.security.auth.dto.TokensDTO;
 import com.gp.radioregistry.security.auth.dto.request.LoginRequest;
+import com.gp.radioregistry.security.exception.InvalidRefreshTokenException;
 import com.gp.radioregistry.security.jwt.refreshtoken.service.RefreshTokenService;
 import com.gp.radioregistry.security.jwt.service.AccessTokenService;
 import com.gp.radioregistry.user.service.UserService;
@@ -46,16 +47,22 @@ public class AuthenticationService {
     public TokensDTO refreshTokens(String refreshToken) {
         var tokenHash = hashToken(refreshToken);
         var refreshTokenEntity = refreshTokenService.findByTokenHash(tokenHash);
-        refreshTokenService.validateRefreshToken(refreshTokenEntity);
 
-        var newAccessToken = accessTokenService.generateAccessToken(refreshTokenEntity.getUser());
-        var newRefreshToken = refreshTokenService.generateAndSaveRefreshToken(refreshTokenEntity.getUser());
+        if (refreshTokenEntity.getExpiresAt().isBefore(OffsetDateTime.now())) {
+            throw new InvalidRefreshTokenException("Refresh token expired");
+        }
 
-        refreshTokenEntity.setRevoked(true);
-        refreshTokenEntity.setRevokedAt(OffsetDateTime.now());
-        refreshTokenService.saveRefreshToken(refreshTokenEntity);
+        if (refreshTokenService.revokeIfActive(refreshTokenEntity.getId(), OffsetDateTime.now()) == 0) {
+            refreshTokenService.revokeAllByUserId(refreshTokenEntity.getUser().getId(), OffsetDateTime.now());
+            throw new InvalidRefreshTokenException("Refresh token reuse detected, all sessions revoked");
+        }
 
-        return new TokensDTO(newAccessToken, newRefreshToken, accessTokenService.getAccessTokenExpirationSeconds(), refreshTokenEntity.getUser());
+        var user = refreshTokenEntity.getUser();
+        var newAccessToken = accessTokenService.generateAccessToken(user);
+        var newRefreshToken = refreshTokenService.generateAndSaveRefreshToken(user);
+
+        return new TokensDTO(newAccessToken, newRefreshToken,
+            accessTokenService.getAccessTokenExpirationSeconds(), user);
     }
 
     public String logout(String refreshToken) {

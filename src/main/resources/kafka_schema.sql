@@ -14,9 +14,9 @@ CREATE TABLE IF NOT EXISTS radio_registry.outbox_event(
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     processed_at TIMESTAMP WITH TIME ZONE,
     outbox_event_status radio_registry.outbox_event_status NOT NULL DEFAULT 'PENDING',
-    retry_count INT NOT NULL DEFAULT 0.
+    retry_count INT NOT NULL DEFAULT 0,
     event_id UUID NOT NULL
 );
 
-CREATE INDEX idx_outbox_event_status_created ON radio_registry.outbox_event(outbox_event_status, created_at) WHERE outbox_event_status = 'PENDING';
+CREATE INDEX idx_outbox_event_status_created ON radio_registry.outbox_event(outbox_event_status, created_at) WHERE outbox_event_status IN ('PENDING', 'FAILED');
 CREATE UNIQUE INDEX idx_outbox_event_event_id ON radio_registry.outbox_event(event_id);

@@ -4,8 +4,10 @@ import com.gp.radioregistry.security.exception.InvalidRefreshTokenException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -100,6 +102,26 @@ public class GlobalExceptionHandler {
 
 		ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, detail);
 		problemDetail.setTitle("Invalid reference or constraint violation");
+		problemDetail.setProperty("timestamp", Instant.now());
+		return problemDetail;
+	}
+
+	@ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+	public ProblemDetail handleOptimisticLock(ObjectOptimisticLockingFailureException ex) {
+		log.warn("Optimistic locking failure: {}", ex.getMessage());
+
+		ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "The resource was modified by another request");
+		problemDetail.setTitle("Optimistic locking error");
+		problemDetail.setProperty("timestamp", Instant.now());
+		return problemDetail;
+	}
+
+	@ExceptionHandler(PessimisticLockingFailureException.class)
+	public ProblemDetail handlePessimisticLock(PessimisticLockingFailureException ex) {
+		log.warn("Pessimistic locking failure: {}", ex.getMessage());
+
+		ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "The resource is currently locked by another request");
+		problemDetail.setTitle("Pessimistic locking error");
 		problemDetail.setProperty("timestamp", Instant.now());
 		return problemDetail;
 	}

@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 
@@ -41,19 +43,17 @@ public class RefreshTokenService {
 		return refreshToken;
 	}
 
+	public int revokeIfActive(Long refreshTokenId, OffsetDateTime revokedAt) {
+		return refreshTokenRepository.revokeIfActive(refreshTokenId, revokedAt);
+	}
+
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public void revokeAllByUserId(Long userId, OffsetDateTime revokedAt) {
+		refreshTokenRepository.revokeAllByUserId(userId, revokedAt);
+	}
+
 	public RefreshToken findByTokenHash(String tokenHash) {
 		return refreshTokenRepository.findByTokenHash(tokenHash)
 			.orElseThrow(() -> new InvalidRefreshTokenException("Refresh token not found"));
-	}
-
-	public void validateRefreshToken(RefreshToken refreshToken) {
-		if (refreshToken.isRevoked()) {
-			refreshTokenRepository.revokeAllByUserId(refreshToken.getUser().getId(), OffsetDateTime.now());
-			throw new InvalidRefreshTokenException("Refresh token reuse detected, all sessions revoked");
-		}
-
-		if (refreshToken.getExpiresAt().isBefore(OffsetDateTime.now())) {
-			throw new InvalidRefreshTokenException("Refresh token expired");
-		}
 	}
 }

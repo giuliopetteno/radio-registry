@@ -81,6 +81,10 @@ public class Device {
     @OnDelete(action = OnDeleteAction.RESTRICT)
     private Department department;
 
+    @Version
+    @Column(nullable = false)
+    private Long version;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;

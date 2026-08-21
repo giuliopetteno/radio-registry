@@ -1,8 +1,9 @@
 CREATE TABLE IF NOT EXISTS radio_registry.organization(
-     id SERIAL PRIMARY KEY,
+     id BIGSERIAL PRIMARY KEY,
      name TEXT NOT NULL,
      code TEXT NOT NULL,
      description TEXT,
+     version BIGINT NOT NULL DEFAULT 0,
      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
@@ -14,6 +15,7 @@ CREATE TABLE IF NOT EXISTS radio_registry.department(
     description TEXT,
     organization_id BIGINT,
     parent_department_id BIGINT,
+    version BIGINT NOT NULL DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
@@ -27,16 +29,17 @@ CREATE TABLE IF NOT EXISTS radio_registry.department(
     REFERENCES radio_registry.department(id)
     ON DELETE SET NULL,
 
-    CONSTRAINT radio_registry.chk_department_parent_structure CHECK(
+    CONSTRAINT chk_department_parent_structure CHECK(
     (organization_id IS NOT NULL AND parent_department_id IS NULL)
     OR
     (organization_id IS NULL AND parent_department_id IS NOT NULL))
 );
 
 CREATE TABLE IF NOT EXISTS radio_registry.device_type(
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT,
+    version BIGINT NOT NULL DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
@@ -61,6 +64,7 @@ CREATE TABLE IF NOT EXISTS radio_registry.device(
     decommission_date DATE,
     organization_id BIGINT,
     department_id BIGINT,
+    version BIGINT NOT NULL DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
 

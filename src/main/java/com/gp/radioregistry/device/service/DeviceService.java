@@ -9,6 +9,7 @@ import com.gp.radioregistry.device.repository.DeviceRepository;
 import com.gp.radioregistry.devicetype.repository.DeviceTypeRepository;
 import com.gp.radioregistry.enums.EntityType;
 import com.gp.radioregistry.enums.EventType;
+import com.gp.radioregistry.exception.InvalidEntityStateException;
 import com.gp.radioregistry.kafka.event.DeviceEvent;
 import com.gp.radioregistry.kafka.outboxevent.service.OutboxEventService;
 import com.gp.radioregistry.organization.repository.OrganizationRepository;
@@ -55,8 +56,16 @@ public class DeviceService {
     @Transactional
     @Auditable(eventType = EventType.UPDATE, entityType = EntityType.DEVICE, entityId = "#id", description = "Device update attempt")
     public Device updateDevice(Long id, UpdateDeviceRequest request) {
-        var device = this.getDeviceById(id);
-        EventType eventType = device.getDeviceStatus() != request.deviceStatus() ? EventType.STATUS_CHANGED : EventType.UPDATE;
+        var device = deviceRepository.findByIdPessimisticLock(id)
+            .orElseThrow(() -> new EntityNotFoundException("Device not found with id: " + id));
+
+        var isStatusChanged = request.deviceStatus() != null && request.deviceStatus() != device.getDeviceStatus();
+
+        EventType eventType = isStatusChanged ? EventType.STATUS_CHANGED : EventType.UPDATE;
+        if (isStatusChanged && !device.getDeviceStatus().canTransitionTo(request.deviceStatus())) {
+            throw new InvalidEntityStateException(
+                "Invalid device status transition from %s to %s".formatted(device.getDeviceStatus(), request.deviceStatus()));
+        }
 
         Optional.ofNullable(request.name()).ifPresent(device::setName);
         Optional.ofNullable(request.deviceTypeId())

@@ -7,6 +7,7 @@ import com.gp.radioregistry.department.dto.request.UpdateDepartmentRequest;
 import com.gp.radioregistry.department.repository.DepartmentRepository;
 import com.gp.radioregistry.enums.EntityType;
 import com.gp.radioregistry.enums.EventType;
+import com.gp.radioregistry.exception.InvalidEntityStateException;
 import com.gp.radioregistry.kafka.event.DepartmentEvent;
 import com.gp.radioregistry.kafka.outboxevent.service.OutboxEventService;
 import com.gp.radioregistry.organization.repository.OrganizationRepository;
@@ -44,6 +45,10 @@ public class DepartmentService {
 
     @Auditable(eventType = EventType.UPDATE, entityType = EntityType.DEPARTMENT, entityId = "#id", description = "Department update attempt")
     public Department updateDepartment(Long id, UpdateDepartmentRequest request) {
+        if (id.equals(request.parentDepartmentId())) {
+            throw new InvalidEntityStateException("A department cannot be its own parent");
+        }
+
         var department = getDepartmentById(id);
         Optional.ofNullable(request.name()).ifPresent(department::setName);
         Optional.ofNullable(request.code()).ifPresent(department::setCode);

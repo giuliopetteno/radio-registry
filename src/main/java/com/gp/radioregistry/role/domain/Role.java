@@ -28,6 +28,10 @@ public class Role {
     @Size(max = NAME_MAX_LENGTH)
     private String name;
 
+    @Version
+    @Column(nullable = false)
+    private Long version;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;

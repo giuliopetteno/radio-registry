@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,8 +18,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.gp.radioregistry.security.constant.SecurityConstants.ROLE_PREFIX;
 import static com.gp.radioregistry.constant.ValidationConstants.*;
+import static com.gp.radioregistry.security.constant.SecurityConstants.ROLE_PREFIX;
 
 @Entity
 @Table(name = "users")
@@ -52,6 +53,10 @@ public class User implements UserDetails {
     @Column(name = "account_non_locked", nullable = false)
     private boolean accountNonLocked = true;
 
+    @Version
+    @Column(nullable = false)
+    private Long version;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
@@ -62,6 +67,7 @@ public class User implements UserDetails {
 
     @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)
+    @OptimisticLock(excluded = false)
     @JoinTable(
             name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),

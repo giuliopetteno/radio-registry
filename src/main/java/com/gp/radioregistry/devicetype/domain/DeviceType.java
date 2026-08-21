@@ -33,6 +33,10 @@ public class DeviceType {
     @Size(max = DESCRIPTION_MAX_LENGTH)
     private String description;
 
+    @Version
+    @Column(nullable = false)
+    private Long version;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;

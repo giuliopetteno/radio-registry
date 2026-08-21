@@ -188,7 +188,7 @@ class DeviceServiceTest {
                     DEVICE_DESCRIPTION_UPDATE, DEVICE_INSTALLATION_DATE, DEVICE_STATUS_UPDATE, DEVICE_DECOMMISSION_DATE_UPDATE, ORGANIZATION_ID, null);
             var deviceTypeRef = new DeviceType();
             var orgRef = new Organization();
-            when(deviceRepository.findById(DEVICE_ID)).thenReturn(Optional.of(device));
+            when(deviceRepository.findByIdPessimisticLock(DEVICE_ID)).thenReturn(Optional.of(device));
             when(deviceTypeRepository.getReferenceById(DEVICE_TYPE_ID_UPDATE)).thenReturn(deviceTypeRef);
             when(organizationRepository.getReferenceById(ORGANIZATION_ID)).thenReturn(orgRef);
             when(deviceRepository.save(device)).thenReturn(device);
@@ -209,7 +209,7 @@ class DeviceServiceTest {
         void updateDevice_notFound() {
             var request = new UpdateDeviceRequest(DEVICE_NAME_UPDATE, DEVICE_TYPE_ID_UPDATE, DEVICE_SERIAL_NUMBER_UPDATE,
                     DEVICE_DESCRIPTION_UPDATE, DEVICE_INSTALLATION_DATE, DEVICE_STATUS_UPDATE, DEVICE_DECOMMISSION_DATE_UPDATE, ORGANIZATION_ID, null);
-            when(deviceRepository.findById(DEVICE_ID_NOT_FOUND)).thenReturn(Optional.empty());
+            when(deviceRepository.findByIdPessimisticLock(DEVICE_ID_NOT_FOUND)).thenReturn(Optional.empty());
 
             assertThrows(EntityNotFoundException.class, () -> deviceService.updateDevice(DEVICE_ID_NOT_FOUND, request));
             verify(deviceRepository, never()).save(any());
