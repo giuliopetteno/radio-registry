@@ -56,7 +56,7 @@ CREATE TYPE radio_registry.device_status AS ENUM(
 CREATE TABLE IF NOT EXISTS radio_registry.device(
     id BIGSERIAL PRIMARY KEY,
     name TEXT NOT NULL,
-    device_type_id INT NOT NULL,
+    device_type_id BIGINT NOT NULL,
     serial_number TEXT NOT NULL,
     description TEXT,
     installation_date DATE NOT NULL,

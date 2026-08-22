@@ -38,28 +38,29 @@ public class AuthenticationService {
         var user = userService.findByUsernameOrEmail(authentication.getName());
 
         var accessToken = accessTokenService.generateAccessToken(user);
-        var refreshToken = refreshTokenService.generateAndSaveRefreshToken(user);
+        var refreshToken = refreshTokenService.generateAndSaveRefreshToken(user, null);
 
         return new TokensDTO(accessToken, refreshToken, accessTokenService.getAccessTokenExpirationSeconds(), user);
     }
 
     @Transactional
     public TokensDTO refreshTokens(String refreshToken) {
+        var now = OffsetDateTime.now();
         var tokenHash = hashToken(refreshToken);
         var refreshTokenEntity = refreshTokenService.findByTokenHash(tokenHash);
 
-        if (refreshTokenEntity.getExpiresAt().isBefore(OffsetDateTime.now())) {
+        if (refreshTokenEntity.getExpiresAt().isBefore(now)) {
             throw new InvalidRefreshTokenException("Refresh token expired");
         }
 
-        if (refreshTokenService.revokeIfActive(refreshTokenEntity.getId(), OffsetDateTime.now()) == 0) {
-            refreshTokenService.revokeAllByUserId(refreshTokenEntity.getUser().getId(), OffsetDateTime.now());
+        if (refreshTokenService.revokeIfActive(refreshTokenEntity.getId(), now) == 0) {
+            refreshTokenService.revokeAllByUserId(refreshTokenEntity.getUser().getId(), now);
             throw new InvalidRefreshTokenException("Refresh token reuse detected, all sessions revoked");
         }
 
         var user = refreshTokenEntity.getUser();
         var newAccessToken = accessTokenService.generateAccessToken(user);
-        var newRefreshToken = refreshTokenService.generateAndSaveRefreshToken(user);
+        var newRefreshToken = refreshTokenService.generateAndSaveRefreshToken(user, refreshTokenEntity);
 
         return new TokensDTO(newAccessToken, newRefreshToken,
             accessTokenService.getAccessTokenExpirationSeconds(), user);

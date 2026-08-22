@@ -3,7 +3,7 @@ package com.gp.radioregistry.department.controller;
 import com.gp.radioregistry.department.domain.Department;
 import com.gp.radioregistry.department.dto.request.CreateDepartmentRequest;
 import com.gp.radioregistry.department.dto.request.UpdateDepartmentRequest;
-import com.gp.radioregistry.department.dto.response.DepartmentResponse;
+import com.gp.radioregistry.department.dto.response.DepartmentSummaryResponse;
 import com.gp.radioregistry.department.service.DepartmentService;
 import com.gp.radioregistry.organization.domain.Organization;
 import jakarta.persistence.EntityNotFoundException;
@@ -83,7 +83,7 @@ class DepartmentControllerTest {
             when(organization.getId()).thenReturn(ORGANIZATION_ID);
             when(departmentService.createDepartment(request)).thenReturn(department);
 
-            ResponseEntity<DepartmentResponse> response = departmentController.createDepartment(request);
+            ResponseEntity<DepartmentSummaryResponse> response = departmentController.createDepartment(request);
 
             assertEquals(HttpStatus.CREATED, response.getStatusCode());
             assertEquals(URI.create(DEPARTMENTS_PATH + "/" + DEPARTMENT_ID), response.getHeaders().getLocation());
@@ -123,7 +123,7 @@ class DepartmentControllerTest {
             department.setDescription(request.description());
             when(departmentService.updateDepartment(DEPARTMENT_ID, request)).thenReturn(department);
 
-            ResponseEntity<DepartmentResponse> response = departmentController.updateDepartment(DEPARTMENT_ID, request);
+            ResponseEntity<DepartmentSummaryResponse> response = departmentController.updateDepartment(DEPARTMENT_ID, request);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
             var body = response.getBody();
@@ -183,7 +183,7 @@ class DepartmentControllerTest {
             Page<Department> page = new PageImpl<>(List.of(department), pageable, 1);
             when(departmentService.getDepartments(pageable)).thenReturn(page);
 
-            ResponseEntity<Page<DepartmentResponse>> response = departmentController.getDepartments(pageable);
+            ResponseEntity<Page<DepartmentSummaryResponse>> response = departmentController.getDepartments(pageable);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
             var body = response.getBody();
@@ -200,7 +200,7 @@ class DepartmentControllerTest {
             Pageable pageable = PageRequest.of(0, 20);
             when(departmentService.getDepartments(pageable)).thenReturn(Page.empty(pageable));
 
-            ResponseEntity<Page<DepartmentResponse>> response = departmentController.getDepartments(pageable);
+            ResponseEntity<Page<DepartmentSummaryResponse>> response = departmentController.getDepartments(pageable);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
             var body = response.getBody();
@@ -219,7 +219,7 @@ class DepartmentControllerTest {
             when(organization.getId()).thenReturn(ORGANIZATION_ID);
             when(departmentService.getDepartmentById(DEPARTMENT_ID)).thenReturn(department);
 
-            ResponseEntity<DepartmentResponse> response = departmentController.getDepartmentById(DEPARTMENT_ID);
+            ResponseEntity<DepartmentSummaryResponse> response = departmentController.getDepartmentById(DEPARTMENT_ID);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
             var body = response.getBody();
@@ -228,8 +228,6 @@ class DepartmentControllerTest {
             assertEquals(DEPARTMENT_NAME, body.name());
             assertEquals(DEPARTMENT_CODE, body.code());
             assertEquals(ORGANIZATION_ID, body.organizationId());
-            assertNotNull(body.childDepartments());
-            assertNotNull(body.devices());
             verify(departmentService).getDepartmentById(DEPARTMENT_ID);
         }
 

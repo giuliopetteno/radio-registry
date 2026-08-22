@@ -48,7 +48,11 @@ class OrganizationControllerWebMvcTest {
     private static final Long ORGANIZATION_ID = 10L;
     private static final Long ORGANIZATION_ID_NOT_FOUND = 99L;
     private static final Long DEPARTMENT_ID = 1L;
+    private static final String DEPARTMENT_NAME = "Radiology";
+    private static final String DEPARTMENT_CODE = "RAD-1";
     private static final Long DEVICE_ID = 5L;
+    private static final String DEVICE_NAME = "CT Scanner";
+    private static final String DEVICE_SERIAL_NUMBER = "SN-123";
     private static final Long DEVICE_TYPE_ID = 7L;
 
     private static final String ORGANIZATION_NAME = "General Hospital";
@@ -72,8 +76,8 @@ class OrganizationControllerWebMvcTest {
 
         Department department = Department.builder()
                 .id(DEPARTMENT_ID)
-                .name("Radiology")
-                .code("RAD-1")
+                .name(DEPARTMENT_NAME)
+                .code(DEPARTMENT_CODE)
                 .createdAt(now)
                 .updatedAt(now)
                 .build();
@@ -81,9 +85,9 @@ class OrganizationControllerWebMvcTest {
         DeviceType deviceType = DeviceType.builder().id(DEVICE_TYPE_ID).build();
         Device device = Device.builder()
                 .id(DEVICE_ID)
-                .name("CT Scanner")
+                .name(DEVICE_NAME)
                 .deviceType(deviceType)
-                .serialNumber("SN-123")
+                .serialNumber(DEVICE_SERIAL_NUMBER)
                 .installationDate(LocalDate.of(2024, 1, 15))
                 .createdAt(now)
                 .updatedAt(now)

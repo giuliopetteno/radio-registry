@@ -49,6 +49,10 @@ public class DepartmentService {
             throw new InvalidEntityStateException("A department cannot be its own parent");
         }
 
+        if (request.parentDepartmentId() != null && departmentRepository.isCreatingCycle(id, request.parentDepartmentId())) {
+            throw new InvalidEntityStateException("The assignment would create a cycle in the department hierarchy");
+        }
+
         var department = getDepartmentById(id);
         Optional.ofNullable(request.name()).ifPresent(department::setName);
         Optional.ofNullable(request.code()).ifPresent(department::setCode);
@@ -78,7 +82,6 @@ public class DepartmentService {
     }
 
     public Department getDepartmentById(Long id) {
-
         return departmentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Department not found with ID: " + id));
     }

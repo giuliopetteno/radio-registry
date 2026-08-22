@@ -29,7 +29,7 @@ public class RefreshTokenService {
 		refreshTokenRepository.save(refreshToken);
 	}
 
-	public String generateAndSaveRefreshToken(User user) {
+	public String generateAndSaveRefreshToken(User user, RefreshToken oldRefreshTokenEntity) {
 		var refreshToken = generateSecureRandomToken();
 		var tokenHash = hashToken(refreshToken);
 
@@ -40,6 +40,12 @@ public class RefreshTokenService {
 			.build();
 
 		saveRefreshToken(refreshTokenEntity);
+
+		if (oldRefreshTokenEntity != null) {
+			oldRefreshTokenEntity.setReplacedByToken(refreshTokenEntity);
+			saveRefreshToken(oldRefreshTokenEntity);
+		}
+
 		return refreshToken;
 	}
 

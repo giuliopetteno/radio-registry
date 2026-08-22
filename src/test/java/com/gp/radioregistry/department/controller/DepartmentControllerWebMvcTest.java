@@ -50,11 +50,16 @@ class DepartmentControllerWebMvcTest {
     private static final Long ORGANIZATION_ID = 10L;
     private static final Long CHILD_DEPARTMENT_ID = 2L;
     private static final Long DEVICE_ID = 5L;
+    private static final String DEVICE_NAME = "CT Scanner";
+    private static final String DEVICE_SERIAL_NUMBER = "SN-123";
     private static final Long DEVICE_TYPE_ID = 7L;
 
     private static final String DEPARTMENT_NAME = "Radiology";
     private static final String DEPARTMENT_CODE = "RAD-1";
     private static final String DEPARTMENT_DESCRIPTION = "Radiology principal department";
+
+    private static final String CHILD_DEPARTMENT_NAME = "Pediatric Radiology";
+    private static final String CHILD_DEPARTMENT_CODE = "RAD-1-C";
 
     @Autowired
     private MockMvc mockMvc;
@@ -76,9 +81,9 @@ class DepartmentControllerWebMvcTest {
         DeviceType deviceType = DeviceType.builder().id(DEVICE_TYPE_ID).build();
         Device device = Device.builder()
                 .id(DEVICE_ID)
-                .name("CT Scanner")
+                .name(DEVICE_NAME)
                 .deviceType(deviceType)
-                .serialNumber("SN-123")
+                .serialNumber(DEVICE_SERIAL_NUMBER)
                 .installationDate(LocalDate.of(2024, 1, 15))
                 .createdAt(now)
                 .updatedAt(now)
@@ -86,8 +91,8 @@ class DepartmentControllerWebMvcTest {
 
         Department childDepartment = Department.builder()
                 .id(CHILD_DEPARTMENT_ID)
-                .name("Pediatric Radiology")
-                .code("RAD-1-C")
+                .name(CHILD_DEPARTMENT_NAME)
+                .code(CHILD_DEPARTMENT_CODE)
                 .organization(organization)
                 .createdAt(now)
                 .updatedAt(now)
@@ -308,10 +313,10 @@ class DepartmentControllerWebMvcTest {
 
         @Test
         @DisplayName("GET by id exposes nested childDepartments and devices collections")
-        void getByIdExposesNestedCollections() throws Exception {
+        void getTreeByIdExposesNestedCollections() throws Exception {
             when(departmentService.getDepartmentById(DEPARTMENT_ID)).thenReturn(department);
 
-            mockMvc.perform(get(DEPARTMENTS_PATH + "/{id}", DEPARTMENT_ID)
+            mockMvc.perform(get(DEPARTMENTS_PATH + "/{id}/tree", DEPARTMENT_ID)
                     .with(jwt().authorities(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + Role.OPERATOR.getName()))))
                     .andExpect(status().isOk())
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
@@ -319,11 +324,11 @@ class DepartmentControllerWebMvcTest {
                     .andExpect(jsonPath("$.organizationId").value(ORGANIZATION_ID))
                     .andExpect(jsonPath("$.childDepartments").isArray())
                     .andExpect(jsonPath("$.childDepartments[0].id").value(CHILD_DEPARTMENT_ID))
-                    .andExpect(jsonPath("$.childDepartments[0].name").value("Pediatric Radiology"))
+                    .andExpect(jsonPath("$.childDepartments[0].name").value(CHILD_DEPARTMENT_NAME))
                     .andExpect(jsonPath("$.devices").isArray())
                     .andExpect(jsonPath("$.devices[0].id").value(DEVICE_ID))
                     .andExpect(jsonPath("$.devices[0].deviceType.id").value(DEVICE_TYPE_ID))
-                    .andExpect(jsonPath("$.devices[0].serialNumber").value("SN-123"));
+                    .andExpect(jsonPath("$.devices[0].serialNumber").value(DEVICE_SERIAL_NUMBER));
         }
 
         @Test

@@ -3,7 +3,8 @@ package com.gp.radioregistry.organization.controller;
 import com.gp.radioregistry.organization.domain.Organization;
 import com.gp.radioregistry.organization.dto.request.CreateOrganizationRequest;
 import com.gp.radioregistry.organization.dto.request.UpdateOrganizationRequest;
-import com.gp.radioregistry.organization.dto.response.OrganizationResponse;
+import com.gp.radioregistry.organization.dto.response.OrganizationTreeResponse;
+import com.gp.radioregistry.organization.dto.response.OrganizationSummaryResponse;
 import com.gp.radioregistry.organization.service.OrganizationService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -75,7 +76,7 @@ class OrganizationControllerTest {
             var request = new CreateOrganizationRequest(ORGANIZATION_NAME, ORGANIZATION_CODE, ORGANIZATION_DESCRIPTION);
             when(organizationService.createOrganization(request)).thenReturn(organization);
 
-            ResponseEntity<OrganizationResponse> response = organizationController.createOrganization(request);
+            ResponseEntity<OrganizationSummaryResponse> response = organizationController.createOrganization(request);
 
             assertEquals(HttpStatus.CREATED, response.getStatusCode());
             assertEquals(URI.create(ORGANIZATIONS_PATH + "/" + ORGANIZATION_ID), response.getHeaders().getLocation());
@@ -84,8 +85,6 @@ class OrganizationControllerTest {
             assertEquals(ORGANIZATION_NAME, response.getBody().name());
             assertEquals(ORGANIZATION_CODE, response.getBody().code());
             assertEquals(ORGANIZATION_DESCRIPTION, response.getBody().description());
-            assertNotNull(response.getBody().departments());
-            assertNotNull(response.getBody().devices());
             verify(organizationService).createOrganization(request);
         }
     }
@@ -103,7 +102,7 @@ class OrganizationControllerTest {
             organization.setDescription(ORGANIZATION_DESCRIPTION_UPDATE);
             when(organizationService.updateOrganization(ORGANIZATION_ID, request)).thenReturn(organization);
 
-            ResponseEntity<OrganizationResponse> response =
+            ResponseEntity<OrganizationSummaryResponse> response =
                     organizationController.updateOrganization(ORGANIZATION_ID, request);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -159,7 +158,7 @@ class OrganizationControllerTest {
         void getOrganizationTreeById_returnsOk() {
             when(organizationService.getOrganizationById(ORGANIZATION_ID)).thenReturn(organization);
 
-            ResponseEntity<OrganizationResponse> response =
+            ResponseEntity<OrganizationTreeResponse> response =
                     organizationController.getOrganizationTreeById(ORGANIZATION_ID);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -193,7 +192,7 @@ class OrganizationControllerTest {
             Page<Organization> page = new PageImpl<>(List.of(organization), pageable, 1);
             when(organizationService.getOrganizations(pageable)).thenReturn(page);
 
-            ResponseEntity<Page<OrganizationResponse>> response =
+            ResponseEntity<Page<OrganizationSummaryResponse>> response =
                     organizationController.getOrganizations(pageable);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -209,7 +208,7 @@ class OrganizationControllerTest {
             Pageable pageable = PageRequest.of(0, 20);
             when(organizationService.getOrganizations(pageable)).thenReturn(Page.empty(pageable));
 
-            ResponseEntity<Page<OrganizationResponse>> response =
+            ResponseEntity<Page<OrganizationSummaryResponse>> response =
                     organizationController.getOrganizations(pageable);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
